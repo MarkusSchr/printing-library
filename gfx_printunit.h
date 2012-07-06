@@ -16,11 +16,11 @@ class GPrintUnit;
 // NUL character
 #define GNUL             ((TCHAR)0)
 // set a structure to NULs
-#define GMAKESTNUL(st)   ::ZeroMemory(&(st), sizeof((st)))
+#define GMakeStructFillZero(st)   ::ZeroMemory(&(st), sizeof((st)))
 // find the size of an array
-#define GCOUNTOF(array)  (sizeof(array)/sizeof(array[0]))
+#define GGetArrayElementCount(array)  (sizeof(array)/sizeof(array[0]))
 // set a string to NULs
-#define GMAKENUL(str)    ::ZeroMemory((str), sizeof((str)))
+#define GMakeStringFillZero(str)    ::ZeroMemory((str), sizeof((str)))
 
 // returns a percentage 'fPct' of a value 'val'
 template <class _Ty> inline _Ty GPERCENT(_Ty val, double fPct)
@@ -64,7 +64,8 @@ inline CRect& GMAKERECT(CRect& r, int nLeft, int nTop, int nWidth, int nHeight)
 BOOL GfxFontToCharformat(CFont *pFont, CHARFORMAT& cf, CDC *pDC=NULL);
 // converts a logfont height to a point size
 int GfxHeightToPointSize(int nHeight, CDC *pDC=NULL);
-// count the number of lines in some text
+// count the number of lines in some text, only to count how many '\n' 
+// are there in the text
 int GfxCountLines(LPCTSTR lpszText);
 
 // turn a bit on or off 
@@ -98,11 +99,11 @@ int GfxCountLines(LPCTSTR lpszText);
 
 typedef struct tagPrintColumnDef
 {
-   CString strName;
-	CString strOverflow;
-   double fPct;
-   UINT nWidth;
-   UINT nStart;
+   CString strName; // the name of the column
+   CString strOverflow;
+   double fPct; // the percentage of the column of the the whole width
+   UINT nWidth; // the actual width to be printed in the client rect
+   UINT nStart; // the start position of the column in the client rect
    DWORD dwFlags;
 
 } PRINTCOLUMNDEF, *LPPRINTCOLUMNDEF;
@@ -155,10 +156,10 @@ typedef enum tagPumType
 
 typedef struct tagPrintTextLine
 {
-   LPCTSTR lpszText;
+   LPCTSTR lpszText; // text content
    int nFormat;
-   CRect rectText;
-   int tmHeight;
+   CRect rectText; // rect to contain the context
+   int tmHeight; // height to adjust from the rectText.top
 	DWORD dwFlags;
 
 } PRINTTEXTLINE, *LPPRINTTEXTLINE;
@@ -229,10 +230,10 @@ typedef struct tagIndexLevelInfo
 
 typedef struct tagPrintColumn
 {
-   int nPos;
-   LPCTSTR lpszName;
-   double fColPct;
-   DWORD dwFlags;
+   int nPos; // the position for this column in the column set, based on 0
+   LPCTSTR lpszName; // name for the column
+   double fColPct; // how much percentage does this column cost of the total columns
+   DWORD dwFlags; // the combination of PCF_RIGHTMARGIN, PCF_USERICHEDIT, PCF_TEXTISID and PCF_STRETCHY
 
 } PRINTCOLUMN, *LPPRINTCOLUMN;
 
@@ -298,9 +299,11 @@ public:
    virtual BOOL Print();
 
 public:
-   virtual void DefineColHeadings();
+   virtual void CompleteAllColHeadingsStartPosition();
    virtual void CreatePrintFonts();
    virtual void InitPrintMetrics();
+   // the nHeading in the following functions means the number of the column set.
+   // there can be many column set, within which there are many columns
    virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, int nHeading=0);
    void InsertPrintCol(int nPos, UINT nIDName, double fColPct=0.0, int nHeading=0);
    void InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading=0);
@@ -312,9 +315,9 @@ public:
 	void RestoreDim(LPJOBUNITDIM pDim);
 
 protected:
-   // starts a new page
+   // starts a new page. it will draw the header
    virtual void StartPage();
-   // ends current page 
+   // ends current page. it will draw the footer 
    virtual void EndPage();
    // prints a blank page, set 'bIncPageNo' to FALSE if you don't want
    // the page number affected...
@@ -328,7 +331,7 @@ protected:
    // adjusts all relavent unit and job dimensions, returns the previous map mode
    virtual int SetMapMode(int nMapMode);
 
-   virtual void PrintCol(int nCol, LPCTSTR lpszText, UINT nFormat);
+   virtual void PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat);
    virtual int DrawColText(LPCTSTR lpszText, int nLen,
 									CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
    virtual LONG FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
@@ -374,7 +377,7 @@ protected:
    PRINTUNITMETRICS m_pum;
    // the current heading
    LPPRINTUNITCOLDEFS m_lpActiveColDefs;
-   // headings
+   // headings, containing all sets of the columns
    PRINTUNITHEADINGS m_headings;
 	//rich edit control used to print multiple lines in same column
 	CRichEditCtrl m_richEdit;
@@ -400,8 +403,8 @@ public:
 
 struct GPTLTOKEN
 {
-   CString strToken;
-   UINT nFormat;
+   CString strToken; // text to draw
+   UINT nFormat; // DrawText() Format Flags like DT_RIGHT
    BOOL bDots;
    int bNewLine;
 };
@@ -430,6 +433,9 @@ public:
    GPrintTextLineParser();
 
    BOOL GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile);
+   // Get next Sub-string and its format according to the text input.
+   // the lpszText will only be used at the first time of the call of one 
+   // instance of GPrintTextLineParser. Later it will make no use.
    GNTRESULT GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token);
 
 protected:

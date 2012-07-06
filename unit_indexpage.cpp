@@ -19,7 +19,7 @@ void IndexUnit::InitPrintMetrics()
    TEXTMETRIC tm;
    JDC.GetTextMetrics(&tm);
 
-   GMAKESTNUL(m_pum);
+   GMakeStructFillZero(m_pum);
    m_pum.pumLineOfText = tm.tmHeight;
 
    RealizeMetrics();

@@ -183,21 +183,23 @@ class MyPrintJob : public GPrintJob
 public:
    MyPrintJob() {;}
    virtual ~MyPrintJob() {;}
-   void OnPrint();
+   virtual void OnPrint();
 };
 
 void MyPrintJob::OnPrint()
 {
-   IndexUnit unitIndex(this);
-   GSELECT_PJINDEXTREE(&unitIndex.m_pTree);
+   //IndexUnit unitIndex(this);
+   //GSELECT_PJINDEXTREE(&unitIndex.m_pTree);
 
-   HeaderPage unitHeaderPage(this);
-   unitHeaderPage.Print();
+   //HeaderPage unitHeaderPage(this);
+   //unitHeaderPage.Print();
 
    Table1Unit unitTable1(this);
    unitTable1.Print();
 
-   unitIndex.Print();
+   // index must be print for the last, or the library
+   // does not know what to take as index
+   //unitIndex.Print();
 }
 
 
