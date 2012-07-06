@@ -115,7 +115,9 @@ int GPrintJob::Print()
             return PRINTJOB_DIALOGNOINIT;
          }
 
+		 // Aicro: to call the virtual fun to invoke the actual printing
          OnPrint();
+
          EndDocPrinting();
          EndPrinting();
       }
@@ -132,7 +134,7 @@ int GPrintJob::Print()
 
 void GPrintJob::InitDocInfo(DOCINFO& docInfo)
 {
-   GMAKESTNUL(docInfo);
+   GMakeStructFillZero(docInfo);
    docInfo.cbSize = sizeof(docInfo);
 
    if(!m_strPrintToFileName.IsEmpty())
@@ -246,7 +248,7 @@ void GPrintJob::UseDefaults()
    m_dwFlags |= PJF_ALLOCATEDPD;
 
    m_pPD = new PRINTDLG;
-   GMAKESTNUL(*m_pPD);
+   GMakeStructFillZero(*m_pPD);
 
    // MFC's CPrintDialog does a lot for you, almost too much.  There are two members
    // of CWinApp, m_hDevMode and m_nDevNames, which contain global print information.

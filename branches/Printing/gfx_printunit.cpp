@@ -25,7 +25,7 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
    m_pJob = pJob;
 
    m_sizeCurrentRow = CSize(0,0);
-   GMAKESTNUL(m_pum);
+   GMakeStructFillZero(m_pum);
 
    m_lpActiveColDefs = NULL;
    m_pActiveFontPair = NULL;
@@ -79,7 +79,7 @@ BOOL GPrintUnit::Print()
 {
    CreatePrintFonts();
    InitPrintMetrics();
-   DefineColHeadings();
+   CompleteAllColHeadingsStartPosition();
    
    return TRUE;
 }
@@ -103,13 +103,15 @@ void GPrintUnit::InitPrintMetrics()
 
 
 
-void GPrintUnit::DefineColHeadings()
+void GPrintUnit::CompleteAllColHeadingsStartPosition()
 {
    int nHeadings = m_headings.GetSize();
-   for(int nHeading = 0; nHeading < nHeadings; nHeading++)
+   
+   // traverse all the column sets
+   for(int i = 0; i < nHeadings; i++)
    {
       int nStart = JRECT.left;
-      LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(nHeading);
+      LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(i);
 
       if(!m_lpActiveColDefs)
       {
@@ -117,13 +119,15 @@ void GPrintUnit::DefineColHeadings()
       }
 
       int nSize = lpColDefs->GetSize();
+	  // traverse all the columns in a column set
       for(int i = 0; i < nSize; i++)
       {
          LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
          if(lpDef)
          {
             lpDef->nStart = nStart;
-            nStart += lpDef->nWidth;
+            //  the next start position just after the previous
+			nStart += lpDef->nWidth;
          }
       }
    }
@@ -136,12 +140,14 @@ void GPrintUnit::DefineColHeadings()
 void GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, int nHeading)
 {
    PRINTCOLUMN pc;
-   GMAKESTNUL(pc);
+   GMakeStructFillZero(pc);
 
    pc.nPos = nPos;
    pc.lpszName = lpszName;
    pc.fColPct = fColPct;
-   pc.dwFlags |= PCF_RIGHTMARGIN;
+   // always use the rich edit to contain the contents, thus it can 
+   // output in multilines
+   pc.dwFlags |= PCF_USERICHEDIT; 
 
    InsertPrintCol(&pc, nHeading);
 }
@@ -165,18 +171,22 @@ void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
    if(!pCol)
       return;
 
-   LPPRINTUNITCOLDEFS lpColDefs = NULL;
+   // this is an array containing all the columns definitions
+   LPPRINTUNITCOLDEFS lpColSet = NULL;
 
    if(nHeading >= m_headings.GetSize())
    {
-      lpColDefs = new PRINTUNITCOLDEFS;
-      m_headings.InsertAt(nHeading, lpColDefs);
+	  // nHeading indicates a new column set
+      lpColSet = new PRINTUNITCOLDEFS;
+      m_headings.InsertAt(nHeading, lpColSet);
    }
    else
    {
-      lpColDefs = m_headings.GetAt(nHeading);
+	   // nHeading indicates an existing column set
+      lpColSet = m_headings.GetAt(nHeading);
    }
 
+   // to define a variable to contain the column def
    LPPRINTCOLUMNDEF lpNewDef = new PRINTCOLUMNDEF;
    if(pCol->lpszName)
    {
@@ -190,10 +200,10 @@ void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
    {
       double fRemaining = 100.0;
 
-      int nSize = lpColDefs->GetSize();
+      int nSize = lpColSet->GetSize();
       for(int i = 0; i < nSize; i++)
       {
-         LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
+         LPPRINTCOLUMNDEF lpDef = lpColSet->GetAt(i);
          if(lpDef)
          {
             fRemaining -= lpDef->fPct;
@@ -203,12 +213,12 @@ void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
       pCol->fColPct = fRemaining;
    }
    
-   
+   // if fColPct is 15, Width() returns 90, the GPERCENT returns 90*0.15
    lpNewDef->nWidth = GPERCENT(JINFO.m_rectDraw.Width(), pCol->fColPct);
 
    lpNewDef->fPct = pCol->fColPct;
    lpNewDef->dwFlags = pCol->dwFlags;
-   lpColDefs->InsertAt(pCol->nPos, lpNewDef);
+   lpColSet->InsertAt(pCol->nPos, lpNewDef);
 }
 
 
@@ -360,14 +370,14 @@ int GPrintUnit::EndRow(BOOL bCheckForOverflow)
 
       // print all overflow
 	   int nSize = m_lpActiveColDefs->GetSize();
-		for(int x = 0; x < nSize; x++)
+		for(int i = 0; i < nSize; i++)
 		{
-			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(x);
+			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
 			if(lpDef && !lpDef->strOverflow.IsEmpty())
 			{
 				CString strTemp = lpDef->strOverflow;
 				lpDef->strOverflow.Empty();
-				PrintCol(x, strTemp, DT_EDITCONTROL);
+				PrintColContent(i, strTemp, DT_EDITCONTROL);
 			}
 		}
 
@@ -417,7 +427,7 @@ int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 
 
 
-void GPrintUnit::PrintCol(int nCol, LPCTSTR lpszText, UINT nFormat)
+void GPrintUnit::PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat)
 {
    if(lpszText)
    {
@@ -467,18 +477,20 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
    // this says use the rich edit control only if it will 
    // overflow the available column width
    else
-   if(nFormat & DT_EDITCONTROL)
    {
-      nFormat &= ~DT_EDITCONTROL;
+	   if(nFormat & DT_EDITCONTROL)
+	   {
+		   nFormat &= ~DT_EDITCONTROL;
 
-      ASSERT(m_pActiveFontPair);
+		   ASSERT(m_pActiveFontPair);
 
-      if(nTextLen >= nWidth)
-      {
-         bUseRichEdit = TRUE;
-      }
+		   if(nTextLen >= nWidth)
+		   {
+			   bUseRichEdit = TRUE;
+		   }
+	   }
    }
-
+   
 
 	if(bUseRichEdit)
 	{
@@ -620,6 +632,8 @@ void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 void GPrintUnit::PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
                                  UINT nFormat, UINT nEffects)
 {
+	// compute the width and height of a line of text 
+	// using the current font to determine the dimensions.
    CSize size = JDC.GetTextExtent(lpszName, nLen);
    if(size.cx > r.Width())
    {
@@ -671,7 +685,7 @@ void GPrintUnit::DrawRepeatChar(TCHAR ch, LPRECT lpRect)
    }
 }
 
-
+// change the client rect size according to the metrics
 void GPrintUnit::RealizeMetrics()
 {
    JRECT = JINFO.m_rectDraw;
@@ -681,6 +695,7 @@ void GPrintUnit::RealizeMetrics()
    JRECT.left += m_pum.pumLeftMarginWidth;
    JRECT.right -= m_pum.pumRightMarginWidth;
 
+   // Normalizes CRect so that both the height and width are positive. 
    JRECT.NormalizeRect();
 }
 
@@ -705,7 +720,7 @@ static BOOL g_StartEndRow = TRUE;
 void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 {
    PRINTTEXTLINE ptl;
-   GMAKESTNUL(ptl);
+   GMakeStructFillZero(ptl);
 
    ptl.lpszText = lpszText;
    ptl.tmHeight = m_pum.pumFooterLineHeight;
@@ -724,7 +739,7 @@ void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 {
    PRINTTEXTLINE ptl;
-   GMAKESTNUL(ptl);
+   GMakeStructFillZero(ptl);
 
    ptl.lpszText = lpszText;
    ptl.tmHeight = m_pum.pumHeaderLineHeight;
@@ -744,7 +759,7 @@ void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 void GPrintUnit::PrintTextLine(LPCTSTR lpszText, UINT nFormat, int tmHeight)
 {
    PRINTTEXTLINE ptl;
-   GMAKESTNUL(ptl);
+   GMakeStructFillZero(ptl);
 
    ptl.lpszText = lpszText;
    ptl.tmHeight = tmHeight;
@@ -833,7 +848,7 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
             break;
       }
 
-      // we've got something to print
+      // we've got something to print?
       if(bPrint)
       {
          // adjust rect for line number
@@ -1093,7 +1108,7 @@ void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
    }
 
    INDEXLEVELINFO li;
-   GMAKESTNUL(li);
+   GMakeStructFillZero(li);
 
    GetLevelInfo(li, lpIndex, nLevel);
    
@@ -1116,7 +1131,7 @@ void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
    }
 
    PRINTTEXTLINE ptl;
-   GMAKESTNUL(ptl);
+   GMakeStructFillZero(ptl);
 
    ptl.lpszText = strLineText;
    ptl.tmHeight = li.nRowHeight;
@@ -1290,6 +1305,7 @@ GNTRESULT GPrintTextLineParser::GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token)
       m_lpszCurChar = lpszText;
    }
 
+   // initialize the token in case the user does not pass an empty one
    token.strToken.Empty();
    token.nFormat = 0;
    token.bDots = FALSE;
@@ -1408,7 +1424,7 @@ BOOL GfxFontToCharformat(CFont *pFont, CHARFORMAT& cf, CDC *pDC)
       {
          bConvert = TRUE;
 
-         GMAKESTNUL(cf);
+         GMakeStructFillZero(cf);
 	      cf.cbSize = sizeof(cf);
          cf.dwMask = CFM_FACE | CFM_SIZE | CFM_CHARSET;
          cf.bCharSet = DEFAULT_CHARSET;
@@ -1483,6 +1499,7 @@ int GfxCountLines(LPCTSTR lpszText)
          if(*lpszText == _T('\n'))  //I18nOK
             nLines++;
 
+		 //Advance a string pointer by one character.
          lpszText = _tcsinc(lpszText);
 
       } while(*lpszText);

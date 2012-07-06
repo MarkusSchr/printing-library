@@ -13,28 +13,28 @@ Table1Unit::~Table1Unit()
 {
 }
 
-void Table1Unit::DefineColHeadings()
+void Table1Unit::CompleteAllColHeadingsStartPosition()
 {
    // define my four columns...percentages should all up to 1.00
    InsertPrintCol(0, "Part Number", 0.45);
    InsertPrintCol(1, "Description", 0.30);
    InsertPrintCol(2, "Qty.", 0.10);
    InsertPrintCol(3, "Cost", 0.15);
-    
+
    // must call base class
-   GPrintUnit::DefineColHeadings();
+   GPrintUnit::CompleteAllColHeadingsStartPosition();
 }
 
 void Table1Unit::CreatePrintFonts()
 {
    LOGFONT logFont;
-   GMAKESTNUL(logFont);
+   GMakeStructFillZero(logFont);
 
 	LPCTSTR lpszFaceName = _T("Arial");//I18nok
 
    logFont.lfCharSet = DEFAULT_CHARSET;
    logFont.lfHeight = 90;
-   lstrcpyn(logFont.lfFaceName, lpszFaceName, GCOUNTOF(logFont.lfFaceName));
+   lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
    logFont.lfWeight = FW_BOLD;
 
    m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
@@ -79,6 +79,7 @@ void Table1Unit::InitPrintMetrics()
    }
 
 
+   // this must be called to make the metrics initialized before work
    RealizeMetrics();
 }
 
@@ -87,16 +88,17 @@ BOOL Table1Unit::Print()
 {
    GPrintUnit::Print();
 
+   // start a new page and print the header
    StartPage();
    
+   // prepare the index item to indicate this table
    INDEXITEM ii;
    ii.strName = "Table 1";
    ii.wPage = (WORD)JINFO.m_nCurPage;
    ii.nFlags = INDEXF_DASHES|INDEXF_PAGENO;
-
    AddIndexItem(&ii);
 
-
+	// print the headings, actually it is titles of the columns)
    {
       GSELECT_OBJECT(&JDC, &m_fontHeading);
       PrintColHeadings(DT_LEFT);
@@ -110,11 +112,12 @@ BOOL Table1Unit::Print()
       LPCTSTR lpszCost;
    };
 
-   struct part parts[] = 
-
-     {"123-4567", "Binary flip flop module, with 4t5 rating", "1","$34.45",
+   struct part parts[] = {
+	  "123-4567", "Binary flip flop module, with 4t5 rating", "1","$34.45",
       "aq4-9909", "Overhead flimflam", "12", "$0.99",
       "b59-123", "Left-handed gangly wrench", "6", "$99.99"};                 
+
+
 
 	GSELECT_PUFONT(&JDC, &m_fontPairBody);
 
@@ -124,10 +127,10 @@ BOOL Table1Unit::Print()
 
       struct part *pPart = &parts[i];
 
-      PrintCol(0, pPart->lpszPart, DT_LEFT);
-      PrintCol(1, pPart->lpszDesc, DT_LEFT);
-      PrintCol(2, pPart->lpszQty, DT_LEFT);
-      PrintCol(3, pPart->lpszCost, DT_LEFT);
+      PrintColContent(0, pPart->lpszPart, DT_LEFT);
+      PrintColContent(1, pPart->lpszDesc, DT_LEFT);
+      PrintColContent(2, pPart->lpszQty, DT_LEFT);
+      PrintColContent(3, pPart->lpszCost, DT_LEFT);
 
       EndRow();
    }
@@ -141,6 +144,9 @@ BOOL Table1Unit::Print()
 
 void Table1Unit::PrintHeader()
 {
+	// use the JDC as the current DC and use the attributes of m_fontHeader
+	// to draw the following contents. Besides, at the end of the scope, 
+	// the old DC will be restored
    GSELECT_OBJECT(&JDC, &m_fontHeader);
 
    CString strDateTime;
@@ -149,7 +155,7 @@ void Table1Unit::PrintHeader()
    GetLocalTime(&sysTime);
    // format it...
    TCHAR szBuf[100];
-   GMAKENUL(szBuf);
+   GMakeStringFillZero(szBuf);
    // get the time
    GetDateFormat(LOCALE_USER_DEFAULT, NULL, &sysTime, NULL, szBuf, sizeof(szBuf));
    strDateTime = szBuf;
@@ -159,9 +165,11 @@ void Table1Unit::PrintHeader()
    strDateTime += szBuf;
 
    CString strHeader = strDateTime;
-   strHeader += HFC_CENTER;
+   // indicate the above text (date) should be drawn at the center
+   strHeader += HFC_CENTER; 
    strHeader += "Company Name";
-   strHeader += HFC_RIGHTJUSTIFY;
+   // indicate the above text("Company Name") should be drawn right justify
+   strHeader += HFC_RIGHTJUSTIFY; 
   
    CString strPage;
    strPage.Format("Page: %d", JINFO.m_nCurPage);
