@@ -25,8 +25,8 @@ class GPrintUnit;
 // returns a percentage 'fPct' of a value 'val'
 template <class _Ty> inline _Ty GPERCENT(_Ty val, double fPct)
 {
-   val = (_Ty)((double)val * fPct);      
-   return val;
+	val = (_Ty)((double)val * fPct);      
+	return val;
 }
 
 // class which selects a GDI object upon construction, and automatically 
@@ -34,26 +34,26 @@ template <class _Ty> inline _Ty GPERCENT(_Ty val, double fPct)
 // a GDI object off the programmer
 class GSelectGdiObject 
 {
-// Constructor
+	// Constructor
 public:
-   GSelectGdiObject(CDC *pDC, CGdiObject *pObject);
+	GSelectGdiObject(CDC *pDC, CGdiObject *pObject);
 
-// Implementation
+	// Implementation
 protected:
-   // dc in which the object was selected
-   CDC *m_pDC;
-   // the previously selected object
-   HGDIOBJ m_hOldGdiObject;
+	// dc in which the object was selected
+	CDC *m_pDC;
+	// the previously selected object
+	HGDIOBJ m_hOldGdiObject;
 
 public:
-   virtual ~GSelectGdiObject();
+	virtual ~GSelectGdiObject();
 };
 
 
 inline CRect& GMAKERECT(CRect& r, int nLeft, int nTop, int nWidth, int nHeight)
 {
-   r.SetRect(nLeft, nTop, nLeft + nWidth, nTop + nHeight);
-   return r;
+	r.SetRect(nLeft, nTop, nLeft + nWidth, nTop + nHeight);
+	return r;
 }
 
 // macro provides safer usage of CDC::SelectObject by providing
@@ -70,10 +70,10 @@ int GfxCountLines(LPCTSTR lpszText);
 
 // turn a bit on or off 
 #define GSET_BIT(val, bit, b) \
-                  if(b) \
-                     val |= bit; \
-                  else \
-                     val &= ~bit;
+	if(b) \
+	val |= bit; \
+				  else \
+				  val &= ~bit;
 
 
 /////////////////////////////////////////
@@ -99,12 +99,12 @@ int GfxCountLines(LPCTSTR lpszText);
 
 typedef struct tagPrintColumnDef
 {
-   CString strName; // the name of the column
-   CString strOverflow;
-   double fPct; // the percentage of the column of the the whole width
-   UINT nWidth; // the actual width to be printed in the client rect
-   UINT nStart; // the start position of the column in the client rect
-   DWORD dwFlags;
+	CString strName; // the name of the column
+	CString strOverflow; // if one page can not contain all the text, the next page will show it out. This field is the remaining text
+	double fPct; // the percentage of the column of the the whole width
+	UINT nWidth; // the actual width to be printed in the client rect
+	UINT nStart; // the start position of the column in the client rect
+	DWORD dwFlags;
 
 } PRINTCOLUMNDEF, *LPPRINTCOLUMNDEF;
 
@@ -112,14 +112,14 @@ typedef struct tagPrintColumnDef
 
 typedef struct tagPrintUnitMetrics
 {
-   int pumHeadingHeight;
-   int pumFooterHeight;
-   int pumHeaderHeight;
-   int pumRightMarginWidth;
-   int pumLeftMarginWidth;
-   int pumFooterLineHeight;
-   int pumHeaderLineHeight;
-   int pumLineOfText;
+	int pumHeadingHeight;
+	int pumFooterHeight;
+	int pumHeaderHeight;
+	int pumRightMarginWidth;
+	int pumLeftMarginWidth;
+	int pumFooterLineHeight;
+	int pumHeaderLineHeight;
+	int pumLineOfText;
 
 } PRINTUNITMETRICS, *LPPRINTUNITMETRICS;
 
@@ -127,14 +127,14 @@ typedef struct tagPrintUnitMetrics
 
 typedef enum tagPumType
 {
-   PT_HEADING = -1,
-   PT_LINEOFTEXT = -2,
-   PT_FOOTER = -3,
-   PT_HEADER = -4,
-   PT_LEFTMARGIN = -5,
-   PT_RIGHTMARGIN = -6,
-   PT_FOOTERLINE = -7,
-   PT_HEADERLINE = -8
+	PT_HEADING = -1,
+	PT_LINEOFTEXT = -2,
+	PT_FOOTER = -3,
+	PT_HEADER = -4,
+	PT_LEFTMARGIN = -5,
+	PT_RIGHTMARGIN = -6,
+	PT_FOOTERLINE = -7,
+	PT_HEADERLINE = -8
 
 } PUMTYPE;
 
@@ -156,10 +156,10 @@ typedef enum tagPumType
 
 typedef struct tagPrintTextLine
 {
-   LPCTSTR lpszText; // text content
-   int nFormat;
-   CRect rectText; // rect to contain the context
-   int tmHeight; // height to adjust from the rectText.top
+	LPCTSTR lpszText; // text content
+	int nFormat;
+	CRect rectText; // rect to contain the context
+	int tmHeight; // height to adjust from the rectText.top
 	DWORD dwFlags;
 
 } PRINTTEXTLINE, *LPPRINTTEXTLINE;
@@ -168,8 +168,8 @@ typedef struct tagPrintTextLine
 
 typedef struct tagPrintUnitFontPair
 {
-   CFont fontPrinter;
-   CFont fontScreen;
+	CFont fontPrinter;
+	CFont fontScreen;
 
 } PUFONTPAIR, *LPPUFONTPAIR;
 
@@ -178,20 +178,20 @@ typedef struct tagPrintUnitFontPair
 class GSelectActivePair
 {
 public:
-   GSelectActivePair(GPrintUnit *pUnit, LPPUFONTPAIR pPair);
-   ~GSelectActivePair();
-   
+	GSelectActivePair(GPrintUnit *pUnit, LPPUFONTPAIR pPair);
+	~GSelectActivePair();
+
 protected:
-   LPPUFONTPAIR m_pOldPair;
-   GPrintUnit *m_pUnit;
+	LPPUFONTPAIR m_pOldPair;
+	GPrintUnit *m_pUnit;
 };
 
 
 
 #define GSELECT_PUFONT(pdc, pfp) \
-         GSELECT_OBJECT(pdc, &((pfp)->fontPrinter)); \
-         GSelectActivePair xx_activefontpair_xx(this, pfp);
-         
+	GSELECT_OBJECT(pdc, &((pfp)->fontPrinter)); \
+	GSelectActivePair xx_activefontpair_xx(this, pfp);
+
 
 
 class GPrintIndexTree;
@@ -205,12 +205,12 @@ class GPrintIndexTree;
 typedef class GIndexItem
 {
 public:
-   CString strName;
-   UINT nFlags;
-   GPrintIndexTree *pChildren; 
-   WORD wPage;
+	CString strName;
+	UINT nFlags;
+	GPrintIndexTree *pChildren; 
+	WORD wPage;
 
-   GIndexItem();
+	GIndexItem();
 
 } INDEXITEM, *LPINDEXITEM;
 
@@ -219,9 +219,9 @@ public:
 // how to print an index tree level
 typedef struct tagIndexLevelInfo
 {
-   CFont *pFont;
-   int nIndent;
-   int nRowHeight;
+	CFont *pFont;
+	int nIndent;
+	int nRowHeight;
 
 } INDEXLEVELINFO;
 
@@ -230,10 +230,10 @@ typedef struct tagIndexLevelInfo
 
 typedef struct tagPrintColumn
 {
-   int nPos; // the position for this column in the column set, based on 0
-   LPCTSTR lpszName; // name for the column
-   double fColPct; // how much percentage does this column cost of the total columns
-   DWORD dwFlags; // the combination of PCF_RIGHTMARGIN, PCF_USERICHEDIT, PCF_TEXTISID and PCF_STRETCHY
+	int nPos; // the position for this column in the column set, based on 0
+	LPCTSTR lpszName; // name for the column
+	double fColPct; // how much percentage does this column cost of the total columns
+	DWORD dwFlags; // the combination of PCF_RIGHTMARGIN, PCF_USERICHEDIT, PCF_TEXTISID and PCF_STRETCHY
 
 } PRINTCOLUMN, *LPPRINTCOLUMN;
 
@@ -253,12 +253,12 @@ typedef struct tagPrintColumn
 class GPrintIndexTree : public CArray <INDEXITEM, INDEXITEM>
 {
 public:
-   GPrintIndexTree();
+	GPrintIndexTree();
 
 public:
-   void DeletePrintIndexTree(GPrintIndexTree *pTree);
+	void DeletePrintIndexTree(GPrintIndexTree *pTree);
 
-   virtual ~GPrintIndexTree();
+	virtual ~GPrintIndexTree();
 };
 
 
@@ -285,114 +285,114 @@ typedef struct tagJobUnitDim
 
 class GPrintUnit : public CObject
 {
-   friend GSelectActivePair;
+	friend GSelectActivePair;
 
-   DECLARE_DYNAMIC(GPrintUnit)
-
-public:
-   GPrintUnit(GPrintJob *pJob=NULL);
-
-   // call to set the print job that owns this unit
-   void SetJob(GPrintJob *pJob);
-   GPrintJob *GetJob() const;
-   // call to print the job, returns FALSE if printing should stop
-   virtual BOOL Print();
+	DECLARE_DYNAMIC(GPrintUnit)
 
 public:
-   virtual void CompleteAllColHeadingsStartPosition();
-   virtual void CreatePrintFonts();
-   virtual void InitPrintMetrics();
-   // the nHeading in the following functions means the number of the column set.
-   // there can be many column set, within which there are many columns
-   virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, int nHeading=0);
-   void InsertPrintCol(int nPos, UINT nIDName, double fColPct=0.0, int nHeading=0);
-   void InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading=0);
+	GPrintUnit(GPrintJob *pJob=NULL);
 
-   LPPRINTCOLUMNDEF GetPrintColDef(int nCol, int nHeading=-1);
+	// call to set the print job that owns this unit
+	void SetJob(GPrintJob *pJob);
+	GPrintJob *GetJob() const;
+	// call to print the job, returns FALSE if printing should stop
+	virtual BOOL Print();
+
+public:
+	virtual void CompleteAllColHeadingsStartPosition();
+	virtual void CreatePrintFonts();
+	virtual void InitPrintMetrics();
+	// the nHeading in the following functions means the number of the column set.
+	// there can be many column set, within which there are many columns
+	virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, int nHeading=0);
+	void InsertPrintCol(int nPos, UINT nIDName, double fColPct=0.0, int nHeading=0);
+	void InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading=0);
+
+	LPPRINTCOLUMNDEF GetPrintColDef(int nCol, int nHeading=-1);
 	// initializes 'pDim' with current job and unit dimensions
 	void SaveDim(LPJOBUNITDIM pDim);
 	// restores job and unit dimensions with data found in 'pDim'
 	void RestoreDim(LPJOBUNITDIM pDim);
 
 protected:
-   // starts a new page. it will draw the header
-   virtual void StartPage();
-   // ends current page. it will draw the footer 
-   virtual void EndPage();
-   // prints a blank page, set 'bIncPageNo' to FALSE if you don't want
-   // the page number affected...
-   virtual void AdvancePage(BOOL bIncPageNo=TRUE);
+	// starts a new page. it will draw the header
+	virtual void StartPage();
+	// ends current page. it will draw the footer 
+	virtual void EndPage();
+	// prints a blank page, set 'bIncPageNo' to FALSE if you don't want
+	// the page number affected...
+	virtual void AdvancePage(BOOL bIncPageNo=TRUE);
 
-   virtual int StartRow(int nHeight=PT_LINEOFTEXT);
-   virtual int EndRow(BOOL bCheckForOverflow=TRUE);
-   virtual void OnContinueRow();
+	virtual int StartRow(int nHeight=PT_LINEOFTEXT);
+	virtual int EndRow(BOOL bCheckForOverflow=TRUE);
+	virtual void OnContinueRow();
 
-   virtual BOOL ContinuePrinting() const;
-   // adjusts all relavent unit and job dimensions, returns the previous map mode
-   virtual int SetMapMode(int nMapMode);
+	virtual BOOL ContinuePrinting() const;
+	// adjusts all relavent unit and job dimensions, returns the previous map mode
+	virtual int SetMapMode(int nMapMode);
 
-   virtual void PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat);
-   virtual int DrawColText(LPCTSTR lpszText, int nLen,
-									CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
-   virtual LONG FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
-                         int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay=TRUE);
-   virtual void PrintColHeadings(UINT nFormat, UINT nEffects=0);
-   virtual void PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-                                UINT nFormat, UINT nEffects);
-   virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-                                UINT nFormat, UINT nEffects);
+	virtual void PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat);
+	virtual int DrawColText(LPCTSTR lpszText, int nLen,
+		CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
+	virtual LONG FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
+		int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay=TRUE);
+	virtual void PrintColHeadings(UINT nFormat, UINT nEffects=0);
+	virtual void PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
+		UINT nFormat, UINT nEffects);
+	virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
+		UINT nFormat, UINT nEffects);
 
-   virtual void PrintFooter();
-   virtual void PrintHeader();
+	virtual void PrintFooter();
+	virtual void PrintHeader();
 
-   virtual void RealizeMetrics();
+	virtual void RealizeMetrics();
 
-   void SetActiveHeading(int nHeading);
+	void SetActiveHeading(int nHeading);
 
-   void PrintFooterText(LPCTSTR lpszText);
-   void PrintHeaderText(LPCTSTR lpszText);
-   void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0);
-   void PrintTextLine(LPPRINTTEXTLINE lpTextLine);
-   // override this if you want to change the behavior of all overloaded
-   // versions of PrintTextLine()
-   virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine);
+	void PrintFooterText(LPCTSTR lpszText);
+	void PrintHeaderText(LPCTSTR lpszText);
+	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0);
+	void PrintTextLine(LPPRINTTEXTLINE lpTextLine);
+	// override this if you want to change the behavior of all overloaded
+	// versions of PrintTextLine()
+	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine);
 
-   void DrawDots(LPRECT lpRect);
-   void DrawRepeatChar(TCHAR ch, LPRECT lpRect);
+	void DrawDots(LPRECT lpRect);
+	void DrawRepeatChar(TCHAR ch, LPRECT lpRect);
 
-   int PumTypeToHeight(PUMTYPE pt) const;
+	int PumTypeToHeight(PUMTYPE pt) const;
 
-// printing index trees
-   virtual void PrintTree(GPrintIndexTree *pObj, int nLevel=0);
-   virtual void PrintTreeItem(LPINDEXITEM lpIndex, int nLevel);
-   virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
+	// printing index trees
+	virtual void PrintTree(GPrintIndexTree *pObj, int nLevel=0);
+	virtual void PrintTreeItem(LPINDEXITEM lpIndex, int nLevel);
+	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
 
-   void AddIndexItem(INDEXITEM *pII);
+	void AddIndexItem(INDEXITEM *pII);
 
 protected:
-   CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
-   // the extents of the current row
-   CSize m_sizeCurrentRow;
-   // metrics used for printing
-   PRINTUNITMETRICS m_pum;
-   // the current heading
-   LPPRINTUNITCOLDEFS m_lpActiveColDefs;
-   // headings, containing all sets of the columns
-   PRINTUNITHEADINGS m_headings;
+	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
+	// the extents of the current row
+	CSize m_sizeCurrentRow;
+	// metrics used for printing
+	PRINTUNITMETRICS m_pum;
+	// the current heading
+	LPPRINTUNITCOLDEFS m_lpActiveColDefs;
+	// headings, containing all sets of the columns
+	PRINTUNITHEADINGS m_headings;
 	//rich edit control used to print multiple lines in same column
 	CRichEditCtrl m_richEdit;
-   // pointer to the currently active font pair
-   LPPUFONTPAIR m_pActiveFontPair;
-   // TRUE if we're currently printing a heading
-   BOOL m_bPrintingHeading;
+	// pointer to the currently active font pair
+	LPPUFONTPAIR m_pActiveFontPair;
+	// TRUE if we're currently printing a heading
+	BOOL m_bPrintingHeading;
 
 public:
-   // pointer to owner print job
-   GPrintJob *m_pJob;
+	// pointer to owner print job
+	GPrintJob *m_pJob;
 
 
 public:
-   virtual ~GPrintUnit();
+	virtual ~GPrintUnit();
 };
 
 
@@ -403,26 +403,26 @@ public:
 
 struct GPTLTOKEN
 {
-   CString strToken; // text to draw
-   UINT nFormat; // DrawText() Format Flags like DT_RIGHT
-   BOOL bDots;
-   int bNewLine;
+	CString strToken; // text to draw
+	UINT nFormat; // DrawText() Format Flags like DT_RIGHT
+	BOOL bDots;
+	int bNewLine;
 };
 
 // return value from GetNextToken()
 enum GNTRESULT
 {
-   GNTR_ERROR,
-   GNTR_ENDOFLINE,
-   GNTR_TOKEN,
-   GNTR_TOKENNEWLINE,
+	GNTR_ERROR,
+	GNTR_ENDOFLINE,
+	GNTR_TOKEN,
+	GNTR_TOKENNEWLINE,
 };
 
 
 // text line profile
 struct GPTLPROFILE
 {
-   BOOL bDots;
+	BOOL bDots;
 };
 
 
@@ -430,24 +430,24 @@ struct GPTLPROFILE
 class GPrintTextLineParser
 {
 public:
-   GPrintTextLineParser();
+	GPrintTextLineParser();
 
-   BOOL GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile);
-   // Get next Sub-string and its format according to the text input.
-   // the lpszText will only be used at the first time of the call of one 
-   // instance of GPrintTextLineParser. Later it will make no use.
-   GNTRESULT GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token);
+	BOOL GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile);
+	// Get next Sub-string and its format according to the text input.
+	// the lpszText will only be used at the first time of the call of one 
+	// instance of GPrintTextLineParser. Later it will make no use.
+	GNTRESULT GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token);
 
 protected:
 	LPCTSTR m_lpszCurChar;
-   int m_nSkipChars;
-   TCHAR m_chCur;
-   UINT m_nNewFormat;
-   BOOL m_bNewDots;
-   BOOL m_bNewLine;
+	int m_nSkipChars;
+	TCHAR m_chCur;
+	UINT m_nNewFormat;
+	BOOL m_bNewDots;
+	BOOL m_bNewLine;
 
 public:
-   virtual ~GPrintTextLineParser();
+	virtual ~GPrintTextLineParser();
 };
 
 

@@ -22,72 +22,72 @@ IMPLEMENT_DYNAMIC(GPrintUnit, CObject)
 
 GPrintUnit::GPrintUnit(GPrintJob *pJob)
 {
-   m_pJob = pJob;
+	m_pJob = pJob;
 
-   m_sizeCurrentRow = CSize(0,0);
-   GMakeStructFillZero(m_pum);
+	m_sizeCurrentRow = CSize(0,0);
+	GMakeStructFillZero(m_pum);
 
-   m_lpActiveColDefs = NULL;
-   m_pActiveFontPair = NULL;
+	m_lpActiveColDefs = NULL;
+	m_pActiveFontPair = NULL;
 
-   m_bPrintingHeading = FALSE;
+	m_bPrintingHeading = FALSE;
 }
 
 
 GPrintUnit::~GPrintUnit()
 {
-   int nHeadings = m_headings.GetSize();
+	int nHeadings = m_headings.GetSize();
 
-   for(int nHeading = 0; nHeading < nHeadings; nHeading++)
-   {
-      LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(nHeading);
-      if(lpColDefs)
-      {
-         int nSize = lpColDefs->GetSize();
-         for(int i = 0; i < nSize; i++)
-         {
-            LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
-            delete lpDef;
-         }
+	for(int nHeading = 0; nHeading < nHeadings; nHeading++)
+	{
+		LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(nHeading);
+		if(lpColDefs)
+		{
+			int nSize = lpColDefs->GetSize();
+			for(int i = 0; i < nSize; i++)
+			{
+				LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
+				delete lpDef;
+			}
 
-         delete lpColDefs;
-      }
-   }
+			delete lpColDefs;
+		}
+	}
 }
 
 
 void GPrintUnit::SetActiveHeading(int nHeading)
 {
-   m_lpActiveColDefs = m_headings.GetAt(nHeading);
+	m_lpActiveColDefs = m_headings.GetAt(nHeading);
 }
 
 
 void GPrintUnit::SetJob(GPrintJob *pJob)
 {
-   m_pJob = pJob;
+	m_pJob = pJob;
 }
 
 
 GPrintJob *GPrintUnit::GetJob() const
 {
-   return m_pJob;
+	return m_pJob;
 }
 
 
 
 BOOL GPrintUnit::Print()
 {
-   CreatePrintFonts();
-   InitPrintMetrics();
-   CompleteAllColHeadingsStartPosition();
-   
-   return TRUE;
+	CreatePrintFonts();
+	InitPrintMetrics();
+	CompleteAllColHeadingsStartPosition();
+
+	return TRUE;
 }
 
 
 BOOL GPrintUnit::ContinuePrinting() const
 {
-   return (m_pJob && m_pJob->m_pInfo && JINFO.m_bContinuePrinting) ? TRUE : FALSE;
+	return (m_pJob && m_pJob->m_pInfo && JINFO.m_bContinuePrinting) ? TRUE : FALSE;
 }
 
 
@@ -105,32 +105,32 @@ void GPrintUnit::InitPrintMetrics()
 
 void GPrintUnit::CompleteAllColHeadingsStartPosition()
 {
-   int nHeadings = m_headings.GetSize();
-   
-   // traverse all the column sets
-   for(int i = 0; i < nHeadings; i++)
-   {
-      int nStart = JRECT.left;
-      LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(i);
+	int nHeadings = m_headings.GetSize();
 
-      if(!m_lpActiveColDefs)
-      {
-         m_lpActiveColDefs = lpColDefs;
-      }
+	// traverse all the column sets
+	for(int i = 0; i < nHeadings; i++)
+	{
+		int nStart = JRECT.left;
+		LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(i);
 
-      int nSize = lpColDefs->GetSize();
-	  // traverse all the columns in a column set
-      for(int i = 0; i < nSize; i++)
-      {
-         LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
-         if(lpDef)
-         {
-            lpDef->nStart = nStart;
-            //  the next start position just after the previous
-			nStart += lpDef->nWidth;
-         }
-      }
-   }
+		if(!m_lpActiveColDefs)
+		{
+			m_lpActiveColDefs = lpColDefs;
+		}
+
+		int nSize = lpColDefs->GetSize();
+		// traverse all the columns in a column set
+		for(int i = 0; i < nSize; i++)
+		{
+			LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
+			if(lpDef)
+			{
+				lpDef->nStart = nStart;
+				//  the next start position just after the previous
+				nStart += lpDef->nWidth;
+			}
+		}
+	}
 }
 
 
@@ -139,26 +139,26 @@ void GPrintUnit::CompleteAllColHeadingsStartPosition()
 
 void GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, int nHeading)
 {
-   PRINTCOLUMN pc;
-   GMakeStructFillZero(pc);
+	PRINTCOLUMN pc;
+	GMakeStructFillZero(pc);
 
-   pc.nPos = nPos;
-   pc.lpszName = lpszName;
-   pc.fColPct = fColPct;
-   // always use the rich edit to contain the contents, thus it can 
-   // output in multilines
-   pc.dwFlags |= PCF_USERICHEDIT; 
+	pc.nPos = nPos;
+	pc.lpszName = lpszName;
+	pc.fColPct = fColPct;
+	// always use the rich edit to contain the contents, thus it can 
+	// output in multilines
+	pc.dwFlags |= PCF_USERICHEDIT; 
 
-   InsertPrintCol(&pc, nHeading);
+	InsertPrintCol(&pc, nHeading);
 }
 
 
 void GPrintUnit::InsertPrintCol(int nPos, UINT nIDName, double fColPct, int nHeading)
 {
-   CString strName;
-   strName.LoadString(nIDName);
+	CString strName;
+	strName.LoadString(nIDName);
 
-   InsertPrintCol(nPos, strName, fColPct, nHeading);
+	InsertPrintCol(nPos, strName, fColPct, nHeading);
 }
 
 
@@ -167,83 +167,83 @@ void GPrintUnit::InsertPrintCol(int nPos, UINT nIDName, double fColPct, int nHea
 
 void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
 {
-   ASSERT(pCol);
-   if(!pCol)
-      return;
+	ASSERT(pCol);
+	if(!pCol)
+		return;
 
-   // this is an array containing all the columns definitions
-   LPPRINTUNITCOLDEFS lpColSet = NULL;
+	// this is an array containing all the columns definitions
+	LPPRINTUNITCOLDEFS lpColSet = NULL;
 
-   if(nHeading >= m_headings.GetSize())
-   {
-	  // nHeading indicates a new column set
-      lpColSet = new PRINTUNITCOLDEFS;
-      m_headings.InsertAt(nHeading, lpColSet);
-   }
-   else
-   {
-	   // nHeading indicates an existing column set
-      lpColSet = m_headings.GetAt(nHeading);
-   }
+	if(nHeading >= m_headings.GetSize())
+	{
+		// nHeading indicates a new column set
+		lpColSet = new PRINTUNITCOLDEFS;
+		m_headings.InsertAt(nHeading, lpColSet);
+	}
+	else
+	{
+		// nHeading indicates an existing column set
+		lpColSet = m_headings.GetAt(nHeading);
+	}
 
-   // to define a variable to contain the column def
-   LPPRINTCOLUMNDEF lpNewDef = new PRINTCOLUMNDEF;
-   if(pCol->lpszName)
-   {
-      if(pCol->dwFlags & PCF_TEXTISID)
-         lpNewDef->strName.LoadString((UINT)pCol->lpszName);
-      else
-         lpNewDef->strName = pCol->lpszName;
-   }
+	// to define a variable to contain the column def
+	LPPRINTCOLUMNDEF lpNewDef = new PRINTCOLUMNDEF;
+	if(pCol->lpszName)
+	{
+		if(pCol->dwFlags & PCF_TEXTISID)
+			lpNewDef->strName.LoadString((UINT)pCol->lpszName);
+		else
+			lpNewDef->strName = pCol->lpszName;
+	}
 
-   if(pCol->dwFlags & PCF_STRETCHY)
-   {
-      double fRemaining = 100.0;
+	if(pCol->dwFlags & PCF_STRETCHY)
+	{
+		double fRemaining = 100.0;
 
-      int nSize = lpColSet->GetSize();
-      for(int i = 0; i < nSize; i++)
-      {
-         LPPRINTCOLUMNDEF lpDef = lpColSet->GetAt(i);
-         if(lpDef)
-         {
-            fRemaining -= lpDef->fPct;
-         }
-      }
+		int nSize = lpColSet->GetSize();
+		for(int i = 0; i < nSize; i++)
+		{
+			LPPRINTCOLUMNDEF lpDef = lpColSet->GetAt(i);
+			if(lpDef)
+			{
+				fRemaining -= lpDef->fPct;
+			}
+		}
 
-      pCol->fColPct = fRemaining;
-   }
-   
-   // if fColPct is 15, Width() returns 90, the GPERCENT returns 90*0.15
-   lpNewDef->nWidth = GPERCENT(JINFO.m_rectDraw.Width(), pCol->fColPct);
+		pCol->fColPct = fRemaining;
+	}
 
-   lpNewDef->fPct = pCol->fColPct;
-   lpNewDef->dwFlags = pCol->dwFlags;
-   lpColSet->InsertAt(pCol->nPos, lpNewDef);
+	// if fColPct is 15, Width() returns 90, the GPERCENT returns 90*0.15
+	lpNewDef->nWidth = GPERCENT(JINFO.m_rectDraw.Width(), pCol->fColPct);
+
+	lpNewDef->fPct = pCol->fColPct;
+	lpNewDef->dwFlags = pCol->dwFlags;
+	lpColSet->InsertAt(pCol->nPos, lpNewDef);
 }
 
 
 
 LPPRINTCOLUMNDEF GPrintUnit::GetPrintColDef(int nCol, int nHeading)
 {
-   LPPRINTUNITCOLDEFS pColDefs = NULL;
+	LPPRINTUNITCOLDEFS pColDefs = NULL;
 
-   if(nHeading == -1)
-   {
-      pColDefs = m_lpActiveColDefs;
-   }
-   else
-   {
-      pColDefs = m_headings.GetAt(nHeading);
-   }
+	if(nHeading == -1)
+	{
+		pColDefs = m_lpActiveColDefs;
+	}
+	else
+	{
+		pColDefs = m_headings.GetAt(nHeading);
+	}
 
-   LPPRINTCOLUMNDEF pDef = NULL;
+	LPPRINTCOLUMNDEF pDef = NULL;
 
-   if(pColDefs)
-   {
-      pDef = pColDefs->GetAt(nCol);
-   }
+	if(pColDefs)
+	{
+		pDef = pColDefs->GetAt(nCol);
+	}
 
-   return pDef;
+	return pDef;
 }
 
 
@@ -269,69 +269,69 @@ void GPrintUnit::RestoreDim(LPJOBUNITDIM pDim)
 
 void GPrintUnit::StartPage()
 {
-   ASSERT(!m_pJob->IsEndPagePending());
+	ASSERT(!m_pJob->IsEndPagePending());
 
-   m_pJob->SetEndPagePending();
+	m_pJob->SetEndPagePending();
 
-   JCUR = JRECT.TopLeft();
-   JDC.StartPage();
+	JCUR = JRECT.TopLeft();
+	JDC.StartPage();
 
-   PrintHeader();
+	PrintHeader();
 }
 
 
 
 void GPrintUnit::EndPage()
 {
-   m_pJob->SetEndPagePending(FALSE);
+	m_pJob->SetEndPagePending(FALSE);
 
-   PrintFooter();
+	PrintFooter();
 
-   JDC.EndPage();
-   JINFO.m_nCurPage++;
-   JINFO.m_nPhysicalCurPage++;
+	JDC.EndPage();
+	JINFO.m_nCurPage++;
+	JINFO.m_nPhysicalCurPage++;
 }
 
 
 
 void GPrintUnit::AdvancePage(BOOL bIncPageNo)
 {
-   JCUR = JRECT.TopLeft();
+	JCUR = JRECT.TopLeft();
 
-   JDC.StartPage();
+	JDC.StartPage();
 
-   JDC.EndPage();
+	JDC.EndPage();
 
-   if(bIncPageNo)
-   {
-      JINFO.m_nCurPage++;
-      JINFO.m_nPhysicalCurPage++;
-   }
+	if(bIncPageNo)
+	{
+		JINFO.m_nCurPage++;
+		JINFO.m_nPhysicalCurPage++;
+	}
 }
 
 
 
 int GPrintUnit::StartRow(int tmHeight)
 {
-   int nRC = SR_NULL;
+	int nRC = SR_NULL;
 
-   // all heights below zero are actually enumerated types...
-   // convert to a height
-   if(tmHeight <= 0)
-   {
-      tmHeight = PumTypeToHeight((PUMTYPE)tmHeight);
-   }
+	// all heights below zero are actually enumerated types...
+	// convert to a height
+	if(tmHeight <= 0)
+	{
+		tmHeight = PumTypeToHeight((PUMTYPE)tmHeight);
+	}
 
-   // if we'll exceed the bottom of the page, we must start a new page
-   if((JCUR.y + tmHeight) > JRECT.bottom)
-   {
-      EndPage();
-      StartPage();
+	// if we'll exceed the bottom of the page, we must start a new page
+	if((JCUR.y + tmHeight) > JRECT.bottom)
+	{
+		EndPage();
+		StartPage();
 
-      nRC = SR_ADVANCEDPAGE;
-   }
+		nRC = SR_ADVANCEDPAGE;
+	}
 
-   return nRC;   
+	return nRC;   
 }
 
 
@@ -339,37 +339,37 @@ int GPrintUnit::StartRow(int tmHeight)
 
 int GPrintUnit::EndRow(BOOL bCheckForOverflow)
 {
-   int nRC = ER_NULL;
+	int nRC = ER_NULL;
 
-   // check for overflow
-   BOOL bOverFlow = FALSE;
-   if(bCheckForOverflow && m_lpActiveColDefs)
-   {
-	   int nSize = m_lpActiveColDefs->GetSize();
+	// check for overflow
+	BOOL bOverFlow = FALSE;
+	if(bCheckForOverflow && m_lpActiveColDefs)
+	{
+		int nSize = m_lpActiveColDefs->GetSize();
 
-	   for(int x = 0; !bOverFlow && x < nSize; x++)
-	   {
-		   LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(x);
-		   if(lpDef)
-		   {
-			   if(!lpDef->strOverflow.IsEmpty())
-			   {
-				   bOverFlow = TRUE;
-			   }
-		   }
-	   }
-   }
+		for(int x = 0; !bOverFlow && x < nSize; x++)
+		{
+			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(x);
+			if(lpDef)
+			{
+				if(!lpDef->strOverflow.IsEmpty())
+				{
+					bOverFlow = TRUE;
+				}
+			}
+		}
+	}
 
 	if(bOverFlow)
 	{
-      nRC = ER_OVERFLOW;
+		nRC = ER_OVERFLOW;
 
-      OnContinueRow();
+		OnContinueRow();
 
 		m_sizeCurrentRow = CSize(0,0);
 
-      // print all overflow
-	   int nSize = m_lpActiveColDefs->GetSize();
+		// print all overflow
+		int nSize = m_lpActiveColDefs->GetSize();
 		for(int i = 0; i < nSize; i++)
 		{
 			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
@@ -383,114 +383,114 @@ int GPrintUnit::EndRow(BOOL bCheckForOverflow)
 
 		EndRow();
 	}
-   else
-   {
-      JCUR.y += m_sizeCurrentRow.cy;
-      JCUR.x = JRECT.left;
-   }
+	else
+	{
+		JCUR.y += m_sizeCurrentRow.cy;
+		JCUR.x = JRECT.left;
+	}
 
-   m_sizeCurrentRow = CSize(0,0);
-   return nRC;
+	m_sizeCurrentRow = CSize(0,0);
+	return nRC;
 }
-   
+
 
 
 void GPrintUnit::OnContinueRow()
 {
-   EndPage();
-   StartPage();
+	EndPage();
+	StartPage();
 }
 
 
 
 int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 {
-   int tmHeight = 0;
+	int tmHeight = 0;
 
-   switch(pt)
-   {
-      case PT_HEADING:
-         tmHeight = m_pum.pumHeadingHeight;
-         break;
+	switch(pt)
+	{
+	case PT_HEADING:
+		tmHeight = m_pum.pumHeadingHeight;
+		break;
 
-      case PT_LINEOFTEXT:
-         tmHeight = m_pum.pumLineOfText;
-         break;
+	case PT_LINEOFTEXT:
+		tmHeight = m_pum.pumLineOfText;
+		break;
 
-      default:
-         ASSERT(FALSE);
-         break;
-   }
+	default:
+		ASSERT(FALSE);
+		break;
+	}
 
-   return tmHeight;
+	return tmHeight;
 }
 
 
 
 void GPrintUnit::PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat)
 {
-   if(lpszText)
-   {
-      LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
+	if(lpszText)
+	{
+		LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
 
-      if(lpDef)
-      {
-         CRect r;
-         GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumLineOfText);
-      
-         if(lpDef->dwFlags & PCF_RIGHTMARGIN)
-         {
-            // reduce column width
-            int nMargin = GPERCENT(r.Width(), 0.015);
-            r.right -= nMargin;
-         }
+		if(lpDef)
+		{
+			CRect r;
+			GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumLineOfText);
 
-         int nLen = _tcslen(lpszText);
-         int nHeight = DrawColText(lpszText, nLen, r, nFormat, nCol, lpDef);
+			if(lpDef->dwFlags & PCF_RIGHTMARGIN)
+			{
+				// reduce column width
+				int nMargin = GPERCENT(r.Width(), 0.015);
+				r.right -= nMargin;
+			}
 
-         m_sizeCurrentRow.cy = max(m_sizeCurrentRow.cy, nHeight);
+			int nLen = _tcslen(lpszText);
+			int nHeight = DrawColText(lpszText, nLen, r, nFormat, nCol, lpDef);
 
-         JCUR.x += lpDef->nWidth;
-      }
-   }
+			m_sizeCurrentRow.cy = max(m_sizeCurrentRow.cy, nHeight);
+
+			JCUR.x += lpDef->nWidth;
+		}
+	}
 }
 
 
 
 int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
-                            int nCol, LPPRINTCOLUMNDEF lpDef)
+							int nCol, LPPRINTCOLUMNDEF lpDef)
 {
 	int nHeight = 0;
 	int nWidth = r.Width();
 
-   // get the extent of this text
-   CSize size = JDC.GetTextExtent(lpszText, nLen);
+	// get the extent of this text
+	CSize size = JDC.GetTextExtent(lpszText, nLen);
 	int nTextLen = size.cx;
 
-   BOOL bUseRichEdit = FALSE;
+	BOOL bUseRichEdit = FALSE;
 
-   // forced use of the rich edit control
-   if(lpDef->dwFlags & PCF_USERICHEDIT)
-   {
-      bUseRichEdit = TRUE;
-   }
-   // this says use the rich edit control only if it will 
-   // overflow the available column width
-   else
-   {
-	   if(nFormat & DT_EDITCONTROL)
-	   {
-		   nFormat &= ~DT_EDITCONTROL;
+	// forced use of the rich edit control
+	if(lpDef->dwFlags & PCF_USERICHEDIT)
+	{
+		bUseRichEdit = TRUE;
+	}
+	// this says use the rich edit control only if it will 
+	// overflow the available column width
+	else
+	{
+		if(nFormat & DT_EDITCONTROL)
+		{
+			nFormat &= ~DT_EDITCONTROL;
 
-		   ASSERT(m_pActiveFontPair);
+			ASSERT(m_pActiveFontPair);
 
-		   if(nTextLen >= nWidth)
-		   {
-			   bUseRichEdit = TRUE;
-		   }
-	   }
-   }
-   
+			if(nTextLen >= nWidth)
+			{
+				bUseRichEdit = TRUE;
+			}
+		}
+	}
+
 
 	if(bUseRichEdit)
 	{
@@ -502,27 +502,27 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 			m_richEdit.Create(dwStyle, r, AfxGetMainWnd(), NULL);
 		}
 
-      ASSERT(m_pActiveFontPair);
-      if(m_pActiveFontPair)
-      {
-		   m_richEdit.SetFont(&(m_pActiveFontPair->fontScreen));
+		ASSERT(m_pActiveFontPair);
+		if(m_pActiveFontPair)
+		{
+			m_richEdit.SetFont(&(m_pActiveFontPair->fontScreen));
 
-	      CHARFORMAT cf;
-         if(GfxFontToCharformat(&m_pActiveFontPair->fontPrinter, cf, &JDC))
-         {
-	         m_richEdit.SetDefaultCharFormat(cf);
-         }
-      }
+			CHARFORMAT cf;
+			if(GfxFontToCharformat(&m_pActiveFontPair->fontPrinter, cf, &JDC))
+			{
+				m_richEdit.SetDefaultCharFormat(cf);
+			}
+		}
 
 		m_richEdit.SetWindowText(lpszText);
 		LONG lEditLength = m_richEdit.GetTextLength();
 
 		LONG lStart = 0;
-//		LONG lEnd = lEditLength - 1;
+		//		LONG lEnd = lEditLength - 1;
 
 		int nOldMode = JDC.SetMapMode(MM_TWIPS);
 		JDC.DPtoLP(r);
-		
+
 		int nBottom = abs(r.bottom);
 		int nTop = abs(r.top);
 		r.bottom = nBottom;
@@ -538,7 +538,7 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 
 		JDC.SetMapMode(nOldMode);
 
-      range.chrg.cpMin = FormatDrawColText(lpszText, nLen, r, nFormat, nCol, lpDef, &range, TRUE);
+		range.chrg.cpMin = FormatDrawColText(lpszText, nLen, r, nFormat, nCol, lpDef, &range, TRUE);
 		//range.chrg.cpMin = m_richEdit.FormatRange(&range, TRUE);
 
 		if((range.chrg.cpMin) < lEditLength)
@@ -564,35 +564,35 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 
 
 LONG GPrintUnit::FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
-                            int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay)
+								   int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay)
 {
-   return m_richEdit.FormatRange(pRange, bDisplay);
+	return m_richEdit.FormatRange(pRange, bDisplay);
 }
 
 
 
 void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 {
-   // Since most derived units will call this from an overidden StartPage(), and
-   // we call StartRow() which can trigger a StartPage(), this boolean prevents
-   // us from printing out the heading twice...
-   if(!m_bPrintingHeading)
-   {
-      m_bPrintingHeading = TRUE;
+	// Since most derived units will call this from an overidden StartPage(), and
+	// we call StartRow() which can trigger a StartPage(), this boolean prevents
+	// us from printing out the heading twice...
+	if(!m_bPrintingHeading)
+	{
+		m_bPrintingHeading = TRUE;
 
-      try
-      {
-         StartRow(PT_HEADING);
+		try
+		{
+			StartRow(PT_HEADING);
 
-         int nSize = m_lpActiveColDefs->GetSize();
-         for(int i = 0; i < nSize; i++)
-         {
-            LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
-            if(lpDef)
-            {
-               CRect r;
-               GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumHeadingHeight);
-               int nLen = lpDef->strName.GetLength();
+			int nSize = m_lpActiveColDefs->GetSize();
+			for(int i = 0; i < nSize; i++)
+			{
+				LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
+				if(lpDef)
+				{
+					CRect r;
+					GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumHeadingHeight);
+					int nLen = lpDef->strName.GetLength();
 
 					if(lpDef->dwFlags & PCF_RIGHTMARGIN)
 					{
@@ -601,28 +601,28 @@ void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 						r.right -= nMargin;
 					}
 
-               if(nEffects && !(nEffects & HE_DOLAST))
-                  DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
+					if(nEffects && !(nEffects & HE_DOLAST))
+						DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
 
-               PrintColHeading(i, lpDef->strName, nLen, r, nFormat, nEffects);
+					PrintColHeading(i, lpDef->strName, nLen, r, nFormat, nEffects);
 
-               if(nEffects & HE_DOLAST)
-                  DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
-            }
-         }
+					if(nEffects & HE_DOLAST)
+						DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
+				}
+			}
 
-         m_sizeCurrentRow.cy = m_pum.pumHeadingHeight;
+			m_sizeCurrentRow.cy = m_pum.pumHeadingHeight;
 
-         EndRow(FALSE);
-      }
-      catch(...)
-      {
-         m_bPrintingHeading = FALSE;
-         throw;
-      }
+			EndRow(FALSE);
+		}
+		catch(...)
+		{
+			m_bPrintingHeading = FALSE;
+			throw;
+		}
 
-      m_bPrintingHeading = FALSE;
-   }
+		m_bPrintingHeading = FALSE;
+	}
 }
 
 
@@ -630,29 +630,29 @@ void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 
 
 void GPrintUnit::PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-                                 UINT nFormat, UINT nEffects)
+								 UINT nFormat, UINT nEffects)
 {
 	// compute the width and height of a line of text 
 	// using the current font to determine the dimensions.
-   CSize size = JDC.GetTextExtent(lpszName, nLen);
-   if(size.cx > r.Width())
-   {
-      // because certain print drivers seem to overflow 'r' no matter what, we
-      // must take extra steps to prevent it...
-      do
-      {
-         size = JDC.GetTextExtent(lpszName, --nLen);
+	CSize size = JDC.GetTextExtent(lpszName, nLen);
+	if(size.cx > r.Width())
+	{
+		// because certain print drivers seem to overflow 'r' no matter what, we
+		// must take extra steps to prevent it...
+		do
+		{
+			size = JDC.GetTextExtent(lpszName, --nLen);
 
-      } while(size.cx > r.Width());
-   }
+		} while(size.cx > r.Width());
+	}
 
-   JDC.DrawText(lpszName, nLen, &r, nFormat);
+	JDC.DrawText(lpszName, nLen, &r, nFormat);
 }
 
 
 
 void GPrintUnit::DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-                                 UINT nFormat, UINT nEffects)
+								 UINT nFormat, UINT nEffects)
 {
 }
 
@@ -660,43 +660,43 @@ void GPrintUnit::DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
 
 void GPrintUnit::DrawDots(LPRECT lpRect)
 {
-   TCHAR chDot = _T('.');//I18nOK
-   DrawRepeatChar(chDot, lpRect);
+	TCHAR chDot = _T('.');//I18nOK
+	DrawRepeatChar(chDot, lpRect);
 }
 
 
 void GPrintUnit::DrawRepeatChar(TCHAR ch, LPRECT lpRect) 
 {
-   if(!lpRect)
-      return;
+	if(!lpRect)
+		return;
 
-   CSize sizeChar = JDC.GetTextExtent(CString(ch));
+	CSize sizeChar = JDC.GetTextExtent(CString(ch));
 
-   if(!sizeChar.cx)
-      return;
+	if(!sizeChar.cx)
+		return;
 
-   int nWidth = max(lpRect->right - lpRect->left, 0);
-   int nChars = nWidth/sizeChar.cx;
+	int nWidth = max(lpRect->right - lpRect->left, 0);
+	int nChars = nWidth/sizeChar.cx;
 
-   if(nChars > 0)
-   {
-	   CString strRepeatChars(ch, nChars);
-      JDC.DrawText(strRepeatChars, lpRect, DT_SINGLELINE);
-   }
+	if(nChars > 0)
+	{
+		CString strRepeatChars(ch, nChars);
+		JDC.DrawText(strRepeatChars, lpRect, DT_SINGLELINE);
+	}
 }
 
 // change the client rect size according to the metrics
 void GPrintUnit::RealizeMetrics()
 {
-   JRECT = JINFO.m_rectDraw;
+	JRECT = JINFO.m_rectDraw;
 
-   JRECT.top += m_pum.pumHeaderHeight;
-   JRECT.bottom -= m_pum.pumFooterHeight;
-   JRECT.left += m_pum.pumLeftMarginWidth;
-   JRECT.right -= m_pum.pumRightMarginWidth;
+	JRECT.top += m_pum.pumHeaderHeight;
+	JRECT.bottom -= m_pum.pumFooterHeight;
+	JRECT.left += m_pum.pumLeftMarginWidth;
+	JRECT.right -= m_pum.pumRightMarginWidth;
 
-   // Normalizes CRect so that both the height and width are positive. 
-   JRECT.NormalizeRect();
+	// Normalizes CRect so that both the height and width are positive. 
+	JRECT.NormalizeRect();
 }
 
 
@@ -719,38 +719,38 @@ static BOOL g_StartEndRow = TRUE;
 
 void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 {
-   PRINTTEXTLINE ptl;
-   GMakeStructFillZero(ptl);
+	PRINTTEXTLINE ptl;
+	GMakeStructFillZero(ptl);
 
-   ptl.lpszText = lpszText;
-   ptl.tmHeight = m_pum.pumFooterLineHeight;
+	ptl.lpszText = lpszText;
+	ptl.tmHeight = m_pum.pumFooterLineHeight;
 
-   ptl.rectText.left = JRECT.left;
-   ptl.rectText.right = JRECT.right;
-   ptl.rectText.top = JRECT.bottom;
-   ptl.rectText.bottom = 0;
+	ptl.rectText.left = JRECT.left;
+	ptl.rectText.right = JRECT.right;
+	ptl.rectText.top = JRECT.bottom;
+	ptl.rectText.bottom = 0;
 
 	g_StartEndRow = FALSE;
-   PrintTextLine(&ptl);
+	PrintTextLine(&ptl);
 }
 
 
 
 void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 {
-   PRINTTEXTLINE ptl;
-   GMakeStructFillZero(ptl);
+	PRINTTEXTLINE ptl;
+	GMakeStructFillZero(ptl);
 
-   ptl.lpszText = lpszText;
-   ptl.tmHeight = m_pum.pumHeaderLineHeight;
+	ptl.lpszText = lpszText;
+	ptl.tmHeight = m_pum.pumHeaderLineHeight;
 
-   ptl.rectText.left = JRECT.left;
-   ptl.rectText.right = JRECT.right;
-   ptl.rectText.top = JRECT.top - m_pum.pumHeaderHeight;
-   ptl.rectText.bottom = 0;
+	ptl.rectText.left = JRECT.left;
+	ptl.rectText.right = JRECT.right;
+	ptl.rectText.top = JRECT.top - m_pum.pumHeaderHeight;
+	ptl.rectText.bottom = 0;
 
 	g_StartEndRow = FALSE;
-   PrintTextLine(&ptl);
+	PrintTextLine(&ptl);
 }
 
 
@@ -758,44 +758,44 @@ void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 
 void GPrintUnit::PrintTextLine(LPCTSTR lpszText, UINT nFormat, int tmHeight)
 {
-   PRINTTEXTLINE ptl;
-   GMakeStructFillZero(ptl);
+	PRINTTEXTLINE ptl;
+	GMakeStructFillZero(ptl);
 
-   ptl.lpszText = lpszText;
-   ptl.tmHeight = tmHeight;
-   ptl.nFormat = nFormat;
+	ptl.lpszText = lpszText;
+	ptl.tmHeight = tmHeight;
+	ptl.nFormat = nFormat;
 	ptl.dwFlags = (PTLF_STARTROW|PTLF_ENDROW);
 
-   ptl.rectText.left = JRECT.left;
-   ptl.rectText.right = JRECT.right;
-   ptl.rectText.top = JCUR.y;
-   ptl.rectText.bottom = 0;
+	ptl.rectText.left = JRECT.left;
+	ptl.rectText.right = JRECT.right;
+	ptl.rectText.top = JCUR.y;
+	ptl.rectText.bottom = 0;
 
 	g_StartEndRow = TRUE;
-   PrintTextLine(&ptl);
+	PrintTextLine(&ptl);
 }
 
 
 
 void GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine)
 {
-   PrintTextLineEx(lpTextLine);
+	PrintTextLineEx(lpTextLine);
 }
 
 
 void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 {
-   if(!lpTextLine)
-      return;
+	if(!lpTextLine)
+		return;
 
-   if(!lpTextLine->tmHeight)
-   {
-      lpTextLine->tmHeight = m_pum.pumLineOfText;
-      ASSERT(lpTextLine->tmHeight); // whoa
-   }
+	if(!lpTextLine->tmHeight)
+	{
+		lpTextLine->tmHeight = m_pum.pumLineOfText;
+		ASSERT(lpTextLine->tmHeight); // whoa
+	}
 
-   // number of lines we've printed
-   int nLines = max(1, GfxCountLines(lpTextLine->lpszText));
+	// number of lines we've printed
+	int nLines = max(1, GfxCountLines(lpTextLine->lpszText));
 
 	if(lpTextLine->dwFlags & PTLF_STARTROW)
 	{
@@ -805,266 +805,266 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 		}
 	}
 
-   // set up some rectangles
-   CRect rectLast(0,0,0,0);
-   // default text rect 'r'
-   CRect r = lpTextLine->rectText;
-   r.bottom = r.top + lpTextLine->tmHeight;
+	// set up some rectangles
+	CRect rectLast(0,0,0,0);
+	// default text rect 'r'
+	CRect r = lpTextLine->rectText;
+	r.bottom = r.top + lpTextLine->tmHeight;
 
-   // establish a parser
-   GPrintTextLineParser parser;
-   
-   // check if there are any dot formatting characters now for speed
-   GPTLPROFILE profile;
-   parser.GetProfile(lpTextLine->lpszText, profile);
+	// establish a parser
+	GPrintTextLineParser parser;
 
-   // number of rows we've printed
-   int nRowsPrinted = 1;
-   BOOL bParse = TRUE;
-   GPTLTOKEN token;
+	// check if there are any dot formatting characters now for speed
+	GPTLPROFILE profile;
+	parser.GetProfile(lpTextLine->lpszText, profile);
 
-   while(bParse)
-   {
-      BOOL bPrint = FALSE;
-      GNTRESULT result = parser.GetNextToken(lpTextLine->lpszText, token);
-      
-      switch(result)
-      {
-         case GNTR_TOKENNEWLINE:
-            nRowsPrinted++;
-            // fall through
-         case GNTR_TOKEN:
-            bPrint = TRUE;
-            break;
+	// number of rows we've printed
+	int nRowsPrinted = 1;
+	BOOL bParse = TRUE;
+	GPTLTOKEN token;
 
-         case GNTR_ENDOFLINE:
-            bParse = FALSE;
-            break;
+	while(bParse)
+	{
+		BOOL bPrint = FALSE;
+		GNTRESULT result = parser.GetNextToken(lpTextLine->lpszText, token);
 
-         case GNTR_ERROR:
-         default:
-            bParse = FALSE;
-            ASSERT(FALSE);
-            break;
-      }
+		switch(result)
+		{
+		case GNTR_TOKENNEWLINE:
+			nRowsPrinted++;
+			// fall through
+		case GNTR_TOKEN:
+			bPrint = TRUE;
+			break;
 
-      // we've got something to print?
-      if(bPrint)
-      {
-         // adjust rect for line number
-         if(token.bNewLine)
-         {
-            r.OffsetRect(0, lpTextLine->tmHeight);
-         }
+		case GNTR_ENDOFLINE:
+			bParse = FALSE;
+			break;
 
-         bPrint = FALSE;
+		case GNTR_ERROR:
+		default:
+			bParse = FALSE;
+			ASSERT(FALSE);
+			break;
+		}
 
-         if(token.bDots || !token.strToken.IsEmpty())
-         {
-            int nTempFormat = token.nFormat|lpTextLine->nFormat;
+		// we've got something to print?
+		if(bPrint)
+		{
+			// adjust rect for line number
+			if(token.bNewLine)
+			{
+				r.OffsetRect(0, lpTextLine->tmHeight);
+			}
 
-            BOOL bIsText = !token.strToken.IsEmpty();
-            CString strTemp(token.strToken);
+			bPrint = FALSE;
 
-            if(bIsText)
-            {
-               JDC.DrawText(token.strToken, &r, nTempFormat);
-            }
+			if(token.bDots || !token.strToken.IsEmpty())
+			{
+				int nTempFormat = token.nFormat|lpTextLine->nFormat;
 
-            CRect rectNew;
+				BOOL bIsText = !token.strToken.IsEmpty();
+				CString strTemp(token.strToken);
 
-            if(profile.bDots)
-            {
-               if(!bIsText)
-               {
-                  rectNew.left = rectNew.right = r.right;
-               }
-               else
-               {
-                  CSize sizeText = JDC.GetTextExtent(strTemp);
-                  int nLineWidth = r.Width();
+				if(bIsText)
+				{
+					JDC.DrawText(token.strToken, &r, nTempFormat);
+				}
 
-                  if(nTempFormat & DT_CENTER)
-                  {
-                     rectNew.left = (nLineWidth - sizeText.cx)/2;
-                     rectNew.left = max(0, rectNew.left);
-                     rectNew.left += r.left;
-                     rectNew.right = rectNew.left + sizeText.cx;
-                  }
-                  else
-                  if(nTempFormat & DT_RIGHT)
-                  {
-                     rectNew.right = r.right; 
-                     rectNew.left = r.right - min(nLineWidth, sizeText.cx);
-                  }
-                  // default to left
-                  else
-                  {
-                     rectNew.left = r.left;
-                     rectNew.right = r.left + min(nLineWidth, sizeText.cx);
-                  }
-               }
+				CRect rectNew;
 
-               rectNew.top = r.top;
-               rectNew.bottom = r.bottom;
-            }
+				if(profile.bDots)
+				{
+					if(!bIsText)
+					{
+						rectNew.left = rectNew.right = r.right;
+					}
+					else
+					{
+						CSize sizeText = JDC.GetTextExtent(strTemp);
+						int nLineWidth = r.Width();
 
-            // print a row of dots between this and the last text
-            if(token.bDots)
-            {
-               if(rectNew.left > rectLast.right)
-               {
-                  CRect rectDots(r);
-                  rectDots.left = rectLast.right;
-                  rectDots.right = rectNew.left;
+						if(nTempFormat & DT_CENTER)
+						{
+							rectNew.left = (nLineWidth - sizeText.cx)/2;
+							rectNew.left = max(0, rectNew.left);
+							rectNew.left += r.left;
+							rectNew.right = rectNew.left + sizeText.cx;
+						}
+						else
+							if(nTempFormat & DT_RIGHT)
+							{
+								rectNew.right = r.right; 
+								rectNew.left = r.right - min(nLineWidth, sizeText.cx);
+							}
+							// default to left
+							else
+							{
+								rectNew.left = r.left;
+								rectNew.right = r.left + min(nLineWidth, sizeText.cx);
+							}
+					}
 
-                  DrawDots(&rectDots);
-               }
-            }
+					rectNew.top = r.top;
+					rectNew.bottom = r.bottom;
+				}
 
-            rectLast = rectNew;
-         }
-      }
-   }
+				// print a row of dots between this and the last text
+				if(token.bDots)
+				{
+					if(rectNew.left > rectLast.right)
+					{
+						CRect rectDots(r);
+						rectDots.left = rectLast.right;
+						rectDots.right = rectNew.left;
 
-   if(nRowsPrinted)
-   {
-      m_sizeCurrentRow.cy = (lpTextLine->tmHeight * nRowsPrinted);
+						DrawDots(&rectDots);
+					}
+				}
+
+				rectLast = rectNew;
+			}
+		}
+	}
+
+	if(nRowsPrinted)
+	{
+		m_sizeCurrentRow.cy = (lpTextLine->tmHeight * nRowsPrinted);
 
 		if(lpTextLine->dwFlags & PTLF_ENDROW)
 		{
 			EndRow(FALSE);
 		}
-   }
+	}
 }
 
 
 
 int GPrintUnit::SetMapMode(int nMapMode)
 {
-   CPoint ptTemp(0,0);
+	CPoint ptTemp(0,0);
 
-   // convert all the current  
-   int nCurrentMapMode = JDC.GetMapMode();
+	// convert all the current  
+	int nCurrentMapMode = JDC.GetMapMode();
 
-   // no need to convert if LP and DP are equal
-   if(nCurrentMapMode != MM_TEXT)
-   {
-      ptTemp.y = m_pum.pumHeadingHeight;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumHeadingHeight = abs(ptTemp.y);
+	// no need to convert if LP and DP are equal
+	if(nCurrentMapMode != MM_TEXT)
+	{
+		ptTemp.y = m_pum.pumHeadingHeight;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumHeadingHeight = abs(ptTemp.y);
 
-      ptTemp.y = m_pum.pumFooterHeight;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumFooterHeight = abs(ptTemp.y);
+		ptTemp.y = m_pum.pumFooterHeight;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumFooterHeight = abs(ptTemp.y);
 
-      ptTemp.y = m_pum.pumHeaderHeight;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumHeaderHeight = abs(ptTemp.y);
+		ptTemp.y = m_pum.pumHeaderHeight;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumHeaderHeight = abs(ptTemp.y);
 
-      ptTemp.x = m_pum.pumRightMarginWidth;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumRightMarginWidth = abs(ptTemp.x);
+		ptTemp.x = m_pum.pumRightMarginWidth;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumRightMarginWidth = abs(ptTemp.x);
 
-      ptTemp.x = m_pum.pumLeftMarginWidth;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumLeftMarginWidth = abs(ptTemp.x);
+		ptTemp.x = m_pum.pumLeftMarginWidth;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumLeftMarginWidth = abs(ptTemp.x);
 
-      ptTemp.y = m_pum.pumFooterLineHeight;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumFooterLineHeight = abs(ptTemp.y);
+		ptTemp.y = m_pum.pumFooterLineHeight;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumFooterLineHeight = abs(ptTemp.y);
 
-      ptTemp.y = m_pum.pumHeaderLineHeight;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumHeaderLineHeight = abs(ptTemp.y);
+		ptTemp.y = m_pum.pumHeaderLineHeight;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumHeaderLineHeight = abs(ptTemp.y);
 
-      ptTemp.y = m_pum.pumLineOfText;
-      JDC.LPtoDP(&ptTemp);
-      m_pum.pumLineOfText = abs(ptTemp.y);
+		ptTemp.y = m_pum.pumLineOfText;
+		JDC.LPtoDP(&ptTemp);
+		m_pum.pumLineOfText = abs(ptTemp.y);
 
-      JDC.LPtoDP(JRECT);
-      JRECT.left = abs(JRECT.left);
-      JRECT.right = abs(JRECT.right);
-      JRECT.top = abs(JRECT.top);
-      JRECT.bottom = abs(JRECT.bottom);
+		JDC.LPtoDP(JRECT);
+		JRECT.left = abs(JRECT.left);
+		JRECT.right = abs(JRECT.right);
+		JRECT.top = abs(JRECT.top);
+		JRECT.bottom = abs(JRECT.bottom);
 
-      JDC.LPtoDP(&JCUR);
-      JCUR.x = abs(JCUR.x);
-      JCUR.y = abs(JCUR.y);
+		JDC.LPtoDP(&JCUR);
+		JCUR.x = abs(JCUR.x);
+		JCUR.y = abs(JCUR.y);
 
-      JDC.LPtoDP(JINFO.m_rectDraw);
-      JINFO.m_rectDraw.left = abs(JINFO.m_rectDraw.left);
-      JINFO.m_rectDraw.right = abs(JINFO.m_rectDraw.right);
-      JINFO.m_rectDraw.top = abs(JINFO.m_rectDraw.top);
-      JINFO.m_rectDraw.bottom = abs(JINFO.m_rectDraw.bottom);
-   }
+		JDC.LPtoDP(JINFO.m_rectDraw);
+		JINFO.m_rectDraw.left = abs(JINFO.m_rectDraw.left);
+		JINFO.m_rectDraw.right = abs(JINFO.m_rectDraw.right);
+		JINFO.m_rectDraw.top = abs(JINFO.m_rectDraw.top);
+		JINFO.m_rectDraw.bottom = abs(JINFO.m_rectDraw.bottom);
+	}
 
-   // change the mapping mode
-   int nOldMapMode = JDC.SetMapMode(nMapMode);
+	// change the mapping mode
+	int nOldMapMode = JDC.SetMapMode(nMapMode);
 
-   ptTemp.y = m_pum.pumHeadingHeight;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumHeadingHeight = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumHeadingHeight;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumHeadingHeight = abs(ptTemp.y);
 
-   ptTemp.y = m_pum.pumFooterHeight;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumFooterHeight = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumFooterHeight;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumFooterHeight = abs(ptTemp.y);
 
-   ptTemp.y = m_pum.pumHeaderHeight;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumHeaderHeight = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumHeaderHeight;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumHeaderHeight = abs(ptTemp.y);
 
-   ptTemp.x = m_pum.pumRightMarginWidth;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumRightMarginWidth = abs(ptTemp.x);
+	ptTemp.x = m_pum.pumRightMarginWidth;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumRightMarginWidth = abs(ptTemp.x);
 
-   ptTemp.x = m_pum.pumLeftMarginWidth;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumLeftMarginWidth = abs(ptTemp.x);
+	ptTemp.x = m_pum.pumLeftMarginWidth;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumLeftMarginWidth = abs(ptTemp.x);
 
-   ptTemp.y = m_pum.pumFooterLineHeight;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumFooterLineHeight = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumFooterLineHeight;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumFooterLineHeight = abs(ptTemp.y);
 
-   ptTemp.y = m_pum.pumHeaderLineHeight;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumHeaderLineHeight = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumHeaderLineHeight;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumHeaderLineHeight = abs(ptTemp.y);
 
-   ptTemp.y = m_pum.pumLineOfText;
-   JDC.DPtoLP(&ptTemp);
-   m_pum.pumLineOfText = abs(ptTemp.y);
+	ptTemp.y = m_pum.pumLineOfText;
+	JDC.DPtoLP(&ptTemp);
+	m_pum.pumLineOfText = abs(ptTemp.y);
 
-   JDC.DPtoLP(JRECT);
-   JRECT.left = abs(JRECT.left);
-   JRECT.right = abs(JRECT.right);
-   JRECT.top = abs(JRECT.top);
-   JRECT.bottom = abs(JRECT.bottom);
+	JDC.DPtoLP(JRECT);
+	JRECT.left = abs(JRECT.left);
+	JRECT.right = abs(JRECT.right);
+	JRECT.top = abs(JRECT.top);
+	JRECT.bottom = abs(JRECT.bottom);
 
-   JDC.DPtoLP(&JCUR);
-   JCUR.x = abs(JCUR.x);
-   JCUR.y = abs(JCUR.y);
+	JDC.DPtoLP(&JCUR);
+	JCUR.x = abs(JCUR.x);
+	JCUR.y = abs(JCUR.y);
 
-   JDC.DPtoLP(JINFO.m_rectDraw);
-   JINFO.m_rectDraw.left = abs(JINFO.m_rectDraw.left);
-   JINFO.m_rectDraw.right = abs(JINFO.m_rectDraw.right);
-   JINFO.m_rectDraw.top = abs(JINFO.m_rectDraw.top);
-   JINFO.m_rectDraw.bottom = abs(JINFO.m_rectDraw.bottom);
+	JDC.DPtoLP(JINFO.m_rectDraw);
+	JINFO.m_rectDraw.left = abs(JINFO.m_rectDraw.left);
+	JINFO.m_rectDraw.right = abs(JINFO.m_rectDraw.right);
+	JINFO.m_rectDraw.top = abs(JINFO.m_rectDraw.top);
+	JINFO.m_rectDraw.bottom = abs(JINFO.m_rectDraw.bottom);
 
-   // the print unit and job expects the device orientation to be y positive down, 
-   // and x positive right, just as with MM_TEXT.  It makes any required adjustments...
-   CSize sizeOrigViewportExt = JDC.GetViewportExt();
-   CSize sizeOrigWindowExt = JDC.GetWindowExt();
+	// the print unit and job expects the device orientation to be y positive down, 
+	// and x positive right, just as with MM_TEXT.  It makes any required adjustments...
+	CSize sizeOrigViewportExt = JDC.GetViewportExt();
+	CSize sizeOrigWindowExt = JDC.GetWindowExt();
 
-   sizeOrigViewportExt.cx = abs(sizeOrigViewportExt.cx);
-   sizeOrigViewportExt.cy = abs(sizeOrigViewportExt.cy);
+	sizeOrigViewportExt.cx = abs(sizeOrigViewportExt.cx);
+	sizeOrigViewportExt.cy = abs(sizeOrigViewportExt.cy);
 
-   sizeOrigWindowExt.cx = abs(sizeOrigWindowExt.cx);
-   sizeOrigWindowExt.cy = abs(sizeOrigWindowExt.cy);
+	sizeOrigWindowExt.cx = abs(sizeOrigWindowExt.cx);
+	sizeOrigWindowExt.cy = abs(sizeOrigWindowExt.cy);
 
-   JDC.SetWindowExt(sizeOrigWindowExt);
-   JDC.SetViewportExt(sizeOrigViewportExt);
+	JDC.SetWindowExt(sizeOrigWindowExt);
+	JDC.SetViewportExt(sizeOrigViewportExt);
 
-   return nOldMapMode;
+	return nOldMapMode;
 }
 
 
@@ -1074,78 +1074,78 @@ int GPrintUnit::SetMapMode(int nMapMode)
 
 void GPrintUnit::PrintTree(GPrintIndexTree *pObj, int nLevel)
 {
-   int nSize = pObj->GetSize();
-   for(int i = 0; i < nSize; i++)
-   {
-      INDEXITEM ti = pObj->GetAt(i);
-      PrintTreeItem(&ti, nLevel);
+	int nSize = pObj->GetSize();
+	for(int i = 0; i < nSize; i++)
+	{
+		INDEXITEM ti = pObj->GetAt(i);
+		PrintTreeItem(&ti, nLevel);
 
-      if(ti.pChildren)
-      {
-         PrintTree(ti.pChildren, nLevel + 1);
-      }
-   }
+		if(ti.pChildren)
+		{
+			PrintTree(ti.pChildren, nLevel + 1);
+		}
+	}
 }
 
 
 
 void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
 {
-   CString strLineText(lpIndex->strName);
-   CString strPage;
+	CString strLineText(lpIndex->strName);
+	CString strPage;
 
-   if(lpIndex->nFlags & INDEXF_PAGENO)
-   {
-      strPage.Format(_T("%d"), lpIndex->wPage);  // I18nOk
+	if(lpIndex->nFlags & INDEXF_PAGENO)
+	{
+		strPage.Format(_T("%d"), lpIndex->wPage);  // I18nOk
 
-      if(lpIndex->nFlags & INDEXF_DASHES)
-      {
-         strLineText += HFC_DOTS;
-      }
+		if(lpIndex->nFlags & INDEXF_DASHES)
+		{
+			strLineText += HFC_DOTS;
+		}
 
-      strLineText += HFC_RIGHTJUSTIFY;
-      strLineText += strPage;
-   }
+		strLineText += HFC_RIGHTJUSTIFY;
+		strLineText += strPage;
+	}
 
-   INDEXLEVELINFO li;
-   GMakeStructFillZero(li);
+	INDEXLEVELINFO li;
+	GMakeStructFillZero(li);
 
-   GetLevelInfo(li, lpIndex, nLevel);
-   
-   CFont *pOldFont = NULL;
-   if(li.pFont)
-   {
-      JDC.SelectObject(li.pFont);
-   }
+	GetLevelInfo(li, lpIndex, nLevel);
 
-   if(!li.nRowHeight)
-   {
-      CSize size = JDC.GetTextExtent(strLineText);
-      li.nRowHeight = size.cy;
-   }
-   
-   if(JRECT.top + li.nRowHeight > JRECT.bottom)
-   {
-      EndPage();
-      StartPage();
-   }
+	CFont *pOldFont = NULL;
+	if(li.pFont)
+	{
+		JDC.SelectObject(li.pFont);
+	}
 
-   PRINTTEXTLINE ptl;
-   GMakeStructFillZero(ptl);
+	if(!li.nRowHeight)
+	{
+		CSize size = JDC.GetTextExtent(strLineText);
+		li.nRowHeight = size.cy;
+	}
 
-   ptl.lpszText = strLineText;
-   ptl.tmHeight = li.nRowHeight;
+	if(JRECT.top + li.nRowHeight > JRECT.bottom)
+	{
+		EndPage();
+		StartPage();
+	}
+
+	PRINTTEXTLINE ptl;
+	GMakeStructFillZero(ptl);
+
+	ptl.lpszText = strLineText;
+	ptl.tmHeight = li.nRowHeight;
 	ptl.dwFlags = (PTLF_STARTROW|PTLF_ENDROW);
-   ptl.rectText = JRECT;
-   ptl.rectText.top = JCUR.y;
-   ptl.rectText.left += li.nIndent;
+	ptl.rectText = JRECT;
+	ptl.rectText.top = JCUR.y;
+	ptl.rectText.left += li.nIndent;
 
-   PrintTextLine(&ptl);
+	PrintTextLine(&ptl);
 
-   if(pOldFont)
-   {
-      JDC.SelectObject(pOldFont);
-   }
+	if(pOldFont)
+	{
+		JDC.SelectObject(pOldFont);
+	}
 }
 
 
@@ -1153,8 +1153,8 @@ void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
 
 void GPrintUnit::GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel)
 {
-   li.pFont = NULL;
-   li.nIndent = nLevel * 100;
+	li.pFont = NULL;
+	li.nIndent = nLevel * 100;
 }
 
 
@@ -1162,8 +1162,8 @@ void GPrintUnit::GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLeve
 
 void GPrintUnit::AddIndexItem(INDEXITEM *pII)
 {
-   if(m_pJob)
-      m_pJob->AddIndexItem(pII);
+	if(m_pJob)
+		m_pJob->AddIndexItem(pII);
 }
 
 
@@ -1178,28 +1178,28 @@ GPrintIndexTree::GPrintIndexTree()
 
 GPrintIndexTree::~GPrintIndexTree() 
 {
-   DeletePrintIndexTree(this);
+	DeletePrintIndexTree(this);
 }
 
 
 
 void GPrintIndexTree::DeletePrintIndexTree(GPrintIndexTree *pTree)
 {
-   int nSize = pTree->GetSize();
+	int nSize = pTree->GetSize();
 
-   for(int i = 0; i < nSize; i++)
-   {
-      INDEXITEM ti = pTree->GetAt(i);
+	for(int i = 0; i < nSize; i++)
+	{
+		INDEXITEM ti = pTree->GetAt(i);
 
-      if(ti.pChildren)
-      {
-         DeletePrintIndexTree(ti.pChildren);
-         delete ti.pChildren;
-         ti.pChildren = NULL;
-      }
-   }
+		if(ti.pChildren)
+		{
+			DeletePrintIndexTree(ti.pChildren);
+			delete ti.pChildren;
+			ti.pChildren = NULL;
+		}
+	}
 
-   pTree->RemoveAll();
+	pTree->RemoveAll();
 }
 
 
@@ -1208,21 +1208,21 @@ void GPrintIndexTree::DeletePrintIndexTree(GPrintIndexTree *pTree)
 
 GSelectActivePair::GSelectActivePair(GPrintUnit *pUnit, LPPUFONTPAIR pPair)
 {
-   if(pUnit)
-   {
-      m_pUnit = pUnit;
-      m_pOldPair = pUnit->m_pActiveFontPair;
-      pUnit->m_pActiveFontPair = pPair;
-   }
+	if(pUnit)
+	{
+		m_pUnit = pUnit;
+		m_pOldPair = pUnit->m_pActiveFontPair;
+		pUnit->m_pActiveFontPair = pPair;
+	}
 }
 
 
 GSelectActivePair::~GSelectActivePair()
 {
-   if(m_pUnit)
-   {
-      m_pUnit->m_pActiveFontPair = m_pOldPair;
-   }
+	if(m_pUnit)
+	{
+		m_pUnit->m_pActiveFontPair = m_pOldPair;
+	}
 }
 
 
@@ -1231,9 +1231,9 @@ GSelectActivePair::~GSelectActivePair()
 
 GIndexItem::GIndexItem()
 {
-   nFlags = 0;
-   pChildren = NULL; 
-   wPage = 0;
+	nFlags = 0;
+	pChildren = NULL; 
+	wPage = 0;
 }
 
 
@@ -1246,11 +1246,11 @@ GIndexItem::GIndexItem()
 GPrintTextLineParser::GPrintTextLineParser()
 {
 	m_lpszCurChar = NULL;
-   m_nSkipChars = 0;
-   m_chCur = GNUL;
-   m_nNewFormat = 0;
-   m_bNewDots = FALSE;
-   m_bNewLine = FALSE;
+	m_nSkipChars = 0;
+	m_chCur = GNUL;
+	m_nNewFormat = 0;
+	m_bNewDots = FALSE;
+	m_bNewLine = FALSE;
 }
 
 
@@ -1261,15 +1261,15 @@ GPrintTextLineParser::~GPrintTextLineParser()
 
 BOOL GPrintTextLineParser::GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile)
 {
-   BOOL bProfile = FALSE;
-   
-   if(lpszText)
-   {
-      profile.bDots = _tcschr(lpszText, (int)HFC_DOTS) ? TRUE : FALSE;
-      bProfile = TRUE;
-   }
+	BOOL bProfile = FALSE;
 
-   return bProfile; 
+	if(lpszText)
+	{
+		profile.bDots = _tcschr(lpszText, (int)HFC_DOTS) ? TRUE : FALSE;
+		bProfile = TRUE;
+	}
+
+	return bProfile; 
 }
 
 
@@ -1277,137 +1277,137 @@ BOOL GPrintTextLineParser::GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile)
 
 GNTRESULT GPrintTextLineParser::GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token)
 {
-   GNTRESULT result = GNTR_ERROR;
+	GNTRESULT result = GNTR_ERROR;
 
-   int nFormat;
-   BOOL bDots;
-   BOOL bNewLine;
+	int nFormat;
+	BOOL bDots;
+	BOOL bNewLine;
 
-   if(m_lpszCurChar)
-   {
-      if(m_chCur == GNUL)
-         return GNTR_ENDOFLINE;
+	if(m_lpszCurChar)
+	{
+		if(m_chCur == GNUL)
+			return GNTR_ENDOFLINE;
 
-      nFormat = m_nNewFormat;
-      bDots = m_bNewDots;
-      bNewLine = m_bNewLine;
+		nFormat = m_nNewFormat;
+		bDots = m_bNewDots;
+		bNewLine = m_bNewLine;
 
-      m_nNewFormat = 0;
-      m_bNewDots = FALSE;
-      m_bNewLine = FALSE;
-   }
-   else
-   {
-      // first time in
-      nFormat = DT_LEFT;
-      bDots = FALSE;
-      bNewLine = FALSE;
-      m_lpszCurChar = lpszText;
-   }
+		m_nNewFormat = 0;
+		m_bNewDots = FALSE;
+		m_bNewLine = FALSE;
+	}
+	else
+	{
+		// first time in
+		nFormat = DT_LEFT;
+		bDots = FALSE;
+		bNewLine = FALSE;
+		m_lpszCurChar = lpszText;
+	}
 
-   // initialize the token in case the user does not pass an empty one
-   token.strToken.Empty();
-   token.nFormat = 0;
-   token.bDots = FALSE;
-   token.bNewLine = FALSE;
+	// initialize the token in case the user does not pass an empty one
+	token.strToken.Empty();
+	token.nFormat = 0;
+	token.bDots = FALSE;
+	token.bNewLine = FALSE;
 
-   do
-   {
-      // point 'lpszChar' to the next available character
-      while(m_nSkipChars--)
-      {
-         m_lpszCurChar = _tcsinc(m_lpszCurChar);
-      }
+	do
+	{
+		// point 'lpszChar' to the next available character
+		while(m_nSkipChars--)
+		{
+			m_lpszCurChar = _tcsinc(m_lpszCurChar);
+		}
 
-      m_chCur = *m_lpszCurChar;
+		m_chCur = *m_lpszCurChar;
 
-      TCHAR chNext = GNUL;
-      // get the character after 'm_chCur'...it will let us
-      // know if we have consecutive formatting characters
-      if(m_chCur != GNUL)
-      {
-         LPCTSTR lpszNextChar = m_lpszCurChar;
-         lpszNextChar = _tcsinc(lpszNextChar);
+		TCHAR chNext = GNUL;
+		// get the character after 'm_chCur'...it will let us
+		// know if we have consecutive formatting characters
+		if(m_chCur != GNUL)
+		{
+			LPCTSTR lpszNextChar = m_lpszCurChar;
+			lpszNextChar = _tcsinc(lpszNextChar);
 
-         if(lpszNextChar)
-         {
-            chNext = *lpszNextChar;
-         }
-      }
+			if(lpszNextChar)
+			{
+				chNext = *lpszNextChar;
+			}
+		}
 
-      // default to 1 
-      m_nSkipChars = 1;
-         
-      switch(m_chCur)
-      {
-         case HFC_CENTER:
-            // check for double HFC_CENTER
-            if(chNext == HFC_CENTER)
-            {
-               token.strToken += m_chCur;
-               m_nSkipChars++;
-            }
-            else
-            {
-               result = GNTR_TOKEN;
-               m_nNewFormat = DT_CENTER;
-            }
+		// default to 1 
+		m_nSkipChars = 1;
 
-            break;
+		switch(m_chCur)
+		{
+		case HFC_CENTER:
+			// check for double HFC_CENTER
+			if(chNext == HFC_CENTER)
+			{
+				token.strToken += m_chCur;
+				m_nSkipChars++;
+			}
+			else
+			{
+				result = GNTR_TOKEN;
+				m_nNewFormat = DT_CENTER;
+			}
 
-         case HFC_RIGHTJUSTIFY:
-            // check for double HFC_RIGHTJUSTIFY
-            if(chNext == HFC_RIGHTJUSTIFY)
-            {
-               token.strToken += m_chCur;
-               m_nSkipChars++;
-            }
-            else
-            {
-               result = GNTR_TOKEN;
-               m_nNewFormat = DT_RIGHT;
-            }
+			break;
 
-            break;
+		case HFC_RIGHTJUSTIFY:
+			// check for double HFC_RIGHTJUSTIFY
+			if(chNext == HFC_RIGHTJUSTIFY)
+			{
+				token.strToken += m_chCur;
+				m_nSkipChars++;
+			}
+			else
+			{
+				result = GNTR_TOKEN;
+				m_nNewFormat = DT_RIGHT;
+			}
 
-         case HFC_NEWLINE:
-            result = GNTR_TOKENNEWLINE;
-            m_nNewFormat = DT_LEFT;
-            m_bNewLine = TRUE;
-            break;
+			break;
 
-         case HFC_DOTS:
-            // check for double HFC_DOTS
-            if(chNext == HFC_DOTS)
-            {
-               token.strToken += m_chCur;
-               m_nSkipChars++;
-            }
-            else
-            {
-               m_bNewDots = TRUE;
-            }
+		case HFC_NEWLINE:
+			result = GNTR_TOKENNEWLINE;
+			m_nNewFormat = DT_LEFT;
+			m_bNewLine = TRUE;
+			break;
 
-            break;
+		case HFC_DOTS:
+			// check for double HFC_DOTS
+			if(chNext == HFC_DOTS)
+			{
+				token.strToken += m_chCur;
+				m_nSkipChars++;
+			}
+			else
+			{
+				m_bNewDots = TRUE;
+			}
 
-         case GNUL:  // end of the line
-            result = GNTR_TOKEN;
-            token.nFormat = DT_LEFT;
-            break;
+			break;
 
-         default:
-            token.strToken += m_chCur;
-            break;
-      }
+		case GNUL:  // end of the line
+			result = GNTR_TOKEN;
+			token.nFormat = DT_LEFT;
+			break;
 
-   } while(result == GNTR_ERROR);
+		default:
+			token.strToken += m_chCur;
+			break;
+		}
 
-   
-   token.nFormat = nFormat;
-   token.bDots = bDots;
-   token.bNewLine = bNewLine;
+	} while(result == GNTR_ERROR);
 
-   return result;
+
+	token.nFormat = nFormat;
+	token.bDots = bDots;
+	token.bNewLine = bNewLine;
+
+	return result;
 }
 
 
@@ -1415,59 +1415,59 @@ GNTRESULT GPrintTextLineParser::GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token)
 
 BOOL GfxFontToCharformat(CFont *pFont, CHARFORMAT& cf, CDC *pDC)
 {
-   BOOL bConvert = FALSE;
+	BOOL bConvert = FALSE;
 
-   if(pFont)
-   {
-	   LOGFONT lf;
-	   if(pFont->GetLogFont(&lf))
-      {
-         bConvert = TRUE;
+	if(pFont)
+	{
+		LOGFONT lf;
+		if(pFont->GetLogFont(&lf))
+		{
+			bConvert = TRUE;
 
-         GMakeStructFillZero(cf);
-	      cf.cbSize = sizeof(cf);
-         cf.dwMask = CFM_FACE | CFM_SIZE | CFM_CHARSET;
-         cf.bCharSet = DEFAULT_CHARSET;
-	      cf.bPitchAndFamily = lf.lfPitchAndFamily;
+			GMakeStructFillZero(cf);
+			cf.cbSize = sizeof(cf);
+			cf.dwMask = CFM_FACE | CFM_SIZE | CFM_CHARSET;
+			cf.bCharSet = DEFAULT_CHARSET;
+			cf.bPitchAndFamily = lf.lfPitchAndFamily;
 
-	      int nPointSize = GfxHeightToPointSize(lf.lfHeight, pDC);
-         //multiply by 20 to convert to twips
-	      cf.yHeight = nPointSize * 20;
-		  memcpy(&cf.szFaceName,&lf.lfFaceName,sizeof(cf.szFaceName));
+			int nPointSize = GfxHeightToPointSize(lf.lfHeight, pDC);
+			//multiply by 20 to convert to twips
+			cf.yHeight = nPointSize * 20;
+			memcpy(&cf.szFaceName,&lf.lfFaceName,sizeof(cf.szFaceName));
 
-	      if(lf.lfItalic)
-	      {
-		      cf.dwEffects |= CFE_ITALIC;
-		      cf.dwMask |= CFM_ITALIC;
-	      }
+			if(lf.lfItalic)
+			{
+				cf.dwEffects |= CFE_ITALIC;
+				cf.dwMask |= CFM_ITALIC;
+			}
 
-	      if(lf.lfWeight == FW_BOLD)
-	      {
-		      cf.dwEffects |= CFE_BOLD;
-		      cf.dwMask |= CFM_BOLD;
-	      }
+			if(lf.lfWeight == FW_BOLD)
+			{
+				cf.dwEffects |= CFE_BOLD;
+				cf.dwMask |= CFM_BOLD;
+			}
 
-	      if(lf.lfUnderline)
-	      {
-		      cf.dwEffects |= CFE_UNDERLINE;
-		      cf.dwMask |= CFM_UNDERLINE;
-	      }
+			if(lf.lfUnderline)
+			{
+				cf.dwEffects |= CFE_UNDERLINE;
+				cf.dwMask |= CFM_UNDERLINE;
+			}
 
-	      if(lf.lfStrikeOut)
-	      {
-		      cf.dwEffects |= CFE_STRIKEOUT;
-		      cf.dwMask |= CFM_STRIKEOUT;
-	      }
-      }
-   }
+			if(lf.lfStrikeOut)
+			{
+				cf.dwEffects |= CFE_STRIKEOUT;
+				cf.dwMask |= CFM_STRIKEOUT;
+			}
+		}
+	}
 
-   return bConvert;
+	return bConvert;
 }
 
 
 int GfxHeightToPointSize(int nHeight, CDC *pDC)
 {
-   HDC hDC = NULL;
+	HDC hDC = NULL;
 
 	if(pDC != NULL)
 	{
@@ -1478,34 +1478,34 @@ int GfxHeightToPointSize(int nHeight, CDC *pDC)
 	else
 		hDC = ::GetDC(NULL);
 
-   int nPointSize = -MulDiv(nHeight, 72, GetDeviceCaps(hDC, LOGPIXELSY));
+	int nPointSize = -MulDiv(nHeight, 72, GetDeviceCaps(hDC, LOGPIXELSY));
 
 	if (pDC == NULL)
 		ReleaseDC(NULL, hDC);
 
-   return nPointSize;
+	return nPointSize;
 }
 
 
 int GfxCountLines(LPCTSTR lpszText)
 {
-   int nLines = 0;
+	int nLines = 0;
 
-   if(lpszText && *lpszText)
-   {
-      nLines = 1;
-      do
-      {
-         if(*lpszText == _T('\n'))  //I18nOK
-            nLines++;
+	if(lpszText && *lpszText)
+	{
+		nLines = 1;
+		do
+		{
+			if(*lpszText == _T('\n'))  //I18nOK
+				nLines++;
 
-		 //Advance a string pointer by one character.
-         lpszText = _tcsinc(lpszText);
+			//Advance a string pointer by one character.
+			lpszText = _tcsinc(lpszText);
 
-      } while(*lpszText);
-   }
+		} while(*lpszText);
+	}
 
-   return nLines;
+	return nLines;
 }
 
 
@@ -1513,39 +1513,39 @@ int GfxCountLines(LPCTSTR lpszText)
 
 GSelectGdiObject::GSelectGdiObject(CDC *pDC, CGdiObject *pObject)
 {
-   m_hOldGdiObject = NULL;
-   m_pDC = NULL;
+	m_hOldGdiObject = NULL;
+	m_pDC = NULL;
 
-   if(pDC)
-   {
-      ASSERT(pObject);
-      if(pObject)
-      {
-         m_pDC = pDC;
+	if(pDC)
+	{
+		ASSERT(pObject);
+		if(pObject)
+		{
+			m_pDC = pDC;
 
-         HDC hDC = m_pDC->m_hDC;
-         HDC hAttribDC = m_pDC->m_hAttribDC;
+			HDC hDC = m_pDC->m_hDC;
+			HDC hAttribDC = m_pDC->m_hAttribDC;
 
-	      if(hDC != hAttribDC)
-		      m_hOldGdiObject = ::SelectObject(hDC, pObject->m_hObject);
-	      if(hAttribDC != NULL)
-		      m_hOldGdiObject = ::SelectObject(hAttribDC, pObject->m_hObject);
-      }
-   }
+			if(hDC != hAttribDC)
+				m_hOldGdiObject = ::SelectObject(hDC, pObject->m_hObject);
+			if(hAttribDC != NULL)
+				m_hOldGdiObject = ::SelectObject(hAttribDC, pObject->m_hObject);
+		}
+	}
 }
 
 
 GSelectGdiObject::~GSelectGdiObject()
 {
-   if(m_hOldGdiObject && m_pDC)
-   {
-      HDC hDC = m_pDC->m_hDC;
-      HDC hAttribDC = m_pDC->m_hAttribDC;
+	if(m_hOldGdiObject && m_pDC)
+	{
+		HDC hDC = m_pDC->m_hDC;
+		HDC hAttribDC = m_pDC->m_hAttribDC;
 
-	   if(hDC != hAttribDC)
-		   ::SelectObject(hDC, m_hOldGdiObject);
-	   if(hAttribDC != NULL)
-		   ::SelectObject(hAttribDC, m_hOldGdiObject);
-   }
+		if(hDC != hAttribDC)
+			::SelectObject(hDC, m_hOldGdiObject);
+		if(hAttribDC != NULL)
+			::SelectObject(hAttribDC, m_hOldGdiObject);
+	}
 }
 
