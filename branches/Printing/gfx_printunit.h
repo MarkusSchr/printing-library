@@ -324,7 +324,7 @@ protected:
 	virtual void AdvancePage(BOOL bIncPageNo=TRUE);
 
 	virtual int StartRow(int nHeight=PT_LINEOFTEXT);
-	virtual int EndRow(BOOL bCheckForOverflow=TRUE);
+	virtual int EndRow(BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
 	virtual void OnContinueRow();
 
 	virtual BOOL ContinuePrinting() const;
@@ -368,6 +368,9 @@ protected:
 	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
 
 	void AddIndexItem(INDEXITEM *pII);
+
+private:
+	void DrawOuterLine();
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
