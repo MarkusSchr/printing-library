@@ -337,7 +337,7 @@ int GPrintUnit::StartRow(int tmHeight)
 
 
 
-int GPrintUnit::EndRow(BOOL bCheckForOverflow)
+int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= TRUE*/ )
 {
 	int nRC = ER_NULL;
 
@@ -364,6 +364,12 @@ int GPrintUnit::EndRow(BOOL bCheckForOverflow)
 	{
 		nRC = ER_OVERFLOW;
 
+		if (bDrawOutline)
+		{
+			// draw the line before go to the next page
+			DrawOuterLine();
+		}
+
 		OnContinueRow();
 
 		m_sizeCurrentRow = CSize(0,0);
@@ -381,13 +387,21 @@ int GPrintUnit::EndRow(BOOL bCheckForOverflow)
 			}
 		}
 
-		EndRow();
+		EndRow(TRUE);
 	}
 	else
 	{
+		if (bDrawOutline)
+		{
+			// draw the line before go to the next page
+			DrawOuterLine();
+		}
+
 		JCUR.y += m_sizeCurrentRow.cy;
 		JCUR.x = JRECT.left;
 	}
+
+	
 
 	m_sizeCurrentRow = CSize(0,0);
 	return nRC;
@@ -435,18 +449,18 @@ void GPrintUnit::PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat)
 
 		if(lpDef)
 		{
-			CRect r;
-			GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumLineOfText);
+			CRect rect;
+			GMAKERECT(rect, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumLineOfText);
 
 			if(lpDef->dwFlags & PCF_RIGHTMARGIN)
 			{
 				// reduce column width
-				int nMargin = GPERCENT(r.Width(), 0.015);
-				r.right -= nMargin;
+				int nMargin = GPERCENT(rect.Width(), 0.015);
+				rect.right -= nMargin;
 			}
 
 			int nLen = _tcslen(lpszText);
-			int nHeight = DrawColText(lpszText, nLen, r, nFormat, nCol, lpDef);
+			int nHeight = DrawColText(lpszText, nLen, rect, nFormat, nCol, lpDef);
 
 			m_sizeCurrentRow.cy = max(m_sizeCurrentRow.cy, nHeight);
 
@@ -457,11 +471,11 @@ void GPrintUnit::PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat)
 
 
 
-int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
+int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect rect, UINT nFormat, 
 							int nCol, LPPRINTCOLUMNDEF lpDef)
 {
 	int nHeight = 0;
-	int nWidth = r.Width();
+	int nWidth = rect.Width();
 
 	// get the extent of this text
 	CSize size = JDC.GetTextExtent(lpszText, nLen);
@@ -494,12 +508,12 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 
 	if(bUseRichEdit)
 	{
-		r.bottom = JRECT.bottom;
+		rect.bottom = JRECT.bottom;
 
 		if(m_richEdit.m_hWnd == NULL)
 		{
 			DWORD dwStyle = ES_MULTILINE | WS_CHILD | ES_LEFT;
-			m_richEdit.Create(dwStyle, r, AfxGetMainWnd(), NULL);
+			m_richEdit.Create(dwStyle, rect, AfxGetMainWnd(), NULL);
 		}
 
 		ASSERT(m_pActiveFontPair);
@@ -521,24 +535,24 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 		//		LONG lEnd = lEditLength - 1;
 
 		int nOldMode = JDC.SetMapMode(MM_TWIPS);
-		JDC.DPtoLP(r);
+		JDC.DPtoLP(rect);
 
-		int nBottom = abs(r.bottom);
-		int nTop = abs(r.top);
-		r.bottom = nBottom;
-		r.top = nTop;
+		int nBottom = abs(rect.bottom);
+		int nTop = abs(rect.top);
+		rect.bottom = nBottom;
+		rect.top = nTop;
 
 		FORMATRANGE range;
 		range.hdcTarget = JDC.m_hAttribDC;
 		range.hdc = JDC.m_hDC;
-		range.rcPage = r;
-		range.rc = r;
+		range.rcPage = rect;
+		range.rc = rect;
 		range.chrg.cpMin = lStart;
 		range.chrg.cpMax = lEditLength;//lEnd;
 
 		JDC.SetMapMode(nOldMode);
 
-		range.chrg.cpMin = FormatDrawColText(lpszText, nLen, r, nFormat, nCol, lpDef, &range, TRUE);
+		range.chrg.cpMin = FormatDrawColText(lpszText, nLen, rect, nFormat, nCol, lpDef, &range, TRUE);
 		//range.chrg.cpMin = m_richEdit.FormatRange(&range, TRUE);
 
 		if((range.chrg.cpMin) < lEditLength)
@@ -555,7 +569,7 @@ int GPrintUnit::DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat,
 	}
 	else
 	{
-		JDC.DrawText(lpszText, nLen, &r, nFormat);
+		JDC.DrawText(lpszText, nLen, &rect, nFormat);
 		nHeight = size.cy;
 	}
 	return nHeight;
@@ -1164,6 +1178,31 @@ void GPrintUnit::AddIndexItem(INDEXITEM *pII)
 {
 	if(m_pJob)
 		m_pJob->AddIndexItem(pII);
+}
+
+// draw the outer line of the row
+void GPrintUnit::DrawOuterLine()
+{
+	// get the rect's left-top and right-top
+	int nSize = m_lpActiveColDefs->GetSize();
+
+	CRect rect;
+	for (int i = 0; i < nSize; i++)
+	{
+		LPPRINTCOLUMNDEF lpDefFirst = m_lpActiveColDefs->GetAt(i);
+		GMAKERECT(
+			rect, 
+			lpDefFirst->nStart, 
+			JCUR.y, 
+			lpDefFirst->nWidth, 
+			m_sizeCurrentRow.cy);
+
+		CBrush brEdge; 
+		brEdge.CreateSolidBrush(RGB(0,0,0));
+
+		GSELECT_OBJECT(&JDC, &brEdge);
+		JDC.DrawEdge(&rect, EDGE_BUMP, BF_ADJUST | BF_BOTTOMLEFT | BF_TOPRIGHT);
+	}
 }
 
 
