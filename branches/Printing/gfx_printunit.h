@@ -347,9 +347,8 @@ protected:
 		CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
 	virtual LONG FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
 		int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay=TRUE);
-	virtual void PrintColHeadings(vector<int> headings, UINT nFormat, UINT nEffects=0, BOOL bPreprocess = FALSE);
-	virtual void PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-		UINT nFormat, UINT nEffects);
+	virtual void PrintColHeadings(vector<int>& headings, UINT nFormat, UINT nEffects=0, BOOL bPreprocess = FALSE);
+	virtual void PrintColHeading(LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects);
 	virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
 		UINT nFormat, UINT nEffects);
 
@@ -418,6 +417,9 @@ private:
 	// to contain the columns, the index means which page this column is in
 	// i.e. m_vecColumnPage[0][1] indicates the second column in page 1
 	vector<vector<int>> m_vecColumnPage;
+
+	// this is the index of m_vecColumnPage, to indicate which Columns page we are
+	int m_currentWorkingColums;
 };
 
 

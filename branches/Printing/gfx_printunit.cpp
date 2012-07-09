@@ -31,6 +31,8 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_pActiveFontPair = NULL;
 
 	m_bPrintingHeading = FALSE;
+
+	m_currentWorkingColums = 0;
 }
 
 
@@ -187,23 +189,23 @@ void GPrintUnit::PrintTableContents( vector<vector<char*> >& contents, UINT nRow
 	}
 
 	int nRows = contents.size();
-
-	int pageBeforeFirstRowNumBeforeChangePage = 0;
+	int pageBeforeFirstRowNumBeforeChangePage = -1;
 	
-	// TODO: can this 2 be combined?
 	// do the actual job
 	bool bNewPage = StartPage(bPreprocess);
 
 	// traverse all the data
 	int row = 0;
-	while( row < nRows )
+	while(row < nRows)
 	{
 		// deal different pages' columns, attention that columns 
 		// can be printed in different pages. here we just print 
 		// them one page by one page
 		int columnPage = 0;
-		while( columnPage < (int)m_vecColumnPage.size())
+		while(columnPage < (int)m_vecColumnPage.size())
 		{
+			m_currentWorkingColums = columnPage;
+
 			// in another page
 			if (!(bNewPage && IsCurrentRowOverflow()))
 			{
@@ -216,8 +218,19 @@ void GPrintUnit::PrintTableContents( vector<vector<char*> >& contents, UINT nRow
 			if (bNewPage && bPrintHeadingWhenChangePage == TRUE)
 			{
 				// TODO: change the font
-				// GSELECT_OBJECT(&JDC, &m_fontHeading);
+				CFont m_fontHeading;
+				LOGFONT logFont;
+				GMakeStructFillZero(logFont);
+				LPCTSTR lpszFaceName = _T("Arial");//I18nok
+				logFont.lfCharSet = DEFAULT_CHARSET;
+				logFont.lfHeight = 90;
+				lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
+				logFont.lfWeight = FW_BOLD;
+				m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
+
+				GSELECT_OBJECT(&JDC, &m_fontHeading);
 				PrintColHeadings(m_vecColumnPage[columnPage], nHeadingFormat, FALSE, bPreprocess);
+				EndRow(bPreprocess);
 			}
 
 			// draw all the columns of the current row in this column's page
@@ -248,17 +261,20 @@ void GPrintUnit::PrintTableContents( vector<vector<char*> >& contents, UINT nRow
 				}				
 			}
 
-			bNewPage = EndRow(bPreprocess, TRUE, FALSE) == ER_OVERFLOW;
+			bNewPage = EndRow( bPreprocess ) == ER_OVERFLOW || row == nRows - 1;
+			// the page is full or we have reached the bottom
 			if (true == bNewPage)
 			{
-				// the current row has caused change page
-				columnPage++;
-
-				// pass the paper
-				bNewPage = OnContinueRow(bPreprocess);
-
+				EndPage(bPreprocess);
+				
+				// if this is the last row of the table, also we have printed all the columns, then just end the page
+				if (!(row == nRows - 1 && columnPage == (int)m_vecColumnPage.size() - 1) )
+				{
+					StartPage(bPreprocess);
+				}
+				
 				// if we reach the last column of the last column's page, begin the next page
-				if ( columnPage == m_vecColumnPage.size() - 1 )
+				if ( columnPage == (int)m_vecColumnPage.size() - 1 )
 				{
 					// we should begin the next page
 					pageBeforeFirstRowNumBeforeChangePage = row - 1; // -1 means to fill the overflow this 'row'
@@ -270,14 +286,18 @@ void GPrintUnit::PrintTableContents( vector<vector<char*> >& contents, UINT nRow
 					// we need to print other columns
 					row = pageBeforeFirstRowNumBeforeChangePage;
 				}
+
+				// the current row has caused change page
+				columnPage++;
 			}
 
 			// go to next row
 			row++;
 		}
-	}
+	}	
 
-	EndPage(bPreprocess);
+	// do not need it, it has been done in the while loop
+	//EndPage(bPreprocess);
 }
 
 
@@ -709,7 +729,7 @@ LONG GPrintUnit::FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFo
 
 
 
-void GPrintUnit::PrintColHeadings( vector<int> headings, UINT nFormat, UINT nEffects/*=0*/, BOOL bPreprocess /*= FALSE*/ )
+void GPrintUnit::PrintColHeadings( vector<int>& headings, UINT nFormat, UINT nEffects/*=0*/, BOOL bPreprocess /*= FALSE*/ )
 {
 	// Since most derived units will call this from an overidden StartPage(), and
 	// we call StartRow() which can trigger a StartPage(), this boolean prevents
@@ -741,8 +761,8 @@ void GPrintUnit::PrintColHeadings( vector<int> headings, UINT nFormat, UINT nEff
 					{
 						DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
 					}
-
-					PrintColHeading(i, lpDef->strName, nLen, r, nFormat, nEffects);
+				
+					PrintColHeading(lpDef->strName, nLen, r, nFormat, nEffects);
 
 					if(nEffects & HE_DOLAST)
 					{
@@ -767,8 +787,7 @@ void GPrintUnit::PrintColHeadings( vector<int> headings, UINT nFormat, UINT nEff
 
 
 
-void GPrintUnit::PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
-								 UINT nFormat, UINT nEffects)
+void GPrintUnit::PrintColHeading( LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects )
 {
 	// compute the width and height of a line of text 
 	// using the current font to determine the dimensions.
@@ -1312,12 +1331,12 @@ void GPrintUnit::AddIndexItem(INDEXITEM *pII)
 void GPrintUnit::DrawOuterLine()
 {
 	// get the rect's left-top and right-top
-	int nSize = m_lpActiveColDefs->GetSize();
+	int nSize = m_vecColumnPage[m_currentWorkingColums].size();
 
 	CRect rect;
 	for (int i = 0; i < nSize; i++)
 	{
-		LPPRINTCOLUMNDEF lpDefFirst = m_lpActiveColDefs->GetAt(i);
+		LPPRINTCOLUMNDEF lpDefFirst = m_lpActiveColDefs->GetAt(m_vecColumnPage[m_currentWorkingColums][i]);
 		GMAKERECT(
 			rect, 
 			lpDefFirst->nStart, 
@@ -1343,20 +1362,17 @@ BOOL GPrintUnit::IsCurrentRowOverflow()
 {
 	BOOL bOverFlow = FALSE;
 
-	int nColumnSize = m_vecColumnPage.size();
+	int nColumnSize = m_vecColumnPage[m_currentWorkingColums].size();
 
 	for (int i = 0; i < nColumnSize; i++)
 	{
-		for (int j = 0; j < nColumnSize; j++)
+		LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(m_vecColumnPage[m_currentWorkingColums][i]);
+		if(lpDef)
 		{
-			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(m_vecColumnPage[i][j]);
-			if(lpDef)
+			if(!lpDef->strOverflow.IsEmpty())
 			{
-				if(!lpDef->strOverflow.IsEmpty())
-				{
-					bOverFlow = TRUE;
-					break;
-				}
+				bOverFlow = TRUE;
+				break;
 			}
 		}
 	}
