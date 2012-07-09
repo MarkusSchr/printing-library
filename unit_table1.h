@@ -8,7 +8,7 @@ public:
    Table1Unit(GPrintJob *pJob);
    virtual ~Table1Unit();
 
-   virtual void CompleteAllColHeadingsStartPosition();
+   virtual void CompleteAllColHeadingsDefinition();
    virtual void CreatePrintFonts();
    virtual void InitPrintMetrics();
 
@@ -16,6 +16,7 @@ public:
    virtual void PrintFooter();
 
    virtual BOOL Print();
+   
 
 protected:
    PUFONTPAIR m_fontPairBody;
