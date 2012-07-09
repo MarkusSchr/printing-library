@@ -10,6 +10,8 @@
 class GPrintJob;
 class GPrintUnit;
 
+#include <vector>
+using namespace std;
 
 /////////////////////////////////////////
 // misc helpers 
@@ -299,7 +301,9 @@ public:
 	virtual BOOL Print();
 
 public:
-	virtual void CompleteAllColHeadingsStartPosition();
+	// before calling this method, call InsertPrintCol() to insert 
+	// the columns' definitions and calculate the start positions of all the columns
+	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
 	virtual void InitPrintMetrics();
 	// the nHeading in the following functions means the number of the column set.
@@ -315,28 +319,35 @@ public:
 	void RestoreDim(LPJOBUNITDIM pDim);
 
 protected:
-	// starts a new page. it will draw the header
-	virtual void StartPage();
+	// starts a new page. it will draw the header(which is the opposite of the footer)
+	// heading will be drawn accordingly
+	virtual bool StartPage(BOOL bPreprocess = FALSE, BOOL bDrawHeading = FALSE);
 	// ends current page. it will draw the footer 
-	virtual void EndPage();
+	virtual void EndPage(BOOL bPreprocess = FALSE);
 	// prints a blank page, set 'bIncPageNo' to FALSE if you don't want
 	// the page number affected...
 	virtual void AdvancePage(BOOL bIncPageNo=TRUE);
 
-	virtual int StartRow(int nHeight=PT_LINEOFTEXT);
-	virtual int EndRow(BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
-	virtual void OnContinueRow();
+	virtual int StartRow(BOOL bPreprocess = FALSE, int nHeight=PT_LINEOFTEXT);
+	virtual int EndRow(BOOL bPreprocess=FALSE, BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
+
+	BOOL IsCurrentRowOverflow(); 
+
+	virtual bool OnContinueRow(BOOL bPreprocess = FALSE);
 
 	virtual BOOL ContinuePrinting() const;
 	// adjusts all relavent unit and job dimensions, returns the previous map mode
 	virtual int SetMapMode(int nMapMode);
 
-	virtual void PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat);
+	virtual void PrintTableContents( vector<vector<char*> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage = TRUE, BOOL bPreprocess = FALSE); 
+	virtual void PrintColForOverflow(int nCol,BOOL bPreprocess = FALSE);	
+	// this method can only output contents that fit "this" page, and the overfolws will be output in the EndRow
+	virtual void PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, BOOL bPreprocess = FALSE);
 	virtual int DrawColText(LPCTSTR lpszText, int nLen,
 		CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
 	virtual LONG FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, 
 		int nCol, LPPRINTCOLUMNDEF lpDef, FORMATRANGE *pRange, BOOL bDisplay=TRUE);
-	virtual void PrintColHeadings(UINT nFormat, UINT nEffects=0);
+	virtual void PrintColHeadings(vector<int> headings, UINT nFormat, UINT nEffects=0, BOOL bPreprocess = FALSE);
 	virtual void PrintColHeading(int nCol, LPCTSTR lpszName, int nLen, CRect r,
 		UINT nFormat, UINT nEffects);
 	virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
@@ -351,11 +362,11 @@ protected:
 
 	void PrintFooterText(LPCTSTR lpszText);
 	void PrintHeaderText(LPCTSTR lpszText);
-	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0);
-	void PrintTextLine(LPPRINTTEXTLINE lpTextLine);
+	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0, BOOL bPreprocess = FALSE);
+	void PrintTextLine(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess = FALSE);
 	// override this if you want to change the behavior of all overloaded
 	// versions of PrintTextLine()
-	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine);
+	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess = FALSE);
 
 	void DrawDots(LPRECT lpRect);
 	void DrawRepeatChar(TCHAR ch, LPRECT lpRect);
@@ -371,6 +382,11 @@ protected:
 
 private:
 	void DrawOuterLine();
+	// to test whether the columns should be printed in different pages
+	// this method must be called after the CompleteAllColHeadingsDefinition()
+// just for test to use "public:", should delete it
+public:
+	bool AreAllColumnsInOnePage();
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
@@ -396,6 +412,12 @@ public:
 
 public:
 	virtual ~GPrintUnit();
+
+
+private:
+	// to contain the columns, the index means which page this column is in
+	// i.e. m_vecColumnPage[0][1] indicates the second column in page 1
+	vector<vector<int>> m_vecColumnPage;
 };
 
 

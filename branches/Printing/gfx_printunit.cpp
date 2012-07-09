@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "gfx_printunit.h"
 #include "gfx_printjob.h"
-
+#include <assert.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -79,7 +79,7 @@ BOOL GPrintUnit::Print()
 {
 	CreatePrintFonts();
 	InitPrintMetrics();
-	CompleteAllColHeadingsStartPosition();
+	CompleteAllColHeadingsDefinition();
 
 	return TRUE;
 }
@@ -103,14 +103,13 @@ void GPrintUnit::InitPrintMetrics()
 
 
 
-void GPrintUnit::CompleteAllColHeadingsStartPosition()
+void GPrintUnit::CompleteAllColHeadingsDefinition()
 {
 	int nHeadings = m_headings.GetSize();
 
 	// traverse all the column sets
 	for(int i = 0; i < nHeadings; i++)
 	{
-		int nStart = JRECT.left;
 		LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(i);
 
 		if(!m_lpActiveColDefs)
@@ -118,27 +117,177 @@ void GPrintUnit::CompleteAllColHeadingsStartPosition()
 			m_lpActiveColDefs = lpColDefs;
 		}
 
+		// move the columns to different pages according to the percentage the user identifies
+		// first clear the container
+		for (int i = 0; i < (int)m_vecColumnPage.size(); i++)
+		{
+			m_vecColumnPage[i].clear();
+		}
+		m_vecColumnPage.clear();
+
+		// begin to move columns
 		int nSize = lpColDefs->GetSize();
-		// traverse all the columns in a column set
+		double currentPercentage = 0;
+		vector<int> currentPageColumns;
+
 		for(int i = 0; i < nSize; i++)
 		{
 			LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
 			if(lpDef)
 			{
-				lpDef->nStart = nStart;
-				//  the next start position just after the previous
-				nStart += lpDef->nWidth;
+				if (currentPercentage + lpDef->fPct <= 1)
+				{
+					// the column should in this page
+					currentPageColumns.push_back(i);
+
+					currentPercentage += lpDef->fPct;
+				}
+				else
+				{
+					// the percentage has exceed this page's capacity
+					m_vecColumnPage.push_back(currentPageColumns);
+					currentPageColumns.clear();
+					currentPercentage = 0.0;
+					
+					// move back to process this column again
+					i--;
+				}
+			}
+		}
+		m_vecColumnPage.push_back(currentPageColumns);
+
+		// adjust the position of the columns
+		for (int i = 0; i < (int)m_vecColumnPage.size(); i++)
+		{
+			// for each page, columns should start at JRECT.left
+			int nStart = JRECT.left;
+			int nSize = m_vecColumnPage[i].size();
+			for(int j = 0; j < nSize; j++)
+			{
+				LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(m_vecColumnPage[i][j]);
+				if(lpDef)
+				{
+					lpDef->nStart = nStart;
+					//  the next start position just after the previous
+					nStart += lpDef->nWidth;
+				}
 			}
 		}
 	}
 }
 
+// it is the user's responsible to check whether all the columns have been set the value
+void GPrintUnit::PrintTableContents( vector<vector<char*> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage /*= TRUE*/, BOOL bPreprocess /*= FALSE*/ )
+{
+	if (bPreprocess == TRUE && AreAllColumnsInOnePage() == true)
+	{
+		// since all the columns can be printed in one page, 
+		// it is no necessary to do the preprocess
+		return;
+	}
+
+	int nRows = contents.size();
+
+	int pageBeforeFirstRowNumBeforeChangePage = 0;
+	
+	// TODO: can this 2 be combined?
+	// do the actual job
+	bool bNewPage = StartPage(bPreprocess);
+
+	// traverse all the data
+	int row = 0;
+	while( row < nRows )
+	{
+		// deal different pages' columns, attention that columns 
+		// can be printed in different pages. here we just print 
+		// them one page by one page
+		int columnPage = 0;
+		while( columnPage < (int)m_vecColumnPage.size())
+		{
+			// in another page
+			if (!(bNewPage && IsCurrentRowOverflow()))
+			{
+				// print the overflow does not need to call 'StartRow'
+				StartRow(bPreprocess);
+			}
+
+			// print heading first
+			// attention that heading is a kind of row
+			if (bNewPage && bPrintHeadingWhenChangePage == TRUE)
+			{
+				// TODO: change the font
+				// GSELECT_OBJECT(&JDC, &m_fontHeading);
+				PrintColHeadings(m_vecColumnPage[columnPage], nHeadingFormat, FALSE, bPreprocess);
+			}
+
+			// draw all the columns of the current row in this column's page
+			for(int columnIndex = 0; columnIndex < (int)m_vecColumnPage[columnPage].size(); columnIndex++)
+			{
+				// check to see whether to print for overflow
+				if (bNewPage && IsCurrentRowOverflow())
+				{
+					// print for overflow
+					// TODO: change the font
+					// GSELECT_PUFONT(&JDC, &m_fontPairBody);
+					int whichColumnToPrint = m_vecColumnPage[columnPage][columnIndex];
+					PrintColForOverflow(
+						whichColumnToPrint,
+						bPreprocess);
+				}
+				else
+				{	
+					// the normal row's printing
+					// TODO: change the font
+					//GSELECT_PUFONT(&JDC, &m_fontPairBody);
+					int whichColumnToPrint = m_vecColumnPage[columnPage][columnIndex];
+					PrintColumnContent(
+						whichColumnToPrint, 
+						contents[row][ whichColumnToPrint ], 
+						nRowFormat, 
+						bPreprocess);
+				}				
+			}
+
+			bNewPage = EndRow(bPreprocess, TRUE, FALSE) == ER_OVERFLOW;
+			if (true == bNewPage)
+			{
+				// the current row has caused change page
+				columnPage++;
+
+				// pass the paper
+				bNewPage = OnContinueRow(bPreprocess);
+
+				// if we reach the last column of the last column's page, begin the next page
+				if ( columnPage == m_vecColumnPage.size() - 1 )
+				{
+					// we should begin the next page
+					pageBeforeFirstRowNumBeforeChangePage = row - 1; // -1 means to fill the overflow this 'row'
+
+					// now the next row to print is the row that is overflow
+				}
+				else
+				{
+					// we need to print other columns
+					row = pageBeforeFirstRowNumBeforeChangePage;
+				}
+			}
+
+			// go to next row
+			row++;
+		}
+	}
+
+	EndPage(bPreprocess);
+}
 
 
 
 
 void GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, int nHeading)
 {
+	// assert the column' percentage must below 1.0
+	assert(fColPct <= 1.0);
+
 	PRINTCOLUMN pc;
 	GMakeStructFillZero(pc);
 
@@ -267,21 +416,23 @@ void GPrintUnit::RestoreDim(LPJOBUNITDIM pDim)
 
 
 
-void GPrintUnit::StartPage()
+bool GPrintUnit::StartPage( BOOL bPreprocess /*= FALSE*/, BOOL bDrawHeading /*= FALSE*/ )
 {
 	ASSERT(!m_pJob->IsEndPagePending());
 
 	m_pJob->SetEndPagePending();
 
 	JCUR = JRECT.TopLeft();
-	JDC.StartPage();
+	bool bResult = JDC.StartPage() >= 0;
 
 	PrintHeader();
+
+	return bResult;
 }
 
 
 
-void GPrintUnit::EndPage()
+void GPrintUnit::EndPage( BOOL bPreprocess /*= FALSE*/ )
 {
 	m_pJob->SetEndPagePending(FALSE);
 
@@ -311,22 +462,22 @@ void GPrintUnit::AdvancePage(BOOL bIncPageNo)
 
 
 
-int GPrintUnit::StartRow(int tmHeight)
+int GPrintUnit::StartRow( BOOL bPreprocess /*= FALSE*/, int nHeight/*=PT_LINEOFTEXT*/ )
 {
 	int nRC = SR_NULL;
 
 	// all heights below zero are actually enumerated types...
 	// convert to a height
-	if(tmHeight <= 0)
+	if(nHeight <= 0)
 	{
-		tmHeight = PumTypeToHeight((PUMTYPE)tmHeight);
+		nHeight = PumTypeToHeight((PUMTYPE)nHeight);
 	}
 
 	// if we'll exceed the bottom of the page, we must start a new page
-	if((JCUR.y + tmHeight) > JRECT.bottom)
+	if((JCUR.y + nHeight) > JRECT.bottom)
 	{
-		EndPage();
-		StartPage();
+		EndPage(bPreprocess);
+		StartPage(bPreprocess);
 
 		nRC = SR_ADVANCEDPAGE;
 	}
@@ -336,8 +487,9 @@ int GPrintUnit::StartRow(int tmHeight)
 
 
 
-
-int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= TRUE*/ )
+// this method will end the row by calculating the height of the row 
+// and print the overflow if necessary
+int GPrintUnit::EndRow( BOOL bPreprocess/*=FALSE*/, BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= TRUE*/ )
 {
 	int nRC = ER_NULL;
 
@@ -345,23 +497,13 @@ int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= T
 	BOOL bOverFlow = FALSE;
 	if(bCheckForOverflow && m_lpActiveColDefs)
 	{
-		int nSize = m_lpActiveColDefs->GetSize();
-
-		for(int x = 0; !bOverFlow && x < nSize; x++)
-		{
-			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(x);
-			if(lpDef)
-			{
-				if(!lpDef->strOverflow.IsEmpty())
-				{
-					bOverFlow = TRUE;
-				}
-			}
-		}
+		// is there any column of the row overflow
+		bOverFlow = IsCurrentRowOverflow();
 	}
 
 	if(bOverFlow)
 	{
+		// there are some columns of the row overflow
 		nRC = ER_OVERFLOW;
 
 		if (bDrawOutline)
@@ -370,24 +512,8 @@ int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= T
 			DrawOuterLine();
 		}
 
-		OnContinueRow();
-
+		// set the currentRow of the new page to 0z
 		m_sizeCurrentRow = CSize(0,0);
-
-		// print all overflow
-		int nSize = m_lpActiveColDefs->GetSize();
-		for(int i = 0; i < nSize; i++)
-		{
-			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
-			if(lpDef && !lpDef->strOverflow.IsEmpty())
-			{
-				CString strTemp = lpDef->strOverflow;
-				lpDef->strOverflow.Empty();
-				PrintColContent(i, strTemp, DT_EDITCONTROL);
-			}
-		}
-
-		EndRow(TRUE);
 	}
 	else
 	{
@@ -401,18 +527,16 @@ int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= T
 		JCUR.x = JRECT.left;
 	}
 
-	
-
 	m_sizeCurrentRow = CSize(0,0);
 	return nRC;
 }
 
 
-
-void GPrintUnit::OnContinueRow()
+// return true, if
+bool GPrintUnit::OnContinueRow( BOOL bPreprocess /*= FALSE*/ )
 {
-	EndPage();
-	StartPage();
+	EndPage(bPreprocess);
+	return StartPage(bPreprocess);
 }
 
 
@@ -441,7 +565,7 @@ int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 
 
 
-void GPrintUnit::PrintColContent(int nCol, LPCTSTR lpszText, UINT nFormat)
+void GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, BOOL bPreprocess )
 {
 	if(lpszText)
 	{
@@ -585,7 +709,7 @@ LONG GPrintUnit::FormatDrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFo
 
 
 
-void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
+void GPrintUnit::PrintColHeadings( vector<int> headings, UINT nFormat, UINT nEffects/*=0*/, BOOL bPreprocess /*= FALSE*/ )
 {
 	// Since most derived units will call this from an overidden StartPage(), and
 	// we call StartRow() which can trigger a StartPage(), this boolean prevents
@@ -596,12 +720,10 @@ void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 
 		try
 		{
-			StartRow(PT_HEADING);
-
-			int nSize = m_lpActiveColDefs->GetSize();
+			int nSize = headings.size();
 			for(int i = 0; i < nSize; i++)
 			{
-				LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
+				LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(headings[i]);
 				if(lpDef)
 				{
 					CRect r;
@@ -616,18 +738,20 @@ void GPrintUnit::PrintColHeadings(UINT nFormat, UINT nEffects)
 					}
 
 					if(nEffects && !(nEffects & HE_DOLAST))
+					{
 						DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
+					}
 
 					PrintColHeading(i, lpDef->strName, nLen, r, nFormat, nEffects);
 
 					if(nEffects & HE_DOLAST)
+					{
 						DoHeadingEffect(i, lpDef->strName, nLen, r, nFormat, nEffects);
+					}
 				}
 			}
 
 			m_sizeCurrentRow.cy = m_pum.pumHeadingHeight;
-
-			EndRow(FALSE);
 		}
 		catch(...)
 		{
@@ -770,7 +894,11 @@ void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 
 
 
-void GPrintUnit::PrintTextLine(LPCTSTR lpszText, UINT nFormat, int tmHeight)
+void GPrintUnit::PrintTextLine(
+	LPCTSTR lpszText, 
+	UINT nFormat, 
+	int tmHeight,
+	BOOL bPreprocess)
 {
 	PRINTTEXTLINE ptl;
 	GMakeStructFillZero(ptl);
@@ -786,18 +914,18 @@ void GPrintUnit::PrintTextLine(LPCTSTR lpszText, UINT nFormat, int tmHeight)
 	ptl.rectText.bottom = 0;
 
 	g_StartEndRow = TRUE;
-	PrintTextLine(&ptl);
+	PrintTextLine(&ptl, bPreprocess);
 }
 
 
 
-void GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine)
+void GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess)
 {
-	PrintTextLineEx(lpTextLine);
+	PrintTextLineEx(lpTextLine, bPreprocess);
 }
 
 
-void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
+void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess)
 {
 	if(!lpTextLine)
 		return;
@@ -813,7 +941,7 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 
 	if(lpTextLine->dwFlags & PTLF_STARTROW)
 	{
-		if(StartRow(lpTextLine->tmHeight * nLines) == SR_ADVANCEDPAGE)
+		if(StartRow(bPreprocess, lpTextLine->tmHeight * nLines) == SR_ADVANCEDPAGE)
 		{
 			lpTextLine->rectText.top = JCUR.y;
 		}
@@ -947,7 +1075,7 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 
 		if(lpTextLine->dwFlags & PTLF_ENDROW)
 		{
-			EndRow(FALSE);
+			EndRow(bPreprocess, FALSE);
 		}
 	}
 }
@@ -1140,8 +1268,8 @@ void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
 
 	if(JRECT.top + li.nRowHeight > JRECT.bottom)
 	{
-		EndPage();
-		StartPage();
+		EndPage(FALSE);
+		StartPage(FALSE);
 	}
 
 	PRINTTEXTLINE ptl;
@@ -1204,6 +1332,51 @@ void GPrintUnit::DrawOuterLine()
 		JDC.DrawEdge(&rect, EDGE_BUMP, BF_ADJUST | BF_BOTTOMLEFT | BF_TOPRIGHT);
 	}
 }
+
+bool GPrintUnit::AreAllColumnsInOnePage()
+{
+	// can all the columns be fit in a single page
+	return m_vecColumnPage.size() == 1;
+}
+
+BOOL GPrintUnit::IsCurrentRowOverflow()
+{
+	BOOL bOverFlow = FALSE;
+
+	int nColumnSize = m_vecColumnPage.size();
+
+	for (int i = 0; i < nColumnSize; i++)
+	{
+		for (int j = 0; j < nColumnSize; j++)
+		{
+			LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(m_vecColumnPage[i][j]);
+			if(lpDef)
+			{
+				if(!lpDef->strOverflow.IsEmpty())
+				{
+					bOverFlow = TRUE;
+					break;
+				}
+			}
+		}
+	}
+
+	return bOverFlow;
+}
+
+void GPrintUnit::PrintColForOverflow( int nCol,BOOL bPreprocess /*= FALSE*/ )
+{
+	LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
+	if(lpDef && !lpDef->strOverflow.IsEmpty())
+	{
+		CString strTemp = lpDef->strOverflow;
+		// clear
+		lpDef->strOverflow.Empty();
+		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL, bPreprocess);
+	}
+}
+
+
 
 
 ///////////////////////////////////////////////////////////////////////
