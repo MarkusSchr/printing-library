@@ -331,7 +331,7 @@ protected:
 	virtual int StartRow(BOOL bPreprocess = FALSE, int nHeight=PT_LINEOFTEXT);
 	virtual int EndRow(BOOL bPreprocess=FALSE, BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
 
-	BOOL IsCurrentRowOverflow(); 
+	BOOL IsPreviousRowOverflow(); 
 
 	virtual bool OnContinueRow(BOOL bPreprocess = FALSE);
 
