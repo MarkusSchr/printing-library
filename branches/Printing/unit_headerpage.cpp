@@ -19,7 +19,7 @@ BOOL HeaderPage::Print()
    StartPage();
 
    CFont font;
-   font.CreatePointFont(480, "Arial", &JDC);
+   font.CreatePointFont(480, TEXT("Arial"), &JDC);
    GSELECT_OBJECT(&JDC, &font);
 
    CString str("The Header Page");

@@ -16,12 +16,12 @@ Table1Unit::~Table1Unit()
 void Table1Unit::CompleteAllColHeadingsDefinition()
 {
    // define my four columns...percentages should all up to 1.00
-   InsertPrintCol(0, "Column1_0.45", 0.45);
-   InsertPrintCol(1, "Column2_0.30", 0.30);
-   InsertPrintCol(2, "Column3_0.10", 0.10);
-   InsertPrintCol(3, "Column4_0.35", 0.35);
-   InsertPrintCol(4, "Column5_0.45", 0.35);
-   InsertPrintCol(5, "Column6_0.30", 0.30);
+   InsertPrintCol(0, TEXT("Column1_0.45"), 0.45);
+   InsertPrintCol(1, TEXT("Column2_0.30"), 0.30);
+   InsertPrintCol(2, TEXT("Column3_0.10"), 0.10);
+   InsertPrintCol(3, TEXT("Column4_0.35"), 0.35);
+   InsertPrintCol(4, TEXT("Column5_0.45"), 0.35);
+   InsertPrintCol(5, TEXT("Column6_0.30"), 0.30);
    
    // must call base class
    GPrintUnit::CompleteAllColHeadingsDefinition();
@@ -177,17 +177,17 @@ BOOL Table1Unit::Print()
 
 
    	// sample 3
-    string strArr[30 * 6];
-	vector<vector<char*> > vecParts;
-	const char* standard = "1234567890";
+    wstring strArr[30 * 6];
+	vector<vector<LPCTSTR> > vecParts;
+	const LPCTSTR standard = TEXT("1234567890");
 
 	for (int i = 0; i < 30 ; i++)
 	{
-		vector<char*> vecTemp;
+		vector<LPCTSTR> vecTemp;
 		
 		for (int j = 0; j < 6 ; j++)
 		{
-			string str(standard);
+			wstring str(standard);
 			for (int k = 0; k < j + 10; k++)
 			{
 				str += standard;
@@ -195,13 +195,13 @@ BOOL Table1Unit::Print()
 			
 			if (j == 0 || j == 3)
 			{
-				char temp[20];
-				itoa(i + 1, temp, 10);
+				TCHAR temp[20];
+				_itow(i + 1, temp, 10);
 				strArr[i * 6 + j] = temp;
 			}
 			else
 				strArr[i * 6 + j] = str;
-			vecTemp.push_back(const_cast<char*>(strArr[i * 6 + j].c_str()));
+			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i * 6 + j].c_str()));
 		}
 
 		vecParts.push_back(vecTemp);
@@ -252,7 +252,7 @@ void Table1Unit::PrintHeader()
    strHeader += HFC_RIGHTJUSTIFY; 
   
    CString strPage;
-   strPage.Format("Page: %d", JINFO.m_nCurPage);
+   strPage.Format(TEXT("Page: %d"), JINFO.m_nCurPage);
 
    strHeader += strPage;
 
