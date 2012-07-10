@@ -33,7 +33,7 @@ BOOL IndexUnit::Print()
 
    // add a title to the page
    CString strLine;
-   strLine.Format("%cIndex\n", HFC_CENTER);
+   strLine.Format(TEXT("%cIndex\n"), HFC_CENTER);
    PrintTextLine(strLine);
 
    PrintTree(m_pTree);

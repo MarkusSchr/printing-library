@@ -339,10 +339,10 @@ protected:
 	// adjusts all relavent unit and job dimensions, returns the previous map mode
 	virtual int SetMapMode(int nMapMode);
 
-	virtual void PrintTableContents( vector<vector<char*> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage = TRUE, BOOL bPreprocess = FALSE); 
+	virtual void PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage = TRUE, BOOL bPreprocess = FALSE); 
 	virtual void PrintColForOverflow(int nCol, UINT height, BOOL bPreprocess = FALSE);	
 	// this method can only output contents that fit "this" page, and the overfolws will be output in the EndRow
-	virtual void PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT height, BOOL bPreprocess = FALSE);
+	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT height, BOOL bPreprocess = FALSE);
 	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef, BOOL bPreprocess = FALSE);
 	virtual void PrintColHeadings(vector<int>& headings, UINT nFormat, UINT nEffects=0, BOOL bPreprocess = FALSE);
 	virtual void PrintColHeading(LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects);

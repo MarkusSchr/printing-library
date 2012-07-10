@@ -179,12 +179,7 @@ void GPrintUnit::CompleteAllColHeadingsDefinition()
 }
 
 // it is the user's responsible to check whether all the columns have been set the value
-void GPrintUnit::PrintTableContents(
-	vector<vector<char*> >& contents, 
-	UINT nRowFormat, 
-	UINT nHeadingFormat,
-	BOOL bPrintHeadingWhenChangePage /*= TRUE*/, 
-	BOOL bPreprocess /*= FALSE*/ )
+void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage /*= TRUE*/, BOOL bPreprocess /*= FALSE*/ )
 {
 	if (bPreprocess == TRUE && AreAllColumnsInOnePage() == true)
 	{
@@ -206,6 +201,8 @@ void GPrintUnit::PrintTableContents(
 	}
 	m_preprocessRowHeight.resize(nRows);
 
+	vector<bool> vecNeedChangeRow(nRows, 0);
+
 	// traverse all the data
 	int row = 0;
 	while(row < nRows)
@@ -216,7 +213,7 @@ void GPrintUnit::PrintTableContents(
 
 		// the min rows proceeded in each page
 		int minProceededRows = nRows; // maximize it in order to use the min
-
+		
 		while(m_currentWorkingColums < (int)m_vecColumnPage.size())
 		{
 			// print heading first
@@ -294,17 +291,30 @@ void GPrintUnit::PrintTableContents(
 						//GSELECT_PUFONT(&JDC, &m_fontPairBody);
 						int whichColumnToPrint = m_vecColumnPage[m_currentWorkingColums][columnIndex];
 						int height = bPreprocess? m_pum.pumLineOfText : m_preprocessRowHeight[row].rowHeight;
-						PrintColumnContent(
-							whichColumnToPrint, 
-							contents[row][ whichColumnToPrint ], 
-							nRowFormat,
-							height,
-							bPreprocess);
+						
+						bool bNeedChangeRow = PrintColumnContent(
+												whichColumnToPrint, 
+												contents[row][ whichColumnToPrint ], 
+												nRowFormat,
+												height,
+												bPreprocess);
+
+						// if it has been true, just maintain it
+						vecNeedChangeRow[row] = vecNeedChangeRow[row] == true? true : bNeedChangeRow;
 
 						if (bPreprocess)
 						{
-							m_preprocessRowHeight[row].rowHeight = 
-								max(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].rowHeight);
+							if (vecNeedChangeRow[row] == false)
+							{
+								m_preprocessRowHeight[row].rowHeight = 
+									max(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].rowHeight);
+							}
+							else
+							{
+								// we need the relatively the smallest one among all the largest ones of different column sets
+								m_preprocessRowHeight[row].rowHeight = 
+									min(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].rowHeight);
+							}
 						}
 					}				
 				}
@@ -650,16 +660,18 @@ int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 }
 
 
-
-void GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT height, BOOL bPreprocess /*= FALSE*/ )
+// return true if this column need to change row
+bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT height, BOOL bPreprocess /*= FALSE*/ )
 {
+	bool bNeedChangeRow = false;
+
 	if(lpszText)
 	{
 		LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
 
 		if(lpDef)
 		{
-			CRect rect;
+			CRect rect;					   
 			GMAKERECT(rect, lpDef->nStart, JCUR.y, lpDef->nWidth, height);
 
 			if(lpDef->dwFlags & PCF_RIGHTMARGIN)
@@ -672,11 +684,15 @@ void GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, U
 			int nLen = _tcslen(lpszText);
 			int nHeight = DrawColText(lpszText, nLen, rect, nFormat, nCol, lpDef, bPreprocess);
 
+			bNeedChangeRow = !(lpDef->strOverflow.IsEmpty());
+
 			m_sizeCurrentRow.cy = max(m_sizeCurrentRow.cy, nHeight);
 
 			JCUR.x += lpDef->nWidth;
 		}
 	}
+
+	return bNeedChangeRow;
 }
 
 
