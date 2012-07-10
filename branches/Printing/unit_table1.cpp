@@ -20,12 +20,9 @@ void Table1Unit::CompleteAllColHeadingsDefinition()
    InsertPrintCol(1, "Column2_0.30", 0.30);
    InsertPrintCol(2, "Column3_0.10", 0.10);
    InsertPrintCol(3, "Column4_0.35", 0.35);
-
-   InsertPrintCol(4, "Column5_0.45", 0.45);
+   InsertPrintCol(4, "Column5_0.45", 0.35);
    InsertPrintCol(5, "Column6_0.30", 0.30);
-   InsertPrintCol(6, "Column7_0.10", 0.10);
-   InsertPrintCol(7, "Column8_0.15", 0.15);
-
+   
    // must call base class
    GPrintUnit::CompleteAllColHeadingsDefinition();
 }
@@ -100,80 +97,113 @@ BOOL Table1Unit::Print()
    ii.nFlags = INDEXF_DASHES|INDEXF_PAGENO;
    AddIndexItem(&ii);
 
-   
+
+   // sample 1
 	//char* parts[30][8] = {
-	//	{"1", "Binary flip flop module, with 4t5 rating", "1","$34.45", "1111", "1122","1133","1144"},
-	//	{"2","Overhead flimflam","12","$0.99","1111","1122","1133","1144"},
-	//	{"3","Left-handed gangly wrench","6","$99.99","1111","1122","1133","1144"},
-	//	{"4","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"6","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"7","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"8","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"9","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"10","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"11","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"12","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"13","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"14","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"15","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"16","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"17","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"18","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"19","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"20","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"21","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"22","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"23","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"24","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"25","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"26","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"27","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"28","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"29","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"30","Binary flip flop module, with 4t5 rasdfdsasdfdasasssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssatialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
+	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
+	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
+	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
+	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
+	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
+	//	{"6","66666666666666666666666666666666666666666666666666666666666666666666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
+	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
+	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
+	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
+	//	{"a","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","1","$34.45","1111","1122","1133","1144"},
+	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
+	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
+	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
+	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
+	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
+	//	{"6","66666666666666666666666666666666666666666666666666666666666666666666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
+	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
+	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
+	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
+	//	{"a","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","1","$34.45","1111","1122","1133","1144"},{"21","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
+	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
+	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
+	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
+	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
+	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
+	//	{"6","66666666666666666666666666666666666666666666666666666666666666666azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
+	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
+	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
+	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
 	//};
 
-   char* parts[30][8] = {
-   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
-	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"}
-   };
+	// sample 2
+//   char* parts[30][8] = {
+//   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//   	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"},
+//	{"1", "1115", "1","$34.45", "1111", "1122","1133","1144"}
+//   };
+	//vector<vector<char*> > vecParts;
+ //  for (int i = 0; i < sizeof(parts)/sizeof(parts[0]) ; i++)
+ //  {
+	//   vector<char*> vecTemp;
+	//   for (int j = 0; j < sizeof(parts[0])/sizeof(parts[0][0]) ; j++)
+	//   {
+	//	   vecTemp.push_back(parts[i][j]);
+	//   }
+	//   vecParts.push_back(vecTemp);
+ //  }
+
+
+   	// sample 3
+    string strArr[30 * 6];
 	vector<vector<char*> > vecParts;
-	for (int i = 0; i < sizeof(parts)/sizeof(parts[0]) ; i++)
+	const char* standard = "1234567890";
+
+	for (int i = 0; i < 30 ; i++)
 	{
 		vector<char*> vecTemp;
-		for (int j = 0; j < sizeof(parts[0])/sizeof(parts[0][0]) ; j++)
+		
+		for (int j = 0; j < 6 ; j++)
 		{
-			vecTemp.push_back(parts[i][j]);
+			string str(standard);
+			for (int k = 0; k < j + 10; k++)
+			{
+				str += standard;
+			}
+			
+			if (j == 0 || j == 3)
+			{
+				char temp[20];
+				itoa(i + 1, temp, 10);
+				strArr[i * 6 + j] = temp;
+			}
+			else
+				strArr[i * 6 + j] = str;
+			vecTemp.push_back(const_cast<char*>(strArr[i * 6 + j].c_str()));
 		}
+
 		vecParts.push_back(vecTemp);
 	}
 
@@ -182,10 +212,10 @@ BOOL Table1Unit::Print()
 	// start to printing
 	
 	// first do the preprocessing
-	PrintTableContents(vecParts, DT_LEFT, TRUE);
+	PrintTableContents(vecParts, DT_LEFT, DT_CENTER, TRUE, TRUE);
 
-	//// actual printing
-	//PrintTableContents(vecParts, DT_LEFT, FALSE);
+	// actual printing
+	PrintTableContents(vecParts, DT_LEFT, DT_CENTER, TRUE, FALSE);
 
 	return TRUE;
 }
