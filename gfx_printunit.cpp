@@ -208,13 +208,10 @@ void GPrintUnit::PrintTableContents(
 
 	// traverse all the data
 	int row = 0;
-
-	
 	while(row < nRows)
 	{
 		// deal different pages' columns, attention that columns 
-		// can be printed in different pages. here we just print 
-		// them one page by one page
+		// can be printed in different pages.
 		m_currentWorkingColums = 0;
 
 		// the min rows proceeded in each page
@@ -245,19 +242,32 @@ void GPrintUnit::PrintTableContents(
 			// in another page
 			if (SR_NEEDADVANCEDPAGE != StartRow(bPreprocess))
 			{
-				// the page can not contain this row
-				bool bOverFlow = IsCurrentRowOverflow();
+				bool bSkipPrint = false;
+
+				// the page can not contain the row
+				bool bOverFlow = IsPreviousRowOverflow();
 				if (bOverFlow)
 				{
-					// if the next page's first job is to print the overflow, we skip adding the row
+					// if the next page's first job is to print the overflow, go back to the previous row
 					row--;
+				}
+				else if (bNewPage && row != 0 && m_preprocessRowHeight[row - 1].overflowHeight != 0)
+				{
+					// this means the some columns of the previous row overflow 
+					// but the parts of columns, which will be printed are not overflow
+					// we just simulate the overflow scenario
+					
+					// cause the EndRow using m_sizeCurrentRow.cy to print table, so use it
+					m_sizeCurrentRow.cy = m_preprocessRowHeight[row - 1].overflowHeight;
+					row--;
+					bSkipPrint = true;			
 				}
 
 				// draw all the columns of the current row in this column's page
-				for(int columnIndex = 0; columnIndex < (int)m_vecColumnPage[m_currentWorkingColums].size(); columnIndex++)
+				for(int columnIndex = 0; columnIndex < (int)m_vecColumnPage[m_currentWorkingColums].size() && !bSkipPrint; columnIndex++)
 				{
 					// check to see whether to print for overflow
-					if (bNewPage && (bOverFlow /*|| m_preprocessRowHeight[row].overflowHeight != 0*/))
+					if (bNewPage && bOverFlow)
 					{
 						int whichColumnToPrint = m_vecColumnPage[m_currentWorkingColums][columnIndex];
 						int height = bPreprocess? m_pum.pumLineOfText : m_preprocessRowHeight[row].overflowHeight;
@@ -327,11 +337,8 @@ void GPrintUnit::PrintTableContents(
 
 					// now the next row to print is the row that is overflow
 				}
-				//else
-				{
-					// we need to print other columns
-					row = oneAheadFirstRowBeforeChangePage;
-				}
+
+				row = oneAheadFirstRowBeforeChangePage;
 
 				// the current row has caused change page
 				m_currentWorkingColums++;
@@ -572,7 +579,7 @@ int GPrintUnit::EndRow( BOOL bPreprocess/*=FALSE*/, BOOL bCheckForOverflow/*=TRU
 	if(bCheckForOverflow && m_lpActiveColDefs)
 	{
 		// is there any column of the row overflow
-		bOverFlow = IsCurrentRowOverflow();
+		bOverFlow = IsPreviousRowOverflow();
 	}
 
 	if(bOverFlow)
@@ -1404,6 +1411,7 @@ void GPrintUnit::DrawOuterLine()
 			lpDefFirst->nWidth, 
 			m_sizeCurrentRow.cy);
 
+		// TODO: change the pen
 		CBrush brEdge; 
 		brEdge.CreateSolidBrush(RGB(0,0,0));
 
@@ -1418,10 +1426,11 @@ bool GPrintUnit::AreAllColumnsInOnePage()
 	return m_vecColumnPage.size() == 1;
 }
 
-BOOL GPrintUnit::IsCurrentRowOverflow()
+BOOL GPrintUnit::IsPreviousRowOverflow()
 {
 	BOOL bOverFlow = FALSE;
 
+	// the information about the overflow contains in the column's definition
 	int nColumnSize = m_vecColumnPage[m_currentWorkingColums].size();
 	vector<int> columnIndex = m_vecColumnPage[m_currentWorkingColums];
 
