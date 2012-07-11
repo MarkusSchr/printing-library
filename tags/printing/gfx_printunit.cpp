@@ -179,13 +179,6 @@ void GPrintUnit::CompleteAllColHeadingsDefinition()
 // it is the user's responsible to check whether all the columns have been set the value
 void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage /*= TRUE*/, BOOL bPreprocess /*= FALSE*/, BOOL bNeedPosition /*= FALSE*/ )
 {
-	if (bPreprocess == TRUE && AreAllColumnsInOnePage() == true)
-	{
-		// since all the columns can be printed in one page, 
-		// it is no necessary to do the preprocess
-		return;
-	}
-
 	int nRows = contents.size();
 	// the row num ahead the first row to be printed before changing page
 	int oneAheadFirstRowBeforeChangePage = -1;
