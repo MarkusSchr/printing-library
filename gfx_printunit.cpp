@@ -6,6 +6,7 @@
 #include "gfx_printunit.h"
 #include "gfx_printjob.h"
 #include <assert.h>
+#include <algorithm>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -15,9 +16,6 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(GPrintUnit, CObject)
-
-
-
 
 
 GPrintUnit::GPrintUnit(GPrintJob *pJob)
@@ -179,7 +177,7 @@ void GPrintUnit::CompleteAllColHeadingsDefinition()
 }
 
 // it is the user's responsible to check whether all the columns have been set the value
-void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage /*= TRUE*/, BOOL bPreprocess /*= FALSE*/ )
+void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage /*= TRUE*/, BOOL bPreprocess /*= FALSE*/, BOOL bNeedPosition /*= FALSE*/ )
 {
 	if (bPreprocess == TRUE && AreAllColumnsInOnePage() == true)
 	{
@@ -195,13 +193,21 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 	// do the actual job
 	bool bNewPage = StartPage(bPreprocess);
 
+	// prepare the preprocess data
 	if (bPreprocess)
 	{
 		m_preprocessRowHeight.clear();
 	}
 	m_preprocessRowHeight.resize(nRows);
 
-	vector<bool> vecNeedChangeRow(nRows, 0);
+	if (bPreprocess && bNeedPosition)
+	{
+		m_preprocessRowStartPosY.clear();
+	}
+	m_preprocessRowStartPosY.resize(nRows);
+
+	// indicate whether any of the columns of the row has exceeded the page
+	vector<bool> vecNeedChangePage(nRows, 0);
 
 	// traverse all the data
 	int row = 0;
@@ -255,8 +261,8 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 					// we just simulate the overflow scenario
 					
 					// cause the EndRow using m_sizeCurrentRow.cy to print table, so use it
-					m_sizeCurrentRow.cy = m_preprocessRowHeight[row - 1].overflowHeight;
 					row--;
+					m_sizeCurrentRow.cy = m_preprocessRowHeight[row].overflowHeight;
 					bSkipPrint = true;			
 				}
 
@@ -272,16 +278,30 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 						// TODO: change the font
 						// GSELECT_PUFONT(&JDC, &m_fontPairBody);
 
-						// print for overflow, if overflow it must be the former row
-						PrintColForOverflow(
-							whichColumnToPrint,
-							height,
-							bPreprocess);
-			
 						if (bPreprocess)
 						{
-							m_preprocessRowHeight[row].overflowHeight = 
-								max(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].overflowHeight);
+							if(!bNeedPosition)
+							{
+								// record the row beginning position
+								m_preprocessRowStartPosY[row].overflowHeight = min(m_preprocessRowStartPosY[row].overflowHeight, JCUR.y);
+							}
+						}
+
+						// print for overflow, if overflow it must be the former row
+						PrintColForOverflow(
+							row,
+							whichColumnToPrint,
+							height,
+							bPreprocess,
+							bNeedPosition);
+			
+						if (bPreprocess )
+						{
+							
+							{
+								m_preprocessRowHeight[row].overflowHeight = 
+									max(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].overflowHeight);
+							}
 						}
 					}
 					else
@@ -291,43 +311,51 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 						//GSELECT_PUFONT(&JDC, &m_fontPairBody);
 						int whichColumnToPrint = m_vecColumnPage[m_currentWorkingColums][columnIndex];
 						int height = bPreprocess? m_pum.pumLineOfText : m_preprocessRowHeight[row].rowHeight;
-						
+
+						int top = JCUR.y;
+						if (bPreprocess && bNeedPosition == false)
+						{
+							top = m_preprocessRowStartPosY[row].rowHeight;
+						}
 						bool bNeedChangeRow = PrintColumnContent(
 												whichColumnToPrint, 
 												contents[row][ whichColumnToPrint ], 
 												nRowFormat,
+												top,
 												height,
 												bPreprocess);
 
 						// if it has been true, just maintain it
-						vecNeedChangeRow[row] = vecNeedChangeRow[row] == true? true : bNeedChangeRow;
+						vecNeedChangePage[row] = vecNeedChangePage[row] == true? true : bNeedChangeRow;
 
 						if (bPreprocess)
 						{
-							if (vecNeedChangeRow[row] == false)
+							if (bNeedPosition)
+							{
+								// record the row beginning position
+								m_preprocessRowStartPosY[row].rowHeight = max(m_preprocessRowStartPosY[row].rowHeight, JCUR.y);
+							}
+							else
 							{
 								m_preprocessRowHeight[row].rowHeight = 
 									max(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].rowHeight);
 							}
-							else
-							{
-								// we need the relatively the smallest one among all the largest ones of different column sets
-								m_preprocessRowHeight[row].rowHeight = 
-									min(m_sizeCurrentRow.cy, m_preprocessRowHeight[row].rowHeight);
-							}
 						}
 					}				
-				}
-			}
+				}// for(int columnIndex = 0; columnIndex < (int)m_vecColumnPage[m_currentWorkingColums].size() && !bSkipPrint; columnIndex++)
 
+			} // if (SR_NEEDADVANCEDPAGE != StartRow(bPreprocess)) 
+
+
+			// end the row
 			bNewPage = 
 				EndRow( bPreprocess ) == ER_OVERFLOW /*overflow happens*/
 			 || row == nRows - 1 /*end of all the rows*/
 			 || row == oneAheadFirstRowBeforeChangePage + minProceededRows /*reach the min row of all the column page*/;
 
-			// the page is full or we have reached the bottom
 			if (true == bNewPage)
 			{
+				// the page is full or we have reached the bottom
 				EndPage(bPreprocess);
 				
 				minProceededRows = min(row - oneAheadFirstRowBeforeChangePage, minProceededRows);
@@ -345,6 +373,40 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 					// we should begin the next page
 					oneAheadFirstRowBeforeChangePage = oneAheadFirstRowBeforeChangePage + minProceededRows;
 
+					// recalculate the overflow, for after the first preprocess, the height of the row has been decided
+					if (bPreprocess && bNeedPosition && vecNeedChangePage[row])
+					{
+						// 专门写成函数， 从printcolumncontent那里拷贝过来的
+						for (int i = 0; i < m_lpActiveColDefs->GetSize(); i++)
+						{
+							LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(i);
+
+							if(lpDef)
+							{
+								// clear the overflow str
+								lpDef->strOverflow.Empty();
+
+								CRect rect;					   
+								GMAKERECT(rect, lpDef->nStart, m_preprocessRowStartPosY[row].rowHeight, lpDef->nWidth, m_pum.pumLineOfText);
+
+								if(lpDef->dwFlags & PCF_RIGHTMARGIN)
+								{
+									// reduce column width
+									int nMargin = GPERCENT(rect.Width(), 0.015);
+									rect.right -= nMargin;
+								}
+
+								LPCTSTR lpctText = contents[row][i];
+								int nLen = _tcslen(lpctText);
+								int nHeight = DrawColText(lpctText, nLen, rect, 0, i, lpDef, bPreprocess);
+								int k = 0;
+							}
+						}
+
+						// now we have used the overflow information to recalc the position and length, it is useless
+						vecNeedChangePage[row] = false;
+					}
+
 					// now the next row to print is the row that is overflow
 				}
 
@@ -354,8 +416,10 @@ void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nR
 				m_currentWorkingColums++;
 			}
 
+			
 			row++;
-		}// while(columnPage < (int)m_vecColumnPage.size()) 
+		}// while(columnPage < (int)m_vecColumnPage.size())
+
 	}// while(row < nRows) 	
 
 	// do not need it, it has been done in the while loop
@@ -661,7 +725,7 @@ int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 
 
 // return true if this column need to change row
-bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT height, BOOL bPreprocess /*= FALSE*/ )
+bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height, BOOL bPreprocess /*= FALSE*/ )
 {
 	bool bNeedChangeRow = false;
 
@@ -672,7 +736,7 @@ bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, U
 		if(lpDef)
 		{
 			CRect rect;					   
-			GMAKERECT(rect, lpDef->nStart, JCUR.y, lpDef->nWidth, height);
+			GMAKERECT(rect, lpDef->nStart, top, lpDef->nWidth, height);
 
 			if(lpDef->dwFlags & PCF_RIGHTMARGIN)
 			{
@@ -735,7 +799,7 @@ int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nForma
 	if(bUseRichEdit)
 	{
 		rect.bottom = JRECT.bottom;
-		
+				
 		if(m_richEdit.m_hWnd == NULL)
 		{
 			DWORD dwStyle = ES_MULTILINE | WS_CHILD | ES_LEFT;
@@ -1466,7 +1530,7 @@ BOOL GPrintUnit::IsPreviousRowOverflow()
 	return bOverFlow;
 }
 
-void GPrintUnit::PrintColForOverflow( int nCol, UINT height, BOOL bPreprocess /*= FALSE*/ )
+void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, BOOL bPreprocess /*= FALSE*/, BOOL bNeedPosition /*= FALSE*/ )
 {
 	LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
 	if(lpDef && !lpDef->strOverflow.IsEmpty())
@@ -1474,7 +1538,13 @@ void GPrintUnit::PrintColForOverflow( int nCol, UINT height, BOOL bPreprocess /*
 		CString strTemp = lpDef->strOverflow;
 		// clear
 		lpDef->strOverflow.Empty();
-		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL, height, bPreprocess);
+
+		int top = JCUR.y;
+		if (bPreprocess && bNeedPosition == false)
+		{
+			top = m_preprocessRowStartPosY[row].overflowHeight;
+		}
+		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL, top, height, bPreprocess);
 	}
 }
 
