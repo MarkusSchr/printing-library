@@ -182,6 +182,8 @@ public:
 	CRect m_rectDevice;
 	// point at which we're currently printing
 	CPoint m_ptCursor;
+	// the size of the original page, including margins, headers, and footers
+	CRect m_rectPage;
 
 	// special print job flags
 	DWORD m_dwFlags;
@@ -196,6 +198,7 @@ public:
 	// attributes
 	void SetEndPagePending(BOOL bPending=TRUE);
 	BOOL IsEndPagePending() const;
+
 
 public:
 	virtual ~GPrintJob();

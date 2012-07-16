@@ -8,6 +8,8 @@
 #include "unit_headerpage.h"
 #include "unit_indexpage.h"
 #include "gfx_printjob.h"
+#include <sstream>
+#include "PrintUnitTable.h"
 
 
 #ifdef _DEBUG
@@ -78,8 +80,10 @@ void CPrintDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPrintDlg)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
+	// NOTE: the ClassWizard will add DDX and DDV calls here
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_EDIT_ROWS, m_editRows);
+	DDX_Control(pDX, IDC_EDIT_COLUMNS, m_editColumns);
 }
 
 BEGIN_MESSAGE_MAP(CPrintDlg, CDialog)
@@ -181,25 +185,29 @@ HCURSOR CPrintDlg::OnQueryDragIcon()
 class MyPrintJob : public GPrintJob
 {
 public:
-   MyPrintJob() {;}
+   MyPrintJob() 
+   {
+   }
    virtual ~MyPrintJob() {;}
    virtual void OnPrint();
+   
+   void InsertTask( GPrintUnit* task )
+   {
+	   task->SetJob(this);
+	   vecTasks.push_back(task);
+   }
+
+private:
+   vector<GPrintUnit*> vecTasks;
 };
 
 void MyPrintJob::OnPrint()
 {
-   //IndexUnit unitIndex(this);
-   //GSELECT_PJINDEXTREE(&unitIndex.m_pTree);
-
-   //HeaderPage unitHeaderPage(this);
-   //unitHeaderPage.Print();
-
-   Table1Unit unitTable1(this);
-   unitTable1.Print();
-
-   // index must be print for the last, or the library
-   // does not know what to take as index
-   //unitIndex.Print();
+	// draw
+	for (int i = 0; i < vecTasks.size(); i++)
+	{
+		vecTasks[i]->Print();
+	}
 }
 
 
@@ -209,6 +217,88 @@ void MyPrintJob::OnPrint()
 
 void CPrintDlg::OnOK() 
 {
-   MyPrintJob job;
+	// get data
+	CString   strRow; 
+	m_editRows.GetWindowText(strRow); 
+	int rowNum = _ttoi(strRow);
+
+	CString   strColumns; 
+	m_editColumns.GetWindowText(strColumns); 
+	int columnNum = _ttoi(strColumns);
+
+	ASSERT(rowNum != 0 && columnNum != 0);
+
+
+	// prepare the column
+	vector<COLUMNDEFINITIONS> vecColumnDef;
+	// define my four columns...
+	for (int i = 0; i < columnNum; i++)
+	{
+		COLUMNDEFINITIONS cd;
+		TCHAR buf[200];
+		_itow_s(i, buf, 10);
+		wstring str = buf;
+		str.append(TEXT("th Column"));
+		cd.strName = str.c_str();
+
+		vecColumnDef.push_back(cd);
+	}
+
+	// prepare the data
+	wstring **strArr = NULL;
+	strArr = new wstring* [rowNum];
+	for (int i = 0; i < rowNum; i++)
+	{
+		strArr[i] = new wstring [columnNum];
+	}
+
+	for (int i = 0; i < rowNum; i++)
+	{
+		for (int j = 0; j < columnNum; j++)
+		{
+			srand((unsigned)time(0));
+			int randomPart1 = rand() % 10000;
+			int randomPart2 = rand() % 1000;
+
+			TCHAR c = 0;
+			if (rand() % 2)
+			{
+				c = TEXT('+');
+			}
+			else
+			{
+				c = TEXT('-');
+			}
+			std::wstringstream ss;
+			ss << c << randomPart1 << TEXT(".") << randomPart2 << TEXT('\0');
+			strArr[i][j] = ss.str(); 
+
+			wstring temp = strArr[i][j];
+		}
+	}
+
+	vector<vector<LPCTSTR> > vecParts;
+
+	for (int i = 0; i < rowNum ; i++)
+	{
+		vector<LPCTSTR> vecTemp;
+
+		for (int j = 0; j < columnNum ; j++)
+		{
+			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i][j].c_str()));
+		}
+
+		vecParts.push_back(vecTemp);
+	}
+
+
+	CPrintUnitStandardTable unitTable1;
+	unitTable1.DefineColumns(vecColumnDef);
+	unitTable1.SetPrintData(&vecParts);
+
+	MyPrintJob job;
+   job.InsertTask(&unitTable1);
+
    job.Print();
 }
+

@@ -391,6 +391,8 @@ void GPrintJob::InitPrintInfo()
 
 		m_rectDevice = m_pInfo->m_rectDraw;
 
+		m_rectPage = m_pInfo->m_rectDraw;
+
 		CRect rectMargins;
 		if(GetPageSetupMargins(rectMargins))
 		{
@@ -465,6 +467,7 @@ void GPrintJob::SetEndPagePending(BOOL bPending)
 {
 	GSET_BIT(m_dwFlags, PJF_ENDPAGEPENDING, bPending);
 }
+
 
 
 /////////////////////////////////////////////////////////////////////////////

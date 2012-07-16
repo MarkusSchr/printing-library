@@ -3,10 +3,14 @@
 #include "unit_table1.h"
 #include "gfx_printjob.h"
 
+#include <string>
+#include <sstream>
+using namespace std;
 
-
-Table1Unit::Table1Unit(GPrintJob *pJob) : GPrintUnit(pJob)
+Table1Unit::Table1Unit(GPrintJob *pJob, int row, int column) : GPrintUnit(pJob)
 {
+	m_row = row;
+	m_column = column;
 }
 
 Table1Unit::~Table1Unit()
@@ -15,13 +19,15 @@ Table1Unit::~Table1Unit()
 
 void Table1Unit::CompleteAllColHeadingsDefinition()
 {
-   // define my four columns...percentages should all up to 1.00
-   InsertPrintCol(0, TEXT("Column1_0.45"), 0.45);
-   InsertPrintCol(1, TEXT("Column2_0.30"), 0.30);
-   InsertPrintCol(2, TEXT("Column3_0.10"), 0.10);
-   InsertPrintCol(3, TEXT("Column4_0.35"), 0.35);
-   InsertPrintCol(4, TEXT("Column5_0.45"), 0.35);
-   InsertPrintCol(5, TEXT("Column6_0.30"), 0.30);
+   // define my four columns...
+	for (int i = 0; i < m_column; i++)
+	{
+		TCHAR buf[2000];
+		_itow_s(i, buf, 10);
+		wstring str = buf;
+		str.append(TEXT("th Column"));
+		InsertPrintCol(i, str.c_str(), 0.2);
+	}
    
    // must call base class
    GPrintUnit::CompleteAllColHeadingsDefinition();
@@ -97,125 +103,48 @@ BOOL Table1Unit::Print()
    ii.nFlags = INDEXF_DASHES|INDEXF_PAGENO;
    AddIndexItem(&ii);
 
-
    // sample 1
-	//char* parts[30][8] = {
-	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
-	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
-	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
-	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
-	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
-	//	{"6","66666666666666666666666666666666666666666666666666666666666666666666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
-	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
-	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
-	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
-	//	{"a","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","1","$34.45","1111","1122","1133","1144"},
-	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
-	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
-	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
-	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
-	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
-	//	{"6","66666666666666666666666666666666666666666666666666666666666666666666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
-	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
-	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
-	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
-	//	{"a","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","1","$34.45","1111","1122","1133","1144"},{"21","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","1133","1144"},
-	//	{"1", "1111111111111111111111111111111111111111111111111111111111111111111111", "1","$34.45", "1111", "1122","1133","1144"},
-	//	{"2","22222222222222222222222222222222222222222222222222222222222222222222222","12","$0.99","1111","1122","1133","1144"},
-	//	{"3","333333333333333333","6","$99.99","33333333333333333333333333333333333333333333333333333333333333333333333333333","1122","1133","1144"},
-	//	{"4","44444444444444444444444444444444444444444444444444444444444444444444444444444444444","1","$34.45","1111","1122","1133","1144"},
-	//	{"5","Binary flip flop module, with 4t5 ratialskdfjfkdlsalaskdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfslalaksdjfjfkdslang","1","$34.45","1111","1122","555555555555555555555555555555555","1144"},
-	//	{"6","66666666666666666666666666666666666666666666666666666666666666666azzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz666","1","$34.45","1111","1122","1133","666666666666666666666666666666666666666666"},
-	//	{"7","7777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777","1","$34.45","1111","77777777777777777777777","1133","1144"},
-	//	{"8","888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888","1","$34.45","1111","8888888888888888888888888888888888888","1133","1144"},
-	//	{"9","99999999999999999999999999999999999999999999kdjfjfdklsalaskdjfjfkdlsalaskjdfjfkdslalaksdjfkjdfsla9999999999999999999999999","1","$34.499999999999999999999999995","1111","1122","1133","1144"},
-	//};
-   //vector<vector<char*> > vecParts;
-   //for (int i = 0; i < sizeof(parts)/sizeof(parts[0]) ; i++)
-   //{
-	  // vector<char*> vecTemp;
-	  // for (int j = 0; j < sizeof(parts[0])/sizeof(parts[0][0]) ; j++)
-	  // {
-		 //  vecTemp.push_back(parts[i][j]);
-	  // }
-	  // vecParts.push_back(vecTemp);
-   //}
+    wstring **strArr = NULL;
+	strArr = new wstring* [m_row];
+	for (int i = 0; i < m_row; i++)
+	{
+		strArr[i] = new wstring [m_column];
+	}
 
+	for (int i = 0; i < m_row; i++)
+	{
+		for (int j = 0; j < m_column; j++)
+		{
+			srand((unsigned)time(0));
+			int randomPart1 = rand() % 10000;
+			int randomPart2 = rand() % 1000;
 
-	// ////sample 2
- //  LPCTSTR parts[30][8] = {
- //  	{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("5"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("10"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("15"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("20"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("25"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("1"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")},
-	//{TEXT("30"), TEXT("1115"), TEXT("1"), TEXT("$34.45"), TEXT("1111"), TEXT("1122"), TEXT("1133"), TEXT("1144")}
- //  	   };
+			TCHAR c = 0;
+			if (rand() % 2)
+			{
+				c = TEXT('+');
+			}
+			else
+			{
+				c = TEXT('-');
+			}
+			std::wstringstream ss;
+			ss << c << randomPart1 << TEXT(".") << randomPart2 << TEXT('\0');
+			strArr[i][j] = ss.str(); 
 
-	//
+			wstring temp = strArr[i][j];
+		}
+	}
 
- //  vector<vector<LPCTSTR> > vecParts;
- //  for (int i = 0; i < sizeof(parts)/sizeof(parts[0]) ; i++)
- //  {
-	//   vector<LPCTSTR> vecTemp;
-	//   for (int j = 0; j < sizeof(parts[0])/sizeof(parts[0][0]) ; j++)
-	//   {
-	//	   vecTemp.push_back(parts[i][j]);
-	//   }
-	//   vecParts.push_back(vecTemp);
- //  }
-
-
-   	// sample 3
-    wstring strArr[30 * 6];
 	vector<vector<LPCTSTR> > vecParts;
-	const LPCTSTR standard = TEXT("°ÂÌØÂü8ÐÖµÜ£¬autraman!!");
 
-	for (int i = 0; i < 30 ; i++)
+	for (int i = 0; i < m_row ; i++)
 	{
 		vector<LPCTSTR> vecTemp;
 		
-		for (int j = 0; j < 6 ; j++)
+		for (int j = 0; j < m_column ; j++)
 		{
-			wstring str = standard;
-			for (int k = 0; k < j + 10; k++)
-			{
-				str += standard;
-			}
-			
-			if (j == 0 || j == 3)
-			{
-				TCHAR temp[20];
-				_itow(i + 1, temp, 10);
-				strArr[i * 6 + j] = temp;
-			}
-			else
-				strArr[i * 6 + j] = str;
-			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i * 6 + j].c_str()));
+			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i][j].c_str()));
 		}
 
 		vecParts.push_back(vecTemp);
@@ -226,12 +155,7 @@ BOOL Table1Unit::Print()
 	// start to printing
 	
 	// first do the preprocessing
-	PrintTableContents(vecParts, DT_LEFT, DT_CENTER, TRUE, TRUE, TRUE);
-
-	PrintTableContents(vecParts, DT_LEFT, DT_CENTER, TRUE, TRUE, FALSE);
-
-	// actual printing
-	PrintTableContents(vecParts, DT_LEFT, DT_CENTER, TRUE, FALSE);
+	//PrintTableContents(printData, nRowFormat);
 
 	return TRUE;
 }
