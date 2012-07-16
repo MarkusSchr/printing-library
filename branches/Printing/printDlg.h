@@ -42,6 +42,10 @@ protected:
 	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+private:
+	CEdit m_editRows;
+private:
+	CEdit m_editColumns;
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -4,6 +4,7 @@
 	Version="8.00"
 	Name="print"
 	ProjectGUID="{10BB5C3E-541E-419E-853B-335BC4CB866F}"
+	RootNamespace="print"
 	Keyword="MFCProj"
 	>
 	<Platforms>
@@ -117,7 +118,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="2"
 			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -314,6 +315,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\PrintUnitTable.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -417,6 +422,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PrintUnitTable.h"
+				>
+			</File>
+			<File
 				RelativePath="Resource.h"
 				>
 			</File>
@@ -456,5 +465,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="print.rc"
+		/>
 	</Globals>
 </VisualStudioProject>
