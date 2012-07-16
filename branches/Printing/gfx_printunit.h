@@ -107,6 +107,7 @@ typedef struct tagPrintColumnDef
 	UINT nWidth; // the actual width to be printed in the client rect
 	UINT nStart; // the start position of the column in the client rect
 	DWORD dwFlags;
+	UINT nFormat;
 
 } PRINTCOLUMNDEF, *LPPRINTCOLUMNDEF;
 
@@ -123,6 +124,17 @@ typedef struct tagPrintUnitMetrics
 	int pumHeaderLineHeight;
 	int pumLineOfText;
 
+	tagPrintUnitMetrics()
+	{
+		pumHeadingHeight = 0;
+		pumFooterHeight = 0;
+		pumHeaderHeight = 0;
+		pumRightMarginWidth = 0;
+		pumLeftMarginWidth = 0;
+		pumFooterLineHeight = 0;
+		pumHeaderLineHeight = 0;
+		pumLineOfText = 0;
+	}
 } PRINTUNITMETRICS, *LPPRINTUNITMETRICS;
 
 
@@ -149,7 +161,7 @@ typedef enum tagPumType
 #define HFC_CENTER        _T('\x1f')            // I18nOk
 #define HFC_RIGHTJUSTIFY  _T('\x1e')            // I18nOk
 #define HFC_NEWLINE       _T('\n')              // I18nOk
-#define HFC_DOTS          _T('\x1c')            // I18nOk
+#define HFC_LINES          _T('\x1c')            // I18nOk
 
 
 #define PTLF_STARTROW   0x00000001
@@ -236,7 +248,7 @@ typedef struct tagPrintColumn
 	LPCTSTR lpszName; // name for the column
 	double fColPct; // how much percentage does this column cost of the total columns
 	DWORD dwFlags; // the combination of PCF_RIGHTMARGIN, PCF_USERICHEDIT, PCF_TEXTISID and PCF_STRETCHY
-
+	UINT nFormat; // format of the column
 } PRINTCOLUMN, *LPPRINTCOLUMN;
 
 
@@ -308,8 +320,7 @@ public:
 	virtual void InitPrintMetrics();
 	// the nHeading in the following functions means the number of the column set.
 	// there can be many column set, within which there are many columns
-	virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, int nHeading=0);
-	void InsertPrintCol(int nPos, UINT nIDName, double fColPct=0.0, int nHeading=0);
+	virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, UINT nFormat = 0, int nHeading=0);
 	void InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading=0);
 
 	LPPRINTCOLUMNDEF GetPrintColDef(int nCol, int nHeading=-1);
@@ -321,30 +332,32 @@ public:
 protected:
 	// starts a new page. it will draw the header(which is the opposite of the footer)
 	// heading will be drawn accordingly
-	virtual bool StartPage(BOOL bPreprocess = FALSE);
+	virtual bool StartPage();
 	// ends current page. it will draw the footer 
-	virtual void EndPage(BOOL bPreprocess = FALSE);
+	virtual void EndPage();
 	// prints a blank page, set 'bIncPageNo' to FALSE if you don't want
 	// the page number affected...
 	virtual void AdvancePage(BOOL bIncPageNo=TRUE);
 
-	virtual int StartRow(BOOL bPreprocess = FALSE, int nHeight=PT_LINEOFTEXT);
-	virtual int EndRow(BOOL bPreprocess=FALSE, BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
-
+	virtual int StartRow(int nHeight=PT_LINEOFTEXT);
+	virtual int EndRow(BOOL bCheckForOverflow=TRUE, BOOL bDrawOutline = TRUE);
 	BOOL IsPreviousRowOverflow(); 
 
-	virtual bool OnContinueRow(BOOL bPreprocess = FALSE);
+	virtual bool OnContinueRow();
 
 	virtual BOOL ContinuePrinting() const;
 	// adjusts all relavent unit and job dimensions, returns the previous map mode
 	virtual int SetMapMode(int nMapMode);
+	
+	// draw table
+	void PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = TRUE);
 
-	virtual void PrintTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, UINT nHeadingFormat,BOOL bPrintHeadingWhenChangePage = TRUE, BOOL bPreprocess = FALSE, BOOL bNeedPosition = FALSE); 
-	virtual void PrintColForOverflow(int row, int nCol, UINT height, BOOL bPreprocess = FALSE, BOOL bNeedPosition = FALSE);	
-	// this method can only output contents that fit "this" page, and the overfolws will be output in the EndRow
-	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height, BOOL bPreprocess = FALSE);
-	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef, BOOL bPreprocess = FALSE);
-	virtual void PrintColHeadings(vector<int>& headings, UINT nFormat, UINT nEffects=0, BOOL bPreprocess = FALSE);
+public:
+	void PrintColForOverflow(int row, int nCol, UINT height);	
+	// this method can only output contents that fit "this" page, and the overflows will be output in the EndRow
+	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
+	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
+	virtual void PrintColHeadings(vector<int>& headings, UINT nEffects=0);
 	virtual void PrintColHeading(LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects);
 	virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
 		UINT nFormat, UINT nEffects);
@@ -358,13 +371,13 @@ protected:
 
 	void PrintFooterText(LPCTSTR lpszText);
 	void PrintHeaderText(LPCTSTR lpszText);
-	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0, BOOL bPreprocess = FALSE);
-	void PrintTextLine(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess = FALSE);
+	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0);
+	void PrintTextLine(LPPRINTTEXTLINE lpTextLine);
 	// override this if you want to change the behavior of all overloaded
 	// versions of PrintTextLine()
-	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine, BOOL bPreprocess = FALSE);
+	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine);
 
-	void DrawDots(LPRECT lpRect);
+	void DrawSeperateLine(LPRECT lpRect);
 	void DrawRepeatChar(TCHAR ch, LPRECT lpRect);
 
 	int PumTypeToHeight(PUMTYPE pt) const;
@@ -373,17 +386,14 @@ protected:
 	virtual void PrintTree(GPrintIndexTree *pObj, int nLevel=0);
 	virtual void PrintTreeItem(LPINDEXITEM lpIndex, int nLevel);
 	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
-
 	void AddIndexItem(INDEXITEM *pII);
 
 private:
 	void DrawOuterLine();
-	void ClearPreprocessTempData();
-	// to test whether the columns should be printed in different pages
-	// this method must be called after the CompleteAllColHeadingsDefinition()
-// just for test to use "public:", should delete it
-public:
-	bool AreAllColumnsInOnePage();
+
+	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
+	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
+	void DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = FALSE);
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
@@ -402,17 +412,25 @@ protected:
 	//rich edit control used to print multiple lines in same column
 	CRichEditCtrl m_richEdit;
 
+	////////////////////////////////////////
+	// fonts 
+	PUFONTPAIR m_fontPairBody;
+	// heading is the column heads
+	CFont m_fontHeading;
+
+	// header is the content of the top of the page
+	CFont m_fontHeader;
+	CFont m_fontFooter;
+
 public:
 	// pointer to owner print job
 	GPrintJob *m_pJob;
 
-
 public:
 	virtual ~GPrintUnit();
 
-
 private:
-// all the followings are for drawing the table
+	// all the followings are for drawing the table
 	// to contain the columns, the index means which page this column is in
 	// i.e. m_vecColumnPage[0][1] indicates the second column in page 1
 	vector<vector<int>> m_vecColumnPage;
@@ -433,14 +451,17 @@ private:
 			overflowHeight = 0;
 		}
 	};
-	// preprocess the row starting position
+	// pre-process the row starting position
 	vector<srtPreprocessData> m_preprocessRowStartPosY;
 
-	// preprocess row height data
+	// pre-process row height data
 	vector<srtPreprocessData> m_preprocessRowHeight;
 
-	// preprocess heading height data
+	// pre-process heading height data
 	int m_preprocessHeadingHeight;
+
+	bool m_bPreprocessing;
+	bool m_bCheckPosition;
 };
 
 
@@ -491,7 +512,7 @@ protected:
 	int m_nSkipChars;
 	TCHAR m_chCur;
 	UINT m_nNewFormat;
-	BOOL m_bNewDots;
+	BOOL m_bNewSeperateLine;
 	BOOL m_bNewLine;
 
 public:
