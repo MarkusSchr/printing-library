@@ -986,19 +986,52 @@ void GPrintUnit::RealizeMetrics()
 	JRECT.NormalizeRect();
 }
 
+void GPrintUnit::PrintHeader()
+{
+	GSELECT_OBJECT(&JDC, &m_fontHeader);
 
+	wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
 
+	CString strHeader;
+	for (int i = 0; i < MAX_HEADER_COUNT; i++)
+	{
+		GetContentOnType(m_header[i].type, m_header[i].content.c_str(), strHeader);
+		strHeader += step[i];
+	}
+	strHeader.Delete(strHeader.GetLength(), 1);
+
+	strHeader += HFC_NEWLINE;
+
+	PrintHeaderText(strHeader);
+
+	// draw the separate line
+	if (m_bNeedHeaderSeparateLine)
+	{
+		DrawSeparetLine(TRUE);
+	}
+}
 
 void GPrintUnit::PrintFooter()
 {
+	GSELECT_OBJECT(&JDC, &m_fontFooter);
 
-}
+	wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
 
+	CString strFooter;
+	// draw the separate line
+	if (m_bNeedFooterSeperateLine)
+	{
+		DrawSeparetLine(FALSE);
+	}
 
+	strFooter += HFC_NEWLINE;
+	for (int i = 0; i < MAX_FOOTER_COUNT; i++)
+	{
+		GetContentOnType(m_footer[i].type, m_footer[i].content.c_str(), strFooter);
+		strFooter += step[i];
+	}
 
-void GPrintUnit::PrintHeader()
-{
-
+	PrintFooterText(strFooter);
 }
 
 
@@ -1305,6 +1338,116 @@ int GPrintUnit::SetMapMode(int nMapMode)
 }
 
 
+void GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
+{
+	// get the current time
+	SYSTEMTIME sysTime;
+	GetLocalTime(&sysTime);
+	// format it...
+	TCHAR szBuf[100];
+	GMakeStringFillZero(szBuf);
+	// get the time
+	GetTimeFormat(LOCALE_USER_DEFAULT, NULL, &sysTime, NULL, szBuf, sizeof(szBuf));
+	time = szBuf;
+	// get the date
+	GetDateFormat(LOCALE_USER_DEFAULT, NULL, &sysTime, NULL, szBuf, sizeof(szBuf));
+	date = szBuf;	
+}
+
+void GPrintUnit::GetContentOnType( int type, CString context, CString& str )
+{
+	switch (type)
+	{
+	case TYPE_EMPTY:
+		{	
+		}
+		break;
+	case TYPE_PAGE: // print current page, using "content" as prefix.
+		{
+			CString strPage;
+			strPage.Format(TEXT("%d"), JINFO.m_nCurPage);
+			str = str + context + strPage;
+		}
+		break;
+	case TYPE_DATE: // the current date, using "content" as prefix.
+		{
+			CString date, time;
+			GetCurrentTimeAndDate(date, time);
+			str = str + context + date;
+		}
+		break;
+	case TYPE_TIME: // the current time, using "content" as prefix.
+		{
+			CString date, time;
+			GetCurrentTimeAndDate(date, time);
+			str = str +context + time;
+		}
+		break;
+	case TYPE_DATETIME: // the current date and time, using "content" as prefix.
+		{
+			CString date, time;
+			GetCurrentTimeAndDate(date, time);
+			str = str + context + date + " " + time;
+		}
+		break;
+	case TYPE_DATA:  // user-defined data, it will use "content"
+		{
+			str = str + context;
+		}
+		break;
+	}	
+}
+
+
+UINT GPrintUnit::SetSeparateLineInterval( UINT interval )
+{
+	UINT old = m_separateLineInterval;
+	m_separateLineInterval = interval;
+	return old;
+}
+
+#define SEPATATELINE_WIDTH_MAX 5
+
+UINT GPrintUnit::SetSeparateLineWidth( UINT width )
+{
+	if (width > SEPATATELINE_WIDTH_MAX)
+	{
+		width = SEPATATELINE_WIDTH_MAX;
+	}
+	UINT old = m_separateLineWidth;
+	m_separateLineWidth = width;
+	return old;
+}
+
+void GPrintUnit::DrawSeparetLine( BOOL bHeader )
+{
+	// adjust the separeteline interval in case the user has entered an invalid value
+	if (bHeader == TRUE && m_separateLineInterval >= m_pum.pumHeaderLineHeight)
+	{
+		m_separateLineInterval = m_pum.pumHeaderLineHeight;
+	}
+	else if(bHeader == FALSE && m_separateLineInterval >= m_pum.pumFooterLineHeight)
+	{
+		m_separateLineInterval = m_pum.pumFooterLineHeight;
+	}
+
+	CPen pen;
+	pen.CreatePen(PS_SOLID, m_separateLineWidth, RGB(0,0,0));
+	GSELECT_OBJECT(&JDC, &pen);
+
+	int linePosY;
+	if (bHeader == TRUE)
+	{
+		linePosY = JRECT.top - m_separateLineInterval;
+	}
+	else
+	{
+		linePosY = JRECT.bottom + m_separateLineInterval;
+	}
+
+	JDC.MoveTo(JCUR.x, linePosY);
+	JDC.LineTo(JCUR.x + JRECT.Width(), linePosY);
+}
 
 /////////////////////////////
 // print index stuff
@@ -1488,6 +1631,82 @@ void GPrintUnit::PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents
 	m_bPreprocessing = false;
 }
 
+void GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )
+{
+	if (m_pUserFontPrinter)
+	{
+		delete m_pUserFontPrinter;
+	}
+
+	m_pUserFontPrinter = new srtFont(nPointSize, lpszFaceName);
+}
+
+void GPrintUnit::SetBodyScreenFont( int nPointSize, LPCTSTR lpszFaceName )
+{
+	if (m_pUserFontScreen)
+	{
+		delete m_pUserFontScreen;
+	}
+
+	m_pUserFontScreen = new srtFont(nPointSize, lpszFaceName);
+}
+
+void GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
+{
+	if (m_pUserFontHeader)
+	{
+		delete m_pUserFontHeader;
+	}
+
+	m_pUserFontHeader = new srtFont(nPointSize, lpszFaceName);
+}
+
+void GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
+{
+	if (m_pUserFontFooter)
+	{
+		delete m_pUserFontFooter;
+	}
+
+	m_pUserFontFooter = new srtFont(nPointSize, lpszFaceName);
+}
+
+void GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
+{
+	memcpy(&m_pum, &pum, sizeof(PRINTUNITMETRICS));
+}
+
+bool GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
+{
+	bool bOld = m_bNeedHeaderSeparateLine;
+	m_bNeedHeaderSeparateLine = bNeedHeaderLine;
+	return bOld;
+}
+
+bool GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
+{
+	bool bOld = m_bNeedFooterSeperateLine;
+	m_bNeedFooterSeperateLine = bNeedFooterLine;
+	return bOld;
+}
+
+void GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
+{
+	int minSize = MAX_HEADER_COUNT >= size? size : MAX_HEADER_COUNT;
+	for (int i = 0; i < minSize; i++)
+	{
+		memcpy(&m_header[i], &header[i], sizeof(HEADERDEFINITIONS));	
+	}
+}
+
+void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
+{
+	int minSize = MAX_FOOTER_COUNT >= size? size : MAX_FOOTER_COUNT;
+	for (int i = 0; i < minSize; i++)
+	{
+		memcpy(&m_footer[i], &footer[i], sizeof(FOOTERDEFINITIONS));	
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////
 

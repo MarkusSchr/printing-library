@@ -294,7 +294,37 @@ typedef struct tagJobUnitDim
 } JOBUNITDIM, *LPJOBUNITDIM;
 
 
+///////////////////////////////////////////////////
+// heading and footer enum and structure
+#define MAX_HEADER_COUNT 3
+#define MAX_FOOTER_COUNT MAX_HEADER_COUNT
 
+enum HEADERFOOTERTYPE
+{
+	TYPE_EMPTY,
+
+	TYPE_PAGE, // print current page, using "content" as prefix.
+	TYPE_DATE, // the current date, using "content" as prefix.
+	TYPE_TIME, // the current time, using "content" as prefix.
+	TYPE_DATETIME, // the current time, using "content" as prefix.
+
+	TYPE_DATA  // user-defined data, it will use "content"
+};
+
+typedef struct tagHeaderDefinitions
+{
+	HEADERFOOTERTYPE type;	
+	std::wstring content;
+
+	tagHeaderDefinitions()
+	{
+		type = TYPE_EMPTY;
+	}
+}HEADERDEFINITIONS, *LPHEADERDEFINITIONS;
+
+typedef HEADERDEFINITIONS FOOTERDEFINITIONS;
+typedef LPHEADERDEFINITIONS LPFOOTERDEFINITIONS;
+///////////////////////////////////////////////////
 
 
 class GPrintUnit : public CObject
@@ -462,6 +492,63 @@ private:
 
 	bool m_bPreprocessing;
 	bool m_bCheckPosition;
+
+protected:
+	// header contents
+	HEADERDEFINITIONS m_header[MAX_HEADER_COUNT];
+	// footer contents
+	HEADERDEFINITIONS m_footer[MAX_FOOTER_COUNT];
+
+	bool m_bNeedHeaderSeparateLine;
+	bool m_bNeedFooterSeperateLine;
+
+	struct srtFont
+	{
+		int nPointSize;
+		wstring name;
+
+		srtFont(int size, wstring name)
+		{
+			this->nPointSize = size;
+			this->name = name;
+		}
+	};
+	srtFont* m_pUserFontHeader;
+	srtFont* m_pUserFontFooter;
+	srtFont* m_pUserFontPrinter;
+	srtFont* m_pUserFontScreen;
+
+	UINT m_separateLineWidth;
+	UINT m_separateLineInterval;
+
+public:
+	// header and footer related methods
+	// the sequence in the array is important, which means the "left", "center" and "right" in sequence
+	// if not necessary, just leave the corresponding item with "type = EMPTY;"
+	void SetHeader(HEADERDEFINITIONS *header, int size);
+	void SetFooter(FOOTERDEFINITIONS *footer, int size);
+	// return the old value
+	bool NeedHeaderLine(bool bNeedHeaderLine = true);
+	bool NeedFooterLine(bool bNeedFooterLine = true);
+	// set the interval between the header and the table
+	UINT  SetSeparateLineInterval(UINT interval);
+	UINT  SetSeparateLineWidth(UINT width);	
+	// header and footer helpers
+	void GetContentOnType( int type, CString context, CString& strHeader );
+	void DrawSeparetLine(BOOL bHeader);
+
+	// attributes set and get
+	void SetBodyPrinterFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetBodyScreenFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetHeaderFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetFooterFont(int nPointSize, LPCTSTR lpszFaceName);
+
+	// print metrics methods
+	PRINTUNITMETRICS GetMetrics();
+	void SetMetrics(PRINTUNITMETRICS pum);
+
+private:
+	void GetCurrentTimeAndDate( CString& date, CString& time );
 };
 
 
