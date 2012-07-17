@@ -285,7 +285,7 @@ void CPrintDlg::OnOK()
 	// create a font that is 90“宋体”for heading
 	unitTable1.SetHeaderFont(90, L"宋体");
 	unitTable1.SetFooterFont(70, L"黑体");
-	unitTable1.SetBodyPrinterFont(130, L"楷体");
+	unitTable1.SetBodyPrinterFont(500, L"楷体");
 
 	// draw header
 	HEADERDEFINITIONS header[3];
@@ -327,7 +327,7 @@ void CPrintDlg::OnOK()
 	CDC dc; 
 	dc.Attach(hdc);
 
-	job.SetPreviewPrintDC(dc);
+	job.SetPreviewPrintDC(&dc);
 	int pages = job.EvaluatePageNum();
 
 	//job.Preview();
@@ -336,6 +336,6 @@ void CPrintDlg::OnOK()
 	// it will use result of the printer dialog's DC
 	job.Print();
 
-	//DeleteDC(hdc);
+	DeleteDC(hdc);
 }
 
