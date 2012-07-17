@@ -273,7 +273,8 @@ void GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRo
 						PrintColForOverflow(
 							row,
 							whichColumnToPrint,
-							height);
+							height,
+							nRowFormat);
 			
 						if (m_bPreprocessing )
 						{
@@ -404,8 +405,8 @@ void GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRo
 
 void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
-	PreCalculateRowHeight(*pContents, nRowFormat);
 	PreCalculateRowStartPosition(*pContents, nRowFormat);
+	PreCalculateRowHeight(*pContents, nRowFormat);
 
 	DrawTableContents(*pContents, nRowFormat, bPrintHeadingWhenChangePage);
 }
@@ -782,6 +783,28 @@ int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nForma
 			}
 		}
 
+		// set alignment according to the format
+		UINT tempFormat = 0;
+		if (nFormat & DT_CENTER)
+		{
+			tempFormat = PFA_CENTER;
+		}
+		else if (nFormat & DT_LEFT)
+		{
+			tempFormat = PFA_LEFT;
+		}
+		else if (nFormat & DT_RIGHT)
+		{
+			tempFormat = PFA_RIGHT;
+		}
+		PARAFORMAT pf; 
+		// Modify the paragraph format so that the text is centered. 
+		pf.cbSize = sizeof(PARAFORMAT); 
+		pf.dwMask = PFM_ALIGNMENT; 
+		pf.wAlignment = tempFormat; 
+		m_richEdit.SetParaFormat(pf); 
+
+		// set the text
 		m_richEdit.SetWindowText(lpszText);
 		LONG lEditLength = m_richEdit.GetTextLength();
 
@@ -1126,7 +1149,7 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 
 			bPrint = FALSE;
 
-			if(token.bDots || !token.strToken.IsEmpty())
+			if(!token.strToken.IsEmpty())
 			{
 				int nTempFormat = token.nFormat|lpTextLine->nFormat;
 
@@ -1137,59 +1160,6 @@ void GPrintUnit::PrintTextLineEx(LPPRINTTEXTLINE lpTextLine)
 				{
 					JDC.DrawText(token.strToken, &r, nTempFormat);
 				}
-
-				CRect rectNew;
-
-				if(profile.bDots)
-				{
-					if(!bIsText)
-					{
-						rectNew.left = rectNew.right = r.right;
-					}
-					else
-					{
-						CSize sizeText = JDC.GetTextExtent(strTemp);
-						int nLineWidth = r.Width();
-
-						if(nTempFormat & DT_CENTER)
-						{
-							rectNew.left = (nLineWidth - sizeText.cx)/2;
-							rectNew.left = max(0, rectNew.left);
-							rectNew.left += r.left;
-							rectNew.right = rectNew.left + sizeText.cx;
-						}
-						else
-							if(nTempFormat & DT_RIGHT)
-							{
-								rectNew.right = r.right; 
-								rectNew.left = r.right - min(nLineWidth, sizeText.cx);
-							}
-							// default to left
-							else
-							{
-								rectNew.left = r.left;
-								rectNew.right = r.left + min(nLineWidth, sizeText.cx);
-							}
-					}
-
-					rectNew.top = r.top;
-					rectNew.bottom = r.bottom;
-				}
-
-				// print a row of dots between this and the last text
-				if(token.bDots)
-				{
-					if(rectNew.left > rectLast.right)
-					{
-						CRect rectDots(r);
-						rectDots.left = rectLast.right;
-						rectDots.right = rectNew.left;
-
-						DrawSeperateLine(&rectDots);
-					}
-				}
-
-				rectLast = rectNew;
 			}
 		}
 	}
@@ -1483,7 +1453,7 @@ BOOL GPrintUnit::IsPreviousRowOverflow()
 	return bOverFlow;
 }
 
-void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height )
+void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, UINT nFormat )
 {
 	LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
 	if(lpDef && !lpDef->strOverflow.IsEmpty())
@@ -1497,7 +1467,7 @@ void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height )
 		{
 			top = m_preprocessRowStartPosY[row].overflowHeight;
 		}
-		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL, top, height);
+		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL | nFormat, top, height);
 	}
 }
 
@@ -1505,7 +1475,7 @@ void GPrintUnit::PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT 
 {
 	m_bPreprocessing = true;
 	m_bCheckPosition = false;
-	DrawTableContents(contents, nRowFormat, FALSE);
+	DrawTableContents(contents, nRowFormat, TRUE);
 	m_bPreprocessing = false;
 }
 
@@ -1513,7 +1483,8 @@ void GPrintUnit::PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents
 {
 	m_bPreprocessing = true;
 	m_bCheckPosition = true;
-	DrawTableContents(contents, nRowFormat, FALSE);
+	DrawTableContents(contents, nRowFormat, TRUE);
+	m_bCheckPosition = false;
 	m_bPreprocessing = false;
 }
 

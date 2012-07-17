@@ -238,7 +238,7 @@ void CPrintDlg::OnOK()
 		TCHAR buf[200];
 		_itow_s(i, buf, 10);
 		wstring str = buf;
-		str.append(TEXT("th Column"));
+		str.append(TEXT("个列"));
 		cd.strName = str.c_str();
 
 		vecColumnDef.push_back(cd);
@@ -295,6 +295,37 @@ void CPrintDlg::OnOK()
 	CPrintUnitStandardTable unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
 	unitTable1.SetPrintData(&vecParts);
+
+	// currently it only support for DT_LEFT, DT_CENTER or DT_RIGHT
+	unitTable1.SetRowFormat(DT_CENTER);
+
+	// create a font that is 90“宋体”for heading
+	unitTable1.SetHeadingFont(90, L"宋体");
+
+	// draw header
+	HEADERDEFINITIONS header[3];
+	header[0].type = TYPE_DATETIME;
+	header[0].content = L"现在时间 ";
+	header[1].type = TYPE_DATA;
+	header[1].content = L"赛克力电缆";
+	header[2].type = TYPE_PAGE;
+	header[2].content = L"页号 ：";
+	// the SetHeader will deal at most 3 items currently
+	unitTable1.SetHeader(header, 3);
+
+	// draw footer
+	// please ensure you have assign for "3" HEADERDEFINITIONS
+	FOOTERDEFINITIONS footer[3];
+	footer[0].type = TYPE_TIME;
+	footer[1].type = TYPE_DATA;
+	footer[1].content = L"我是三得利";
+	footer[2].type = TYPE_DATE;
+	footer[2].content = L"日期 ：";
+	// the SetFooter will deal at most 3 items currently
+	unitTable1.SetFooter(footer, 3);
+
+	unitTable1.SetSeparateLineInterval(10);
+	unitTable1.SetSeparateLineWidth(3);
 
 	MyPrintJob job;
    job.InsertTask(&unitTable1);

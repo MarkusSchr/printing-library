@@ -68,21 +68,26 @@ public:
 	// heading and footer
 	// the sequence in the array is important, which means the "left", "center" and "right" in sequence
 	// if not necessary, just leave the corresponding item with "type = EMPTY;"
-	void SetHeader(HEADERDEFINITIONS *header);
-	void SetFooter(FOOTERDEFINITIONS *footer);
-
-	void SetPrintData(vector<vector<LPCTSTR>> *data);
-	void SetRowFormat(UINT nFormat);
-
+	void SetHeader(HEADERDEFINITIONS *header, int size);
+	void SetFooter(FOOTERDEFINITIONS *footer, int size);
 	// return the old value
 	bool NeedHeaderLine(bool bNeedHeaderLine = true);
 	bool NeedFooterLine(bool bNeedFooterLine = true);
+	// set the interval between the header and the table
+	UINT  SetSeparateLineInterval(UINT interval);
+	UINT  SetSeparateLineWidth(UINT width);	
+
+
+	BOOL SetPrintData(vector<vector<LPCTSTR>> *data);
+	BOOL SetRowFormat(UINT nFormat);
+
 
 	// font related methods
-	void SetHeadingFont(CFont* font);
-	void SetBodyFont(CFont* printerFont, CFont* screenFont);
-	void SetHeaderFont(CFont* font);
-	void SetFooterFont(CFont* font);
+	void SetHeadingFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetBodyPrinterFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetBodyScreenFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetHeaderFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetFooterFont(int nPointSize, LPCTSTR lpszFaceName);
 
 	// print metrics methods
 	PRINTUNITMETRICS GetMetrics();
@@ -102,27 +107,43 @@ private:
 	void PrepareMetrics();
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
 	void GetContentOnType( int type, CString context, CString& strHeader );
-	void CopyFont(CFont& fontDes, CFont& fontSource);
+	void DrawSeparetLine(BOOL bHeader);
+
+	struct srtFont
+	{
+		int nPointSize;
+		wstring name;
+
+		srtFont(int size, wstring name)
+		{
+			this->nPointSize = size;
+			this->name = name;
+		}
+	};
+
+	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 
 private:
+	srtFont* m_pUserFontHeading;
+	vector<vector<LPCTSTR>> *m_pData;
+	UINT m_nRowFormat;
 	// column information
 	vector<COLUMNDEFINITIONS> m_vecColumnDef;
+
 
 	// header contents
 	HEADERDEFINITIONS m_header[MAX_HEADER_COUNT];
 	// footer contents
 	HEADERDEFINITIONS m_footer[MAX_FOOTER_COUNT];
 
-	vector<vector<LPCTSTR>> *m_pData;
-
-	UINT m_nRowFormat;
-
 	bool m_bNeedHeaderSeparateLine;
 	bool m_bNeedFooterSeperateLine;
 
-	CFont* m_pUserFontHeader;
-	CFont* m_pUserFontFooter;
-	CFont* m_pUserFontPrinter;
-	CFont* m_pUserFontScreen;
-	CFont* m_pUserFontHeading;
+	srtFont* m_pUserFontHeader;
+	srtFont* m_pUserFontFooter;
+	srtFont* m_pUserFontPrinter;
+	srtFont* m_pUserFontScreen;
+	
+	UINT m_separateLineWidth;
+	UINT m_separateLineInterval;
 };
