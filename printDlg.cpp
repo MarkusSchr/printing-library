@@ -188,28 +188,11 @@ public:
    MyPrintJob() 
    {
    }
-   virtual ~MyPrintJob() {;}
-   virtual void OnPrint();
-   
-   void InsertTask( GPrintUnit* task )
+   virtual ~MyPrintJob() 
    {
-	   task->SetJob(this);
-	   vecTasks.push_back(task);
+	   int j = 0;
    }
-
-private:
-   vector<GPrintUnit*> vecTasks;
 };
-
-void MyPrintJob::OnPrint()
-{
-	// draw
-	for (int i = 0; i < vecTasks.size(); i++)
-	{
-		vecTasks[i]->Print();
-	}
-}
-
 
 ///////////////////////////////////////////
 
@@ -302,7 +285,7 @@ void CPrintDlg::OnOK()
 	// create a font that is 90“宋体”for heading
 	unitTable1.SetHeaderFont(90, L"宋体");
 	unitTable1.SetFooterFont(70, L"黑体");
-	unitTable1.SetBodyPrinterFont(50, L"楷体");
+	unitTable1.SetBodyPrinterFont(130, L"楷体");
 
 	// draw header
 	HEADERDEFINITIONS header[3];
@@ -330,8 +313,29 @@ void CPrintDlg::OnOK()
 	unitTable1.SetSeparateLineWidth(3);
 
 	MyPrintJob job;
-   job.InsertTask(&unitTable1);
+	job.InsertTask(&unitTable1);
 
-   job.Print();
+	// preview
+	CPrintDialog pd(FALSE); 
+	if(!pd.GetDefaults()) 
+	{ 
+		MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
+		return; 
+	} 
+	pd.GetDevMode()->dmOrientation=1; 
+	HDC hdc = pd.CreatePrinterDC(); 
+	CDC dc; 
+	dc.Attach(hdc);
+
+	job.SetPreviewPrintDC(dc);
+	int pages = job.EvaluatePageNum();
+
+	//job.Preview();
+
+	// actual printing
+	// it will use result of the printer dialog's DC
+	job.Print();
+
+	//DeleteDC(hdc);
 }
 

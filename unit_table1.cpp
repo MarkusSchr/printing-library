@@ -59,31 +59,31 @@ void Table1Unit::InitPrintMetrics()
    TEXTMETRIC tm;
 
    {
-      GSELECT_OBJECT(&JDC, &m_fontHeader);
-      JDC.GetTextMetrics(&tm);
+	  GSELECT_OBJECT(&JDC, &m_fontHeader);
+	  JDC.GetTextMetrics(&tm);
 
-      m_pum.pumHeaderHeight = tm.tmHeight * 2;
-      m_pum.pumHeaderLineHeight = tm.tmHeight;
+	  m_pum.pumHeaderHeight = tm.tmHeight * 2;
+	  m_pum.pumHeaderLineHeight = tm.tmHeight;
    }
 
    {
-      GSELECT_OBJECT(&JDC, &m_fontFooter);
-      JDC.GetTextMetrics(&tm);
+	  GSELECT_OBJECT(&JDC, &m_fontFooter);
+	  JDC.GetTextMetrics(&tm);
 
-      m_pum.pumFooterHeight = tm.tmHeight * 2;
-      m_pum.pumFooterLineHeight = tm.tmHeight;
+	  m_pum.pumFooterHeight = tm.tmHeight * 2;
+	  m_pum.pumFooterLineHeight = tm.tmHeight;
    }
 
    {
-      GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
-      JDC.GetTextMetrics(&tm);
-      m_pum.pumLineOfText = tm.tmHeight;
+	  GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
+	  JDC.GetTextMetrics(&tm);
+	  m_pum.pumLineOfText = tm.tmHeight;
    }
 
    {
-      GSELECT_OBJECT(&JDC, &(m_fontHeading));
-      JDC.GetTextMetrics(&tm);
-      m_pum.pumHeadingHeight = m_pum.pumLineOfText;
+	  GSELECT_OBJECT(&JDC, &(m_fontHeading));
+	  JDC.GetTextMetrics(&tm);
+	  m_pum.pumHeadingHeight = m_pum.pumLineOfText;
    }
 
 
@@ -104,7 +104,7 @@ BOOL Table1Unit::Print()
    AddIndexItem(&ii);
 
    // sample 1
-    wstring **strArr = NULL;
+	wstring **strArr = NULL;
 	strArr = new wstring* [m_row];
 	for (int i = 0; i < m_row; i++)
 	{
