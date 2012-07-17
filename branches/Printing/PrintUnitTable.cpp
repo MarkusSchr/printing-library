@@ -18,6 +18,9 @@ CPrintUnitStandardTable::CPrintUnitStandardTable( GPrintJob *pJob )
 	m_pUserFontPrinter = NULL;
 	m_pUserFontScreen = NULL;
 	m_pUserFontHeading = NULL;
+
+	m_totalPages = 0;
+	m_bInsertCol = false;
 }
 
 void CPrintUnitStandardTable::PrepareDefaultFonts()
@@ -32,11 +35,20 @@ void CPrintUnitStandardTable::PrepareDefaultFonts()
 	lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
 	logFont.lfWeight = FW_BOLD;
 
+
+	m_fontHeading.DeleteObject();
 	m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
+	
+	m_fontPairBody.fontPrinter.DeleteObject();
 	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
+	
+	m_fontPairBody.fontScreen.DeleteObject();
 	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
 
+	m_fontHeader.DeleteObject();
 	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK
+	
+	m_fontFooter.DeleteObject();
 	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
 }
 
@@ -133,10 +145,12 @@ void CPrintUnitStandardTable::CreatePrintFonts()
 
 void CPrintUnitStandardTable::CompleteAllColHeadingsDefinition()
 {
-	for (int i = 0; i < (int)m_vecColumnDef.size(); i++)
+	for (int i = 0; !m_bInsertCol && i < (int)m_vecColumnDef.size(); i++)
 	{
 		InsertPrintCol(i, m_vecColumnDef[i].strName.c_str(), m_vecColumnDef[i].fPct, m_vecColumnDef[i].nFormat);
 	}
+
+	m_bInsertCol = true;
 
 	// must call base class
 	GPrintUnit::CompleteAllColHeadingsDefinition();
@@ -204,5 +218,17 @@ BOOL CPrintUnitStandardTable::SetRowFormat( UINT nFormat )
 	}
 	m_nRowFormat = nFormat;
 	return TRUE;
+}
+
+int CPrintUnitStandardTable::GetPageNum()
+{
+	// it is the user's responsible to check whether the column can match the data
+	if (m_pData == NULL || m_vecColumnDef.size() == 0)
+	{
+		return -1;
+	}
+
+	Print();
+	return JINFO.m_nCurPage - 1;
 }
 

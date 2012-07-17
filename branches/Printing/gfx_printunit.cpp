@@ -34,6 +34,8 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	m_bPreprocessing = true;
 	m_bCheckPosition = false;
+
+	m_totalPages = 0;
 }
 
 
@@ -75,8 +77,6 @@ GPrintJob *GPrintUnit::GetJob() const
 {
 	return m_pJob;
 }
-
-
 
 BOOL GPrintUnit::Print()
 {
@@ -1695,7 +1695,8 @@ void GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
 	int minSize = MAX_HEADER_COUNT >= size? size : MAX_HEADER_COUNT;
 	for (int i = 0; i < minSize; i++)
 	{
-		memcpy(&m_header[i], &header[i], sizeof(HEADERDEFINITIONS));	
+		m_header[i].type = header[i].type;
+		m_header[i].content = header[i].content;
 	}
 }
 
@@ -1704,8 +1705,14 @@ void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
 	int minSize = MAX_FOOTER_COUNT >= size? size : MAX_FOOTER_COUNT;
 	for (int i = 0; i < minSize; i++)
 	{
-		memcpy(&m_footer[i], &footer[i], sizeof(FOOTERDEFINITIONS));	
+		m_footer[i].type = footer[i].type;
+		m_footer[i].content = footer[i].content;
 	}
+}
+
+int GPrintUnit::GetPageNum()
+{
+	return m_totalPages;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -2089,4 +2096,3 @@ GSelectGdiObject::~GSelectGdiObject()
 			::SelectObject(hAttribDC, m_hOldGdiObject);
 	}
 }
-

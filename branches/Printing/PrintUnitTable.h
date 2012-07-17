@@ -49,10 +49,14 @@ private:
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
 	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 
+	virtual int GetPageNum();
+
 private:
 	srtFont* m_pUserFontHeading;
 	vector<vector<LPCTSTR>> *m_pData;
 	UINT m_nRowFormat;
 	// column information
 	vector<COLUMNDEFINITIONS> m_vecColumnDef;
+
+	int m_bInsertCol;
 };

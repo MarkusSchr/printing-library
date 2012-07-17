@@ -163,6 +163,14 @@ public:
 	// aren't using the defualt print dialog
 	virtual void UseDefaults();
 
+	// get the total pages that will print within this job
+	int EvaluatePageNum();								  
+
+	// return the old CDC
+	void SetPreviewPrintDC(CDC& dc);
+
+	void InsertTask( GPrintUnit* task );
+
 protected:
 	// returns TRUE if this job is using the default print dialog
 	BOOL IsUsingDefaultPrintDialog();
@@ -199,6 +207,9 @@ public:
 	void SetEndPagePending(BOOL bPending=TRUE);
 	BOOL IsEndPagePending() const;
 
+	int m_totalPages;
+
+	vector<GPrintUnit*> vecTasks;
 
 public:
 	virtual ~GPrintJob();
