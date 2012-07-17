@@ -300,7 +300,9 @@ void CPrintDlg::OnOK()
 	unitTable1.SetRowFormat(DT_CENTER);
 
 	// create a font that is 90“宋体”for heading
-	unitTable1.SetHeadingFont(90, L"宋体");
+	unitTable1.SetHeaderFont(90, L"宋体");
+	unitTable1.SetFooterFont(70, L"黑体");
+	unitTable1.SetBodyPrinterFont(50, L"楷体");
 
 	// draw header
 	HEADERDEFINITIONS header[3];
