@@ -353,7 +353,7 @@ protected:
 	void PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = TRUE);
 
 public:
-	void PrintColForOverflow(int row, int nCol, UINT height);	
+	void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	
 	// this method can only output contents that fit "this" page, and the overflows will be output in the EndRow
 	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
 	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
