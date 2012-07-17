@@ -55,12 +55,6 @@ GPrintJob::~GPrintJob()
 		delete m_pDialog;
 		m_pDialog = NULL;
 	}
-
-	if (m_pDC != NULL)
-	{
-		delete m_pDC;
-		m_pDC = NULL;
-	}
 	
 	if (m_pInfo != NULL)
 	{
@@ -510,9 +504,9 @@ int GPrintJob::EvaluatePageNum()
 	return m_totalPages;
 }
 
-void GPrintJob::SetPreviewPrintDC( CDC& dc )
+void GPrintJob::SetPreviewPrintDC( CDC* dc )
 {
-	m_pDC = &dc;
+	m_pDC = dc;
 }
 
 void GPrintJob::InsertTask( GPrintUnit* task )

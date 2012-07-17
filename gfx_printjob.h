@@ -167,7 +167,7 @@ public:
 	int EvaluatePageNum();								  
 
 	// return the old CDC
-	void SetPreviewPrintDC(CDC& dc);
+	void SetPreviewPrintDC(CDC* dc);
 
 	void InsertTask( GPrintUnit* task );
 
