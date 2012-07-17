@@ -381,6 +381,8 @@ protected:
 	
 	// draw table
 	void PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = TRUE);
+	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
+	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
 
 public:
 	void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	
@@ -418,11 +420,10 @@ public:
 	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
 	void AddIndexItem(INDEXITEM *pII);
 
+	virtual int GetPageNum();
 private:
 	void DrawOuterLine();
 
-	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
-	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
 	void DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = FALSE);
 
 protected:
@@ -451,6 +452,8 @@ protected:
 	// header is the content of the top of the page
 	CFont m_fontHeader;
 	CFont m_fontFooter;
+
+	int m_totalPages;
 
 public:
 	// pointer to owner print job

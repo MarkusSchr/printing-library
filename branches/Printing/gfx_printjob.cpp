@@ -56,11 +56,17 @@ GPrintJob::~GPrintJob()
 		m_pDialog = NULL;
 	}
 
-	delete m_pDC;
-	m_pDC = NULL;
-
-	delete m_pInfo;
-	m_pInfo = NULL;
+	if (m_pDC != NULL)
+	{
+		delete m_pDC;
+		m_pDC = NULL;
+	}
+	
+	if (m_pInfo != NULL)
+	{
+		delete m_pInfo;
+		m_pInfo = NULL;
+	}
 }
 
 
@@ -202,12 +208,13 @@ int GPrintJob::DoPrintDialog()
 		}
 	}
 	else
+	{
 		if(m_pDialog)
 		{
 			nRC = m_pDialog->DoModal();
 		}
-
-		return nRC;
+	}
+	return nRC;
 }
 
 
@@ -299,9 +306,16 @@ BOOL GPrintJob::DoPrintToFileDialog(CString& strFileName)
 
 CDC *GPrintJob::CreatePrintDC()
 {
+	static CDC *pDC = NULL;
+	
 	if(m_pPD)
 	{
-		CDC *pDC = new CDC();
+		if (pDC != NULL)
+		{
+			delete pDC;
+			pDC = NULL;
+		}
+		pDC = new CDC();
 		pDC->Attach(m_pPD->hDC);
 		return pDC;
 	}
@@ -419,10 +433,11 @@ BOOL GPrintJob::GetPageSetupMargins(CRect& rectMargins)
 
 void GPrintJob::OnPrint()
 {
-
+	for (int i = 0; i < vecTasks.size(); i++)
+	{
+		vecTasks[i]->Print();
+	}
 }
-
-
 
 void GPrintJob::GetDeviceNames(LPGDEVNAMES pDevNames)
 {
@@ -466,6 +481,44 @@ BOOL GPrintJob::IsEndPagePending() const
 void GPrintJob::SetEndPagePending(BOOL bPending)
 {
 	GSET_BIT(m_dwFlags, PJF_ENDPAGEPENDING, bPending);
+}
+
+
+int GPrintJob::EvaluatePageNum()
+{
+	if (!m_pDC)
+	{
+		return -1;
+	}
+
+	m_totalPages = 0;
+	
+	GPrintInfo* old = m_pInfo;
+	m_pInfo = new GPrintInfo;
+
+	InitPrintDC();
+	InitPrintInfo();
+
+	for (int i = 0; i < vecTasks.size(); i++)
+	{
+		m_totalPages += vecTasks[i]->GetPageNum();
+	}
+	
+	delete m_pInfo;
+	m_pInfo = old;
+
+	return m_totalPages;
+}
+
+void GPrintJob::SetPreviewPrintDC( CDC& dc )
+{
+	m_pDC = &dc;
+}
+
+void GPrintJob::InsertTask( GPrintUnit* task )
+{
+	task->SetJob(this);
+	vecTasks.push_back(task);
 }
 
 
