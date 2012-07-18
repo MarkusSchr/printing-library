@@ -23,10 +23,9 @@ public:
 	CPrintUnitStandardTable(GPrintJob *pJob = NULL);
 	virtual ~CPrintUnitStandardTable();
 	
-public:
+private:
 	// printing
-	virtual BOOL Print();
-	BOOL Print(vector<vector<LPCTSTR>>* pPrintData, UINT nRowFormat);
+	virtual int Paint(int from, int to);
 
 public:
 	// define columns
@@ -41,15 +40,17 @@ public:
 protected:
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
+	virtual void DeleteDefaultFonts();
 	virtual void InitPrintMetrics();
 
 private:
 	void PrepareDefaultFonts();
+
 	void PrepareMetrics();
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
 	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 
-	virtual int GetPageNum();
+	virtual int Preview(int from, int to);
 
 private:
 	srtFont* m_pUserFontHeading;
