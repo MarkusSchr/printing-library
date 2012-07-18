@@ -58,5 +58,9 @@ private:
 	// column information
 	vector<COLUMNDEFINITIONS> m_vecColumnDef;
 
-	int m_bInsertCol;
+	bool m_bNeedResetColumns;
+
+	// the enumarate num of pages of this print task.
+	// the value will be valis if the user has called GPrintJob::EvaluatePageNum()
+	int pages;
 };

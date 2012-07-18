@@ -335,6 +335,7 @@ class GPrintUnit : public CObject
 
 public:
 	GPrintUnit(GPrintJob *pJob=NULL);
+	virtual ~GPrintUnit();
 
 	// call to set the print job that owns this unit
 	void SetJob(GPrintJob *pJob);
@@ -352,6 +353,7 @@ public:
 	// there can be many column set, within which there are many columns
 	virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, UINT nFormat = 0, int nHeading=0);
 	void InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading=0);
+	void ClearColumnSet();
 
 	LPPRINTCOLUMNDEF GetPrintColDef(int nCol, int nHeading=-1);
 	// initializes 'pDim' with current job and unit dimensions
@@ -389,6 +391,7 @@ public:
 	// this method can only output contents that fit "this" page, and the overflows will be output in the EndRow
 	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
 	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
+
 	virtual void PrintColHeadings(vector<int>& headings, UINT nEffects=0);
 	virtual void PrintColHeading(LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects);
 	virtual void DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
@@ -420,10 +423,14 @@ public:
 	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
 	void AddIndexItem(INDEXITEM *pII);
 
+	// for all the deprived print unit task to override
 	virtual int GetPageNum();
+
+	void SetNeedPreprocessSign(bool bNeedPreprocess);
+	bool GetNeedPreprocessSign();
 private:
 	void DrawOuterLine();
-
+	PARAFORMAT ConfirmRichEditParaFormat( UINT nFormat );
 	void DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = FALSE);
 
 protected:
@@ -453,14 +460,9 @@ protected:
 	CFont m_fontHeader;
 	CFont m_fontFooter;
 
-	int m_totalPages;
-
 public:
 	// pointer to owner print job
 	GPrintJob *m_pJob;
-
-public:
-	virtual ~GPrintUnit();
 
 private:
 	// all the followings are for drawing the table
@@ -496,6 +498,9 @@ private:
 	bool m_bPreprocessing;
 	bool m_bCheckPosition;
 
+	// a sign to indicate whether we have done the preprocessing
+	bool m_bNeedPreprocessed;
+
 protected:
 	// header contents
 	HEADERDEFINITIONS m_header[MAX_HEADER_COUNT];
@@ -524,6 +529,7 @@ protected:
 	UINT m_separateLineWidth;
 	UINT m_separateLineInterval;
 
+
 public:
 	// header and footer related methods
 	// the sequence in the array is important, which means the "left", "center" and "right" in sequence
@@ -538,6 +544,7 @@ public:
 	UINT  SetSeparateLineWidth(UINT width);	
 	// header and footer helpers
 	void GetContentOnType( int type, CString context, CString& strHeader );
+	// if bHeader is TRUE, means drawing header's line, or drawing footer's line
 	void DrawSeparetLine(BOOL bHeader);
 
 	// attributes set and get
