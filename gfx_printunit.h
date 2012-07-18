@@ -341,13 +341,16 @@ public:
 	void SetJob(GPrintJob *pJob);
 	GPrintJob *GetJob() const;
 	// call to print the job, returns FALSE if printing should stop
-	virtual BOOL Print();
+	virtual int Paint(int from, int to);
+	virtual BOOL EnvSetBeforePrinting();
+	virtual BOOL EnvCleanupAfterPrinting();
 
 public:
 	// before calling this method, call InsertPrintCol() to insert 
 	// the columns' definitions and calculate the start positions of all the columns
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
+	virtual void DeleteDefaultFonts();
 	virtual void InitPrintMetrics();
 	// the nHeading in the following functions means the number of the column set.
 	// there can be many column set, within which there are many columns
@@ -382,11 +385,12 @@ protected:
 	virtual int SetMapMode(int nMapMode);
 	
 	// draw table
-	void PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = TRUE);
-	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
-	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat);
+	// return how many pages have been drawn
+	int PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = TRUE);
+	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
+	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
 
-public:
+protected:
 	void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	
 	// this method can only output contents that fit "this" page, and the overflows will be output in the EndRow
 	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
@@ -424,14 +428,16 @@ public:
 	void AddIndexItem(INDEXITEM *pII);
 
 	// for all the deprived print unit task to override
-	virtual int GetPageNum();
+	// return the pages this unit task will print
+	virtual int Preview(int from, int to);
 
 	void SetNeedPreprocessSign(bool bNeedPreprocess);
 	bool GetNeedPreprocessSign();
 private:
 	void DrawOuterLine();
 	PARAFORMAT ConfirmRichEditParaFormat( UINT nFormat );
-	void DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage = FALSE);
+	int DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = FALSE);
+	void ClearColumnOverflow();
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
@@ -497,6 +503,7 @@ private:
 
 	bool m_bPreprocessing;
 	bool m_bCheckPosition;
+	bool m_bPrintThePage;
 
 	// a sign to indicate whether we have done the preprocessing
 	bool m_bNeedPreprocessed;
@@ -559,6 +566,8 @@ public:
 
 private:
 	void GetCurrentTimeAndDate( CString& date, CString& time );
+
+	friend class GPrintJob;
 };
 
 

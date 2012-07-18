@@ -107,11 +107,22 @@ public:
 	GPrintJob();
 
 	// call to print this job..returns one of the "PRINTJOB_..." codes
-	int Print();
+	int PrintFollowingPrintDialog();
 	// will initialize a structure with pointers to all device names
 	// these structure values are temporary, and must be stored as 
 	// CStrings if you intend to use them later
 	void GetDeviceNames(LPGDEVNAMES pDevNames);
+	// do the printing job by using the specified CDC 	
+	// return -1 if sth wrong
+	// the function will also get the total pages that will print within this job or some units
+	// if the unitIndex is -1, means to preview all the units
+	// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
+	// e.g. Preview(pDC, -1, 3, 5) means using pDC to print the whole job's page 3 to page 5
+	virtual int Preview(CDC * pPreviewDC, int unitIndex = -1, int from = 1, int to = 65535 );								  
+	// insert print unit task into the job
+	void InsertTask( GPrintUnit* task );
+	// evaluate the total pages of the job or the specified unit
+	int EvaluatePages(CDC* pPreviewDC, int unitIndex);
 
 public:    
 	// return a pointer to the dialog specific to this print job...if you don't override
@@ -153,9 +164,6 @@ public:
 	// called to initialize the 'docInfo' structure
 	virtual void InitDocInfo(DOCINFO& docInfo);
 
-	// called when the derived class can begin priting
-	virtual void OnPrint();
-
 	// index item helpers
 	void AddIndexItem(INDEXITEM *pII);
 
@@ -163,19 +171,13 @@ public:
 	// aren't using the defualt print dialog
 	virtual void UseDefaults();
 
-	// get the total pages that will print within this job
-	// if the unitIndex is -1, means to get all units total pages
-	// return -1 if sth wrong
-	int EvaluateUnitPageNum(CDC * pPreviewDC, int unitIndex = -1);								  
-
-	// return the old CDC
-	void SetPreviewPrintDC(CDC* dc);
-
-	void InsertTask( GPrintUnit* task );
+	
 
 protected:
 	// returns TRUE if this job is using the default print dialog
 	BOOL IsUsingDefaultPrintDialog();
+	// return the old CDC
+	void SetPreviewPrintDC(CDC* dc);
 
 public:
 	// print device context
@@ -214,8 +216,6 @@ private:
 	vector<GPrintUnit*> m_vecPrintUnitTasks;
 	// the vector contains need pages of each print unit 
 	vector<int> m_vecUnitPages;
-	//  the sum of all the units
-	int m_totalPages;
 
 public:
 	virtual ~GPrintJob();

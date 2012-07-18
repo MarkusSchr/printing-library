@@ -66,7 +66,7 @@ GPrintJob::~GPrintJob()
 
 
 
-int GPrintJob::Print()
+int GPrintJob::PrintFollowingPrintDialog()
 {
 	int nPrintCode = PRINTJOB_READY;
 
@@ -115,8 +115,8 @@ int GPrintJob::Print()
 				return PRINTJOB_DIALOGNOINIT;
 			}
 
-			// Aicro: to call the virtual fun to invoke the actual printing
-			OnPrint();
+			// print
+			Preview(m_pDC, -1, m_pPD->nFromPage, m_pPD->nToPage);
 
 			EndDocPrinting();
 			EndPrinting();
@@ -424,15 +424,6 @@ BOOL GPrintJob::GetPageSetupMargins(CRect& rectMargins)
 	return FALSE;
 }
 
-
-void GPrintJob::OnPrint()
-{
-	for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
-	{
-		m_vecPrintUnitTasks[i]->Print();
-	}
-}
-
 void GPrintJob::GetDeviceNames(LPGDEVNAMES pDevNames)
 {
 	if(pDevNames)
@@ -478,12 +469,13 @@ void GPrintJob::SetEndPagePending(BOOL bPending)
 }
 
 
-int GPrintJob::EvaluateUnitPageNum( CDC * pPreviewDC, int unitIndex /*= -1*/ )
+int GPrintJob::Preview(CDC * pPreviewDC, int unitIndex, int from, int to)
 {
 	if (pPreviewDC == NULL 
 		|| pPreviewDC->GetSafeHdc() == NULL 
 		|| unitIndex < -1
 		|| (unitIndex != -1 && unitIndex > m_vecPrintUnitTasks.size() - 1)
+		|| from > to
 		)
 	{
 		return -1;
@@ -491,32 +483,50 @@ int GPrintJob::EvaluateUnitPageNum( CDC * pPreviewDC, int unitIndex /*= -1*/ )
 
 	SetPreviewPrintDC(pPreviewDC);
 
+	// allocate a new one in case the former is different
 	GPrintInfo* old = m_pInfo;
 	m_pInfo = new GPrintInfo;
 
 	InitPrintDC();
 	InitPrintInfo();
 
+	// let all the unit to begin with the first page
+	m_pInfo->m_nCurPage = !old ? 1 : old->m_nCurPage;
+
+	int totalPages = 0;
 	int unitPage = 0;
 	if (unitIndex == -1)
 	{
-		m_totalPages = 0;
-		for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
+		int base = 1;
+		for (int i = 0; from <= to && i < m_vecPrintUnitTasks.size(); i++)
 		{
-			// let all the unit to begin with the first page
-			m_pInfo->m_nCurPage = 1;
-			m_totalPages += (unitPage = m_vecPrintUnitTasks[i]->GetPageNum());
+			int unitMaxPage = EvaluatePages( pPreviewDC, i);
+
+			if (from > unitMaxPage + base - 1)
+			{
+				continue;
+			}
+			else
+			{
+				// this unit needs to be drawn
+				int newfrom = from - base + 1;
+				int newto = to -base + 1;
+				int acturalPrintedPage = m_vecPrintUnitTasks[i]->Preview(newfrom, newto);
+				from += acturalPrintedPage;
+				base += unitMaxPage;
+				totalPages += acturalPrintedPage;
+			}
 		}
 	}
 	else
 	{
-		unitPage = m_vecPrintUnitTasks[unitIndex]->GetPageNum();
+		totalPages = m_vecPrintUnitTasks[unitIndex]->Preview(from, to);
 	}
 	
 	delete m_pInfo;
 	m_pInfo = old;
 
-	return unitIndex == -1 ? m_totalPages : unitPage;
+	return totalPages;
 }
 
 void GPrintJob::SetPreviewPrintDC( CDC* dc )
@@ -531,6 +541,38 @@ void GPrintJob::InsertTask( GPrintUnit* task )
 
 	// add the record of the unit's page
 	m_vecUnitPages.push_back(0);
+}
+
+int GPrintJob::EvaluatePages( CDC* pPreviewDC, int unitIndex )
+{
+	if (unitIndex == -1)
+	{
+		return -1;
+	}
+
+	// need a temperate DC
+	CDC *memDC = new CDC;
+	memDC->CreateCompatibleDC(pPreviewDC);
+
+	int totalNum = 0;
+	if (unitIndex == -1)
+	{
+		for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
+		{
+			m_vecUnitPages[i] = Preview(memDC, i);
+			totalNum += m_vecUnitPages[i];
+		}
+	}
+	else
+	{
+		totalNum = Preview(memDC, unitIndex);
+	}
+
+	delete memDC;
+
+	SetPreviewPrintDC(pPreviewDC);
+
+	return totalNum;
 }
 
 
