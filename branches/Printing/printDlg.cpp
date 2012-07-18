@@ -285,7 +285,7 @@ void CPrintDlg::OnOK()
 	// create a font that is 90“宋体”for heading
 	unitTable1.SetHeaderFont(90, L"宋体");
 	unitTable1.SetFooterFont(70, L"黑体");
-	unitTable1.SetBodyPrinterFont(500, L"楷体");
+	unitTable1.SetBodyPrinterFont(90, L"楷体");
 
 	// draw header
 	HEADERDEFINITIONS header[3];
@@ -325,12 +325,29 @@ void CPrintDlg::OnOK()
 	pd.GetDevMode()->dmOrientation=1; 
 	HDC hdc = pd.CreatePrinterDC(); 
 	CDC dc; 
+	HDC hDC = dc.GetSafeHdc();
 	dc.Attach(hdc);
+	hDC = dc.GetSafeHdc();
 
-	job.SetPreviewPrintDC(&dc);
-	int pages = job.EvaluatePageNum();
+	int pages = job.EvaluateUnitPageNum(&dc);
+	// currently there is only one unit task, so the following assert must be true
+	ASSERT(pages == job.EvaluateUnitPageNum(&dc, 0));
+	
+	COLUMNDEFINITIONS cd;
+	TCHAR buf[200];
+	_itow_s(100, buf, 10);
+	wstring str = buf;
+	str.append(TEXT("个列"));
+	cd.strName = str.c_str();
+	vecColumnDef.erase(vecColumnDef.end() - 1);
+	vecColumnDef.push_back(cd);
+	// need preprocess again
+	unitTable1.SetRowFormat(DT_LEFT);
+	// need check columns again
+	unitTable1.DefineColumns(vecColumnDef);
+	
+	pages = job.EvaluateUnitPageNum(&dc);
 
-	//job.Preview();
 
 	// actual printing
 	// it will use result of the printer dialog's DC

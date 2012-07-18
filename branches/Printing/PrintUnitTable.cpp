@@ -19,8 +19,9 @@ CPrintUnitStandardTable::CPrintUnitStandardTable( GPrintJob *pJob )
 	m_pUserFontScreen = NULL;
 	m_pUserFontHeading = NULL;
 
-	m_totalPages = 0;
-	m_bInsertCol = false;
+	m_bNeedResetColumns = true;
+
+	pages = 0;
 }
 
 void CPrintUnitStandardTable::PrepareDefaultFonts()
@@ -94,20 +95,20 @@ void CPrintUnitStandardTable::PrepareMetrics()
 
 void CPrintUnitStandardTable::SetHeadingFont( int nPointSize, LPCTSTR lpszFaceName )
 {
-	if (m_pUserFontHeading)
-	{
-		delete m_pUserFontHeading;
-	}
-
+	DELETE_IF_NOT_NULL(m_pUserFontHeading);
 	m_pUserFontHeading = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
 }
 
 void CPrintUnitStandardTable::DefineColumns( vector<COLUMNDEFINITIONS>& columns )
 {
 	m_vecColumnDef.clear();
 	m_vecColumnDef.resize(columns.size());
-
 	copy(columns.begin(), columns.end(), m_vecColumnDef.begin());
+
+	m_bNeedResetColumns = true;
+	SetNeedPreprocessSign(true);
 }
 
 void CPrintUnitStandardTable::InitPrintMetrics()
@@ -145,12 +146,17 @@ void CPrintUnitStandardTable::CreatePrintFonts()
 
 void CPrintUnitStandardTable::CompleteAllColHeadingsDefinition()
 {
-	for (int i = 0; !m_bInsertCol && i < (int)m_vecColumnDef.size(); i++)
+	if (m_bNeedResetColumns)
+	{
+		ClearColumnSet();
+	}
+
+	for (int i = 0; m_bNeedResetColumns && i < (int)m_vecColumnDef.size(); i++)
 	{
 		InsertPrintCol(i, m_vecColumnDef[i].strName.c_str(), m_vecColumnDef[i].fPct, m_vecColumnDef[i].nFormat);
 	}
 
-	m_bInsertCol = true;
+	m_bNeedResetColumns = false;
 
 	// must call base class
 	GPrintUnit::CompleteAllColHeadingsDefinition();
@@ -198,6 +204,7 @@ void CPrintUnitStandardTable::CreateUserDefinedFont( CFont& fontDes, srtFont *fo
 
 CPrintUnitStandardTable::~CPrintUnitStandardTable()
 {
+	DELETE_IF_NOT_NULL(m_pUserFontHeading);
 }
 
 BOOL CPrintUnitStandardTable::SetPrintData( vector<vector<LPCTSTR>> *data )
@@ -207,16 +214,22 @@ BOOL CPrintUnitStandardTable::SetPrintData( vector<vector<LPCTSTR>> *data )
 		return FALSE;
 	}
 	m_pData = data;
+
+	SetNeedPreprocessSign(true);
+
 	return TRUE;
 }
 
 BOOL CPrintUnitStandardTable::SetRowFormat( UINT nFormat )
 {
-	if (!(nFormat & DT_CENTER || nFormat & DT_LEFT || nFormat & DT_RIGHT))
+	if (!(nFormat == DT_CENTER || nFormat == DT_LEFT || nFormat == DT_RIGHT))
 	{
 		return FALSE;
 	}
 	m_nRowFormat = nFormat;
+
+	SetNeedPreprocessSign(true);
+
 	return TRUE;
 }
 
@@ -227,8 +240,12 @@ int CPrintUnitStandardTable::GetPageNum()
 	{
 		return -1;
 	}
+	// ensure the current page start from 1
+	JINFO.m_nCurPage = 1;
 
 	Print();
-	return JINFO.m_nCurPage - 1;
+
+	pages = JINFO.m_nCurPage - 1;
+	return pages;
 }
 
