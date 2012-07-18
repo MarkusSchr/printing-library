@@ -7,7 +7,7 @@
 
 #include "gfx_printunit.h"
 
-
+#define DELETE_IF_NOT_NULL(p) if(p != NULL){delete p; p = NULL;}
 
 class GPrintJob;
 class GPrintIndexTree;
@@ -164,7 +164,9 @@ public:
 	virtual void UseDefaults();
 
 	// get the total pages that will print within this job
-	int EvaluatePageNum();								  
+	// if the unitIndex is -1, means to get all units total pages
+	// return -1 if sth wrong
+	int EvaluateUnitPageNum(CDC * pPreviewDC, int unitIndex = -1);								  
 
 	// return the old CDC
 	void SetPreviewPrintDC(CDC* dc);
@@ -207,9 +209,13 @@ public:
 	void SetEndPagePending(BOOL bPending=TRUE);
 	BOOL IsEndPagePending() const;
 
+private:
+	// remain a list of all the print unit task
+	vector<GPrintUnit*> m_vecPrintUnitTasks;
+	// the vector contains need pages of each print unit 
+	vector<int> m_vecUnitPages;
+	//  the sum of all the units
 	int m_totalPages;
-
-	vector<GPrintUnit*> vecTasks;
 
 public:
 	virtual ~GPrintJob();

@@ -35,29 +35,18 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_bPreprocessing = true;
 	m_bCheckPosition = false;
 
-	m_totalPages = 0;
+	SetNeedPreprocessSign(true);
 }
 
 
 GPrintUnit::~GPrintUnit()
 {
-	int nHeadings = m_headings.GetSize();
+	ClearColumnSet();
 
-	for(int nHeading = 0; nHeading < nHeadings; nHeading++)
-	{
-		LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(nHeading);
-		if(lpColDefs)
-		{
-			int nSize = lpColDefs->GetSize();
-			for(int i = 0; i < nSize; i++)
-			{
-				LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
-				delete lpDef;
-			}
-
-			delete lpColDefs;
-		}
-	}
+	DELETE_IF_NOT_NULL(m_pUserFontHeader);
+	DELETE_IF_NOT_NULL(m_pUserFontFooter);
+	DELETE_IF_NOT_NULL(m_pUserFontPrinter);
+	DELETE_IF_NOT_NULL(m_pUserFontScreen);
 }
 
 
@@ -405,9 +394,16 @@ void GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRo
 
 void GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
-	PreCalculateRowStartPosition(*pContents, nRowFormat);
-	PreCalculateRowHeight(*pContents, nRowFormat);
-
+	// if we have precalculate before, just skip
+	if (GetNeedPreprocessSign() == true)
+	{
+		// all the preprocess stage will not increase the pages
+		PreCalculateRowStartPosition(*pContents, nRowFormat);
+		PreCalculateRowHeight(*pContents, nRowFormat);
+		SetNeedPreprocessSign(false);
+	}
+	
+	// here it will actually print, and increase the pages
 	DrawTableContents(*pContents, nRowFormat, bPrintHeadingWhenChangePage);
 }
 
@@ -435,6 +431,8 @@ void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
 	ASSERT(pCol);
 	if(!pCol)
 		return;
+
+	SetNeedPreprocessSign(true);
 
 	// this is an array containing all the columns definitions
 	LPPRINTUNITCOLDEFS lpColSet = NULL;
@@ -784,25 +782,7 @@ int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nForma
 		}
 
 		// set alignment according to the format
-		UINT tempFormat = 0;
-		if (nFormat & DT_CENTER)
-		{
-			tempFormat = PFA_CENTER;
-		}
-		else if (nFormat & DT_LEFT)
-		{
-			tempFormat = PFA_LEFT;
-		}
-		else if (nFormat & DT_RIGHT)
-		{
-			tempFormat = PFA_RIGHT;
-		}
-		PARAFORMAT pf; 
-		// Modify the paragraph format so that the text is centered. 
-		pf.cbSize = sizeof(PARAFORMAT); 
-		pf.dwMask = PFM_ALIGNMENT; 
-		pf.wAlignment = tempFormat; 
-		m_richEdit.SetParaFormat(pf); 
+		m_richEdit.SetParaFormat(ConfirmRichEditParaFormat(nFormat)); 
 
 		// set the text
 		m_richEdit.SetWindowText(lpszText);
@@ -829,6 +809,7 @@ int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nForma
 
 		JDC.SetMapMode(nOldMode);
 
+		m_richEdit.SetParaFormat(ConfirmRichEditParaFormat(nFormat));
 		range.chrg.cpMin = m_richEdit.FormatRange(&range, !m_bPreprocessing);
 
 		if((range.chrg.cpMin) < lEditLength)
@@ -1633,53 +1614,52 @@ void GPrintUnit::PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents
 
 void GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )
 {
-	if (m_pUserFontPrinter)
-	{
-		delete m_pUserFontPrinter;
-	}
+	DELETE_IF_NOT_NULL(m_pUserFontPrinter);
 
 	m_pUserFontPrinter = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
 }
 
 void GPrintUnit::SetBodyScreenFont( int nPointSize, LPCTSTR lpszFaceName )
 {
-	if (m_pUserFontScreen)
-	{
-		delete m_pUserFontScreen;
-	}
+	DELETE_IF_NOT_NULL(m_pUserFontScreen);
 
 	m_pUserFontScreen = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
 }
 
 void GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
 {
-	if (m_pUserFontHeader)
-	{
-		delete m_pUserFontHeader;
-	}
+	DELETE_IF_NOT_NULL(m_pUserFontHeader);
 
 	m_pUserFontHeader = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
 }
 
 void GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 {
-	if (m_pUserFontFooter)
-	{
-		delete m_pUserFontFooter;
-	}
+	DELETE_IF_NOT_NULL(m_pUserFontFooter);
 
 	m_pUserFontFooter = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
 }
 
 void GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
 {
 	memcpy(&m_pum, &pum, sizeof(PRINTUNITMETRICS));
+
+	SetNeedPreprocessSign(true);
 }
 
 bool GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
 {
 	bool bOld = m_bNeedHeaderSeparateLine;
 	m_bNeedHeaderSeparateLine = bNeedHeaderLine;
+	SetNeedPreprocessSign(true);
 	return bOld;
 }
 
@@ -1687,6 +1667,7 @@ bool GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
 {
 	bool bOld = m_bNeedFooterSeperateLine;
 	m_bNeedFooterSeperateLine = bNeedFooterLine;
+	SetNeedPreprocessSign(true);
 	return bOld;
 }
 
@@ -1698,6 +1679,8 @@ void GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
 		m_header[i].type = header[i].type;
 		m_header[i].content = header[i].content;
 	}
+
+	SetNeedPreprocessSign(true);
 }
 
 void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
@@ -1708,11 +1691,73 @@ void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
 		m_footer[i].type = footer[i].type;
 		m_footer[i].content = footer[i].content;
 	}
+
+	SetNeedPreprocessSign(true);
 }
 
 int GPrintUnit::GetPageNum()
 {
-	return m_totalPages;
+	return 0;
+}
+
+void GPrintUnit::SetNeedPreprocessSign( bool bNeedPreprocess )
+{
+	m_bNeedPreprocessed = bNeedPreprocess;
+}
+
+bool GPrintUnit::GetNeedPreprocessSign()
+{
+	return m_bNeedPreprocessed;
+}
+
+void GPrintUnit::ClearColumnSet()
+{
+	int nHeadings = m_headings.GetSize();
+
+	for(int nHeading = 0; nHeading < nHeadings; nHeading++)
+	{
+		LPPRINTUNITCOLDEFS lpColDefs = m_headings.GetAt(nHeading);
+		if(lpColDefs)
+		{
+			int nSize = lpColDefs->GetSize();
+			for(int i = 0; i < nSize; i++)
+			{
+				LPPRINTCOLUMNDEF lpDef = lpColDefs->GetAt(i);
+				DELETE_IF_NOT_NULL(lpDef);
+			}
+
+			DELETE_IF_NOT_NULL(lpColDefs);
+		}
+	}
+	m_headings.RemoveAll();
+}
+
+PARAFORMAT GPrintUnit::ConfirmRichEditParaFormat( UINT nFormat )
+{
+	UINT tempFormat = 0;
+
+	switch(nFormat)
+	{
+	case DT_CENTER:
+		tempFormat = PFA_CENTER;
+		break;
+	case DT_LEFT:
+		tempFormat = PFA_LEFT;
+		break;
+	case DT_RIGHT:
+		tempFormat = PFA_RIGHT;
+		break;
+	default:
+		tempFormat = PFA_CENTER;
+	}
+
+	PARAFORMAT pf; 
+	// Modify the paragraph format so that the text is centered. 
+	pf.cbSize = sizeof(PARAFORMAT); 
+	pf.dwMask = PFM_ALIGNMENT; 
+	pf.wAlignment = tempFormat;
+
+	return pf;
 }
 
 ///////////////////////////////////////////////////////////////////////

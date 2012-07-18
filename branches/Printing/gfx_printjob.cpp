@@ -427,9 +427,9 @@ BOOL GPrintJob::GetPageSetupMargins(CRect& rectMargins)
 
 void GPrintJob::OnPrint()
 {
-	for (int i = 0; i < vecTasks.size(); i++)
+	for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
 	{
-		vecTasks[i]->Print();
+		m_vecPrintUnitTasks[i]->Print();
 	}
 }
 
@@ -478,30 +478,45 @@ void GPrintJob::SetEndPagePending(BOOL bPending)
 }
 
 
-int GPrintJob::EvaluatePageNum()
+int GPrintJob::EvaluateUnitPageNum( CDC * pPreviewDC, int unitIndex /*= -1*/ )
 {
-	if (!m_pDC)
+	if (pPreviewDC == NULL 
+		|| pPreviewDC->GetSafeHdc() == NULL 
+		|| unitIndex < -1
+		|| (unitIndex != -1 && unitIndex > m_vecPrintUnitTasks.size() - 1)
+		)
 	{
 		return -1;
 	}
 
-	m_totalPages = 0;
-	
+	SetPreviewPrintDC(pPreviewDC);
+
 	GPrintInfo* old = m_pInfo;
 	m_pInfo = new GPrintInfo;
 
 	InitPrintDC();
 	InitPrintInfo();
 
-	for (int i = 0; i < vecTasks.size(); i++)
+	int unitPage = 0;
+	if (unitIndex == -1)
 	{
-		m_totalPages += vecTasks[i]->GetPageNum();
+		m_totalPages = 0;
+		for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
+		{
+			// let all the unit to begin with the first page
+			m_pInfo->m_nCurPage = 1;
+			m_totalPages += (unitPage = m_vecPrintUnitTasks[i]->GetPageNum());
+		}
+	}
+	else
+	{
+		unitPage = m_vecPrintUnitTasks[unitIndex]->GetPageNum();
 	}
 	
 	delete m_pInfo;
 	m_pInfo = old;
 
-	return m_totalPages;
+	return unitIndex == -1 ? m_totalPages : unitPage;
 }
 
 void GPrintJob::SetPreviewPrintDC( CDC* dc )
@@ -512,7 +527,10 @@ void GPrintJob::SetPreviewPrintDC( CDC* dc )
 void GPrintJob::InsertTask( GPrintUnit* task )
 {
 	task->SetJob(this);
-	vecTasks.push_back(task);
+	m_vecPrintUnitTasks.push_back(task);
+
+	// add the record of the unit's page
+	m_vecUnitPages.push_back(0);
 }
 
 
