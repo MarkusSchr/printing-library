@@ -4,9 +4,6 @@
 #include "stdafx.h"
 #include "print.h"
 #include "printDlg.h"
-#include "unit_table1.h"
-#include "unit_headerpage.h"
-#include "unit_indexpage.h"
 #include "gfx_printjob.h"
 #include <sstream>
 #include "PrintUnitTable.h"
@@ -280,7 +277,7 @@ void CPrintDlg::OnOK()
 	unitTable1.SetPrintData(&vecParts);
 
 	// currently it only support for DT_LEFT, DT_CENTER or DT_RIGHT
-	unitTable1.SetRowFormat(DT_CENTER);
+	unitTable1.SetRowFormat(DT_RIGHT);
 
 	// create a font that is 90¡°ËÎÌå¡±for heading
 	unitTable1.SetHeaderFont(90, L"ËÎÌå");
@@ -315,6 +312,13 @@ void CPrintDlg::OnOK()
 	MyPrintJob job;
 	job.InsertTask(&unitTable1);
 
+	CPrintUnitStandardTable unitTable2;
+	unitTable2.DefineColumns(vecColumnDef);
+	unitTable2.SetPrintData(&vecParts);
+	unitTable2.SetHeader(footer, 3);
+	job.InsertTask(&unitTable2);
+
+
 	// preview
 	CPrintDialog pd(FALSE); 
 	if(!pd.GetDefaults()) 
@@ -329,9 +333,9 @@ void CPrintDlg::OnOK()
 	dc.Attach(hdc);
 	hDC = dc.GetSafeHdc();
 
-	int pages = job.EvaluateUnitPageNum(&dc);
-	// currently there is only one unit task, so the following assert must be true
-	ASSERT(pages == job.EvaluateUnitPageNum(&dc, 0));
+	// use the preview function to get the total pages that will be printed
+	int pages = job.Preview(&dc);
+	ASSERT(pages = job.Preview(&dc) );
 	
 	COLUMNDEFINITIONS cd;
 	TCHAR buf[200];
@@ -345,13 +349,12 @@ void CPrintDlg::OnOK()
 	unitTable1.SetRowFormat(DT_LEFT);
 	// need check columns again
 	unitTable1.DefineColumns(vecColumnDef);
-	
-	pages = job.EvaluateUnitPageNum(&dc);
-
+	// only preview the first unit's page 1 to 2
+	int totalPages = job.Preview(&dc, 0, 1, 2);
 
 	// actual printing
 	// it will use result of the printer dialog's DC
-	job.Print();
+	job.PrintFollowingPrintDialog();
 
 	DeleteDC(hdc);
 }

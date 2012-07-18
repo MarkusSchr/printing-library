@@ -36,20 +36,10 @@ void CPrintUnitStandardTable::PrepareDefaultFonts()
 	lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
 	logFont.lfWeight = FW_BOLD;
 
-
-	m_fontHeading.DeleteObject();
 	m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
-	
-	m_fontPairBody.fontPrinter.DeleteObject();
 	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
-	
-	m_fontPairBody.fontScreen.DeleteObject();
 	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
-
-	m_fontHeader.DeleteObject();
-	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK
-	
-	m_fontFooter.DeleteObject();
+	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
 	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
 }
 
@@ -162,38 +152,20 @@ void CPrintUnitStandardTable::CompleteAllColHeadingsDefinition()
 	GPrintUnit::CompleteAllColHeadingsDefinition();
 }
 
-BOOL CPrintUnitStandardTable::Print( vector<vector<LPCTSTR>>* pPrintData, UINT nRowFormat )
-{
-	if (m_vecColumnDef.size() == 0 || pPrintData == NULL)
-	{
-		// not define columns yet
-		return FALSE;
-	}
-
-	// it is the user's responsibility to ensure the data in each row 
-	// equals to the number of the column
-	if (!(SetPrintData(pPrintData) && SetRowFormat(nRowFormat)))
-	{
-		return FALSE;
-	}
-
-	Print();
-
-	return TRUE;
-}
-
-BOOL CPrintUnitStandardTable::Print()
+int CPrintUnitStandardTable::Paint( int from, int to )
 {
 	if (m_pData == NULL || m_vecColumnDef.size() == 0)
 	{
 		return FALSE;
 	}
 
-	GPrintUnit::Print();
+	EnvSetBeforePrinting();
 
-	PrintTableContents(m_pData, m_nRowFormat);
+	int printedPages = PrintTableContents(m_pData, m_nRowFormat, from, to);
 
-	return TRUE;
+	EnvCleanupAfterPrinting();
+
+	return printedPages;
 }
 
 void CPrintUnitStandardTable::CreateUserDefinedFont( CFont& fontDes, srtFont *fontSource )
@@ -233,19 +205,23 @@ BOOL CPrintUnitStandardTable::SetRowFormat( UINT nFormat )
 	return TRUE;
 }
 
-int CPrintUnitStandardTable::GetPageNum()
+int CPrintUnitStandardTable::Preview( int from, int to )
 {
 	// it is the user's responsible to check whether the column can match the data
-	if (m_pData == NULL || m_vecColumnDef.size() == 0)
+	if (m_pData == NULL || m_vecColumnDef.size() == 0 || from > to)
 	{
 		return -1;
 	}
-	// ensure the current page start from 1
-	JINFO.m_nCurPage = 1;
 
-	Print();
+	return Paint(from, to);
+}
 
-	pages = JINFO.m_nCurPage - 1;
-	return pages;
+void CPrintUnitStandardTable::DeleteDefaultFonts()
+{
+	m_fontHeading.DeleteObject();
+	m_fontPairBody.fontPrinter.DeleteObject();
+	m_fontPairBody.fontScreen.DeleteObject();
+	m_fontHeader.DeleteObject();
+	m_fontFooter.DeleteObject();
 }
 
