@@ -13,10 +13,6 @@ CPrintUnitStandardTable::CPrintUnitStandardTable( GPrintJob *pJob )
 	m_pData = NULL;
 	m_nRowFormat = DT_CENTER;
 
-	m_pUserFontHeader = NULL;
-	m_pUserFontFooter = NULL;
-	m_pUserFontPrinter = NULL;
-	m_pUserFontScreen = NULL;
 	m_pUserFontHeading = NULL;
 
 	m_bNeedResetColumns = true;
@@ -207,7 +203,7 @@ BOOL CPrintUnitStandardTable::SetRowFormat( UINT nFormat )
 	return TRUE;
 }
 
-int CPrintUnitStandardTable::Preview( int from, int to )
+int CPrintUnitStandardTable::PreviewUnit( int from, int to )
 {
 	// it is the user's responsible to check whether the column can match the data
 	if (m_pData == NULL || m_vecColumnDef.size() == 0 || from > to)
@@ -215,6 +211,7 @@ int CPrintUnitStandardTable::Preview( int from, int to )
 		return -1;
 	}
 
+	// it is necessary to call this function if we want to use the column-cross-page table
 	SetNeedPreprocessSign(!CheckCurrentDCCompatibleWithPrevious());
 
 	return Paint(from, to);

@@ -24,7 +24,9 @@ public:
 	virtual ~CPrintUnitStandardTable();
 	
 private:
+	// the following two methods must be overrided
 	// printing
+	virtual int PreviewUnit(int from, int to);
 	virtual int Paint(int from, int to);
 
 public:
@@ -49,8 +51,6 @@ private:
 	void PrepareMetrics();
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
 	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
-
-	virtual int Preview(int from, int to);
 
 	BOOL CheckCurrentDCCompatibleWithPrevious();
 

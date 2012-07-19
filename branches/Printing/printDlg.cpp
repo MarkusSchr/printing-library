@@ -7,7 +7,7 @@
 #include "gfx_printjob.h"
 #include <sstream>
 #include "PrintUnitTable.h"
-
+#include "PrintUnitFromDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -270,7 +270,9 @@ void CPrintDlg::OnOK()
 		vecParts.push_back(vecTemp);
 	}
 
-
+	/////////////////////////////////////////////////////////////////////////////////
+	MyPrintJob job;
+	
 	CPrintUnitStandardTable unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
 	unitTable1.SetPrintData(&vecParts);
@@ -308,7 +310,6 @@ void CPrintDlg::OnOK()
 	unitTable1.SetSeparateLineInterval(10);
 	unitTable1.SetSeparateLineWidth(3);
 
-	MyPrintJob job;
 	job.InsertTask(&unitTable1);
 
 	CPrintUnitStandardTable unitTable2;
@@ -317,7 +318,7 @@ void CPrintDlg::OnOK()
 	unitTable2.SetHeader(footer, 3);
 	job.InsertTask(&unitTable2);
 
-
+	//////////// test 1 : preview ////////////////////////////
 	// preview
 	CPrintDialog pd(FALSE); 
 	if(!pd.GetDefaults()) 
@@ -333,9 +334,11 @@ void CPrintDlg::OnOK()
 	hDC = dc.GetSafeHdc();
 
 	// use the preview function to get the total pages that will be printed
-	int pages = job.Preview(&dc);
-	ASSERT(pages = job.Preview(&dc) );
-	
+	int totalPages = job.PreviewAll(&dc);
+	int unit0Pages = job.PreviewOneUnit(&dc, 0);
+	int unit1Pages = job.PreviewOneUnit(&dc, 1);
+	ASSERT(unit0Pages + unit1Pages == totalPages);
+
 	COLUMNDEFINITIONS cd;
 	TCHAR buf[200];
 	_itow_s(100, buf, 10);
@@ -349,12 +352,20 @@ void CPrintDlg::OnOK()
 	// need check columns again
 	unitTable1.DefineColumns(vecColumnDef);
 	// only preview the first unit's page 1 to 2
-	int totalPages = job.Preview(&dc, 0, 1, 2);
+	totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
 
+
+	//////////// test 3 : self-define page ////////////////////////////
+	// first to print in a compatible DC, then to copy it to the printer DC
+	CPrintUnitFromDC unitTable3;
+	job.InsertTask(&unitTable3);
+
+	//////////// test 4 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.PrintFollowingPrintDialog();
 
-	DeleteDC(hdc);
+
+	//DeleteDC(hdc);
 }
 

@@ -36,6 +36,11 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_bCheckPosition = false;
 	m_bPrintThePage = false;
 
+	m_pUserFontHeader = NULL;
+	m_pUserFontFooter = NULL;
+	m_pUserFontPrinter = NULL;
+	m_pUserFontScreen = NULL;
+
 	SetNeedPreprocessSign(true);
 }
 
@@ -1713,8 +1718,9 @@ void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
 	SetNeedPreprocessSign(true);
 }
 
-int GPrintUnit::Preview(int from, int to)
+int GPrintUnit::PreviewUnit(int from, int to)
 {
+	ASSERT(0, "You must override PreviewUnit method");
 	// this method must be override by deprived classes
 	return 0;
 }
@@ -1801,7 +1807,16 @@ void GPrintUnit::DeleteDefaultFonts()
 
 int GPrintUnit::Paint( int from, int to )
 {
+	ASSERT(0, "This method must be override by the derived class");
 	return 0;
+}
+
+void GPrintUnit::OnBeginPrinting()
+{
+}
+
+void GPrintUnit::OnEndPrinting()
+{
 }
 
 ///////////////////////////////////////////////////////////////////////
