@@ -22,6 +22,8 @@ CPrintUnitStandardTable::CPrintUnitStandardTable( GPrintJob *pJob )
 	m_bNeedResetColumns = true;
 
 	pages = 0;
+
+	m_pPreviousDC = NULL;
 }
 
 void CPrintUnitStandardTable::PrepareDefaultFonts()
@@ -213,6 +215,8 @@ int CPrintUnitStandardTable::Preview( int from, int to )
 		return -1;
 	}
 
+	SetNeedPreprocessSign(!CheckCurrentDCCompatibleWithPrevious());
+
 	return Paint(from, to);
 }
 
@@ -223,5 +227,23 @@ void CPrintUnitStandardTable::DeleteDefaultFonts()
 	m_fontPairBody.fontScreen.DeleteObject();
 	m_fontHeader.DeleteObject();
 	m_fontFooter.DeleteObject();
+}
+
+BOOL CPrintUnitStandardTable::CheckCurrentDCCompatibleWithPrevious()
+{
+	if (m_pPreviousDC == NULL)
+	{
+		m_pPreviousDC = &JDC;	
+		return false;
+	}
+	else
+	{
+		// check if compatible
+		// TODO : replace the following code to check whether the m_pDC is compatible with 
+		// the input dc. Aicro does not find that function. return the right value
+
+		// return compatible? true:false;
+		return false;
+	}
 }
 

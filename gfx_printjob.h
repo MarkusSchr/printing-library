@@ -177,7 +177,7 @@ protected:
 	// returns TRUE if this job is using the default print dialog
 	BOOL IsUsingDefaultPrintDialog();
 	// return the old CDC
-	void SetPreviewPrintDC(CDC* dc);
+	void SetPreviewPrintDC(CDC* dc, BOOL needPreprocessing = FALSE);
 
 public:
 	// print device context
