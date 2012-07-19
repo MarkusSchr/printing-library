@@ -529,7 +529,7 @@ int GPrintJob::Preview(CDC * pPreviewDC, int unitIndex, int from, int to)
 	return totalPages;
 }
 
-void GPrintJob::SetPreviewPrintDC( CDC* dc )
+void GPrintJob::SetPreviewPrintDC( CDC* dc, BOOL needPreprocessing /*= FALSE*/ )
 {
 	m_pDC = dc;
 }
@@ -570,7 +570,7 @@ int GPrintJob::EvaluatePages( CDC* pPreviewDC, int unitIndex )
 
 	delete memDC;
 
-	SetPreviewPrintDC(pPreviewDC);
+	SetPreviewPrintDC(pPreviewDC, FALSE);
 
 	return totalNum;
 }

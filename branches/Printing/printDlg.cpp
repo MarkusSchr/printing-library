@@ -187,7 +187,6 @@ public:
    }
    virtual ~MyPrintJob() 
    {
-	   int j = 0;
    }
 };
 

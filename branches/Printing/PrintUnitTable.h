@@ -52,6 +52,8 @@ private:
 
 	virtual int Preview(int from, int to);
 
+	BOOL CheckCurrentDCCompatibleWithPrevious();
+
 private:
 	srtFont* m_pUserFontHeading;
 	vector<vector<LPCTSTR>> *m_pData;
@@ -64,4 +66,6 @@ private:
 	// the enumarate num of pages of this print task.
 	// the value will be valis if the user has called GPrintJob::EvaluatePageNum()
 	int pages;
+
+	CDC * m_pPreviousDC;
 };
