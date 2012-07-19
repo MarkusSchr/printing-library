@@ -117,12 +117,13 @@ public:
 	// the function will also get the total pages that will print within this job or some units
 	// if the unitIndex is -1, means to preview all the units
 	// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
-	// e.g. Preview(pDC, -1, 3, 5) means using pDC to print the whole job's page 3 to page 5
-	virtual int Preview(CDC * pPreviewDC, int unitIndex = -1, int from = 1, int to = 65535 );								  
+	virtual int PreviewOneUnit(CDC * pPreviewDC, int unitIndex = 0, int from = 1, int to = 65535 );
+	virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535 );
 	// insert print unit task into the job
 	void InsertTask( GPrintUnit* task );
 	// evaluate the total pages of the job or the specified unit
-	int EvaluatePages(CDC* pPreviewDC, int unitIndex);
+	int EvaluateAllUnitPages(CDC* pPreviewDC, int from = 1, int to = 65535);
+	int EvaluateOneUnitPages(CDC* pPreviewDC, int unitIndex, int from = 1, int to = 65535);
 
 public:    
 	// return a pointer to the dialog specific to this print job...if you don't override
@@ -143,10 +144,10 @@ public:
 	// returns a pointer to the device context to use for printing
 	virtual CDC *CreatePrintDC();
 	// called when the print job is ready to begin
-	virtual void BeginPrinting();
+	virtual void OnBeginPrinting();
 	// called when the print job has ended.  'bError' is TRUE if the print ended
 	// in error
-	virtual void EndPrinting(BOOL bError=FALSE);
+	virtual void OnEndPrinting(BOOL bError=FALSE);
 
 	// called to ready the printer for the document...'docInfo' contains document
 	// information...returns TRUE if we started printing
