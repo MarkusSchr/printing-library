@@ -340,12 +340,15 @@ public:
 	// call to set the print job that owns this unit
 	void SetJob(GPrintJob *pJob);
 	GPrintJob *GetJob() const;
-	// call to print the job, returns FALSE if printing should stop
-	virtual int Paint(int from, int to);
 	virtual BOOL EnvSetBeforePrinting();
 	virtual BOOL EnvCleanupAfterPrinting();
 
 public:
+	// called when the unit's print job is ready to begin
+	virtual void OnBeginPrinting();
+	// called when the unit's print job has ended.
+	virtual void OnEndPrinting();
+
 	// before calling this method, call InsertPrintCol() to insert 
 	// the columns' definitions and calculate the start positions of all the columns
 	virtual void CompleteAllColHeadingsDefinition();
@@ -429,7 +432,7 @@ protected:
 
 	// for all the deprived print unit task to override
 	// return the pages this unit task will print
-	virtual int Preview(int from, int to);
+	virtual int PreviewUnit(int from, int to);
 
 	void SetNeedPreprocessSign(bool bNeedPreprocess);
 	bool GetNeedPreprocessSign();
@@ -438,6 +441,10 @@ private:
 	PARAFORMAT ConfirmRichEditParaFormat( UINT nFormat );
 	int DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = FALSE);
 	void ClearColumnOverflow();
+	// call to print the job, returns FALSE if printing should stop
+	// 'from' is the page index based on the current unit, beginning with 1
+	// 'to' may exceed the whole range
+	virtual int Paint(int from, int to);
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
