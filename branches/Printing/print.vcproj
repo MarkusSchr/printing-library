@@ -215,6 +215,14 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\BitmapTableUnit.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DataTableUnit.cpp"
+				>
+			</File>
+			<File
 				RelativePath="gfx_printjob.cpp"
 				>
 				<FileConfiguration
@@ -315,7 +323,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\PrintUnitTable.cpp"
+				RelativePath=".\PrintUnitFromDC.cpp"
 				>
 			</File>
 			<File
@@ -340,11 +348,39 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="HSE"
+				>
+				<File
+					RelativePath=".\HSECPrintPageConfig.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HSECPrintPageConfig.h"
+					>
+				</File>
+				<File
+					RelativePath=".\HSEPrinter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\HSEPrinter.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\BitmapTableUnit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DataTableUnit.h"
+				>
+			</File>
 			<File
 				RelativePath="gfx_printjob.h"
 				>
@@ -354,11 +390,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MemDC.h"
+				>
+			</File>
+			<File
 				RelativePath="print.h"
 				>
 			</File>
 			<File
 				RelativePath="printDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintUnitFromDC.h"
 				>
 			</File>
 			<File

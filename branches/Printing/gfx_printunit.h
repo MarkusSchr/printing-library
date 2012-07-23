@@ -333,6 +333,34 @@ class GPrintUnit : public CObject
 
 	DECLARE_DYNAMIC(GPrintUnit)
 
+
+public:
+	// header and footer related methods
+	// the sequence in the array is important, which means the "left", "center" and "right" in sequence
+	// if not necessary, just leave the corresponding item with "type = EMPTY;"
+	void SetHeader(HEADERDEFINITIONS *header, int size);
+	void SetFooter(FOOTERDEFINITIONS *footer, int size);
+	// return the old value
+	bool NeedHeaderLine(bool bNeedHeaderLine = true);
+	bool NeedFooterLine(bool bNeedFooterLine = true);
+	// set the interval between the header and the table
+	UINT  SetSeparateLineInterval(UINT interval);
+	UINT  SetSeparateLineWidth(UINT width);	
+	// header and footer helpers
+	void GetContentOnType( int type, CString context, CString& strHeader );
+	// if bHeader is TRUE, means drawing header's line, or drawing footer's line
+	void DrawSeparetLine(BOOL bHeader);
+
+	// attributes set and get
+	void SetBodyPrinterFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetBodyScreenFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetHeaderFont(int nPointSize, LPCTSTR lpszFaceName);
+	void SetFooterFont(int nPointSize, LPCTSTR lpszFaceName);
+
+	// print metrics methods
+	PRINTUNITMETRICS GetMetrics();
+	void SetMetrics(PRINTUNITMETRICS pum);
+
 public:
 	GPrintUnit(GPrintJob *pJob=NULL);
 	virtual ~GPrintUnit();
@@ -343,7 +371,7 @@ public:
 	virtual BOOL EnvSetBeforePrinting();
 	virtual BOOL EnvCleanupAfterPrinting();
 
-public:
+protected:
 	// called when the unit's print job is ready to begin
 	virtual void OnBeginPrinting();
 	// called when the unit's print job has ended.
@@ -389,14 +417,15 @@ protected:
 	
 	// draw table
 	// return how many pages have been drawn
+	// fill the table with data
 	int PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = TRUE);
-	void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
-	void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
+	virtual void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
+	virtual void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
 
 protected:
-	void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	
+	virtual void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	
 	// this method can only output contents that fit "this" page, and the overflows will be output in the EndRow
-	bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
+	virtual bool PrintColumnContent(int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height);
 	virtual int DrawColText(LPCTSTR lpszText, int nLen, CRect r, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef);
 
 	virtual void PrintColHeadings(vector<int>& headings, UINT nEffects=0);
@@ -413,11 +442,12 @@ protected:
 
 	void PrintFooterText(LPCTSTR lpszText);
 	void PrintHeaderText(LPCTSTR lpszText);
-	void PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0);
-	void PrintTextLine(LPPRINTTEXTLINE lpTextLine);
+	// return the height of the text
+	int PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0, bool bDrawOuterline = false);
+	int PrintTextLine(LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine = false);
 	// override this if you want to change the behavior of all overloaded
 	// versions of PrintTextLine()
-	virtual void PrintTextLineEx(LPPRINTTEXTLINE lpTextLine);
+	virtual int PrintTextLineEx(LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine);
 
 	void DrawSeperateLine(LPRECT lpRect);
 	void DrawRepeatChar(TCHAR ch, LPRECT lpRect);
@@ -432,11 +462,15 @@ protected:
 
 	// for all the deprived print unit task to override
 	// return the pages this unit task will print
-	virtual int PreviewUnit(int from, int to);
+	virtual int PreviewUnit(int from, int to) = 0;
 
 	void SetNeedPreprocessSign(bool bNeedPreprocess);
 	bool GetNeedPreprocessSign();
-private:
+
+	void SetPreprocessValue(bool bPreprocess);
+	bool GetPreprocessValue();
+
+protected:
 	void DrawOuterLine();
 	PARAFORMAT ConfirmRichEditParaFormat( UINT nFormat );
 	int DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = FALSE);
@@ -444,7 +478,8 @@ private:
 	// call to print the job, returns FALSE if printing should stop
 	// 'from' is the page index based on the current unit, beginning with 1
 	// 'to' may exceed the whole range
-	virtual int Paint(int from, int to);
+	virtual int Paint(int from, int to) = 0;
+	void GetCurrentTimeAndDate( CString& date, CString& time );
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
@@ -473,6 +508,10 @@ protected:
 	CFont m_fontHeader;
 	CFont m_fontFooter;
 
+	bool m_bPreprocessing;
+	bool m_bCheckPosition;
+	bool m_bPrintThePage;
+
 public:
 	// pointer to owner print job
 	GPrintJob *m_pJob;
@@ -483,8 +522,6 @@ private:
 	// i.e. m_vecColumnPage[0][1] indicates the second column in page 1
 	vector<vector<int>> m_vecColumnPage;
 
-	// this is the index of m_vecColumnPage, to indicate which Columns page we are
-	int m_currentWorkingColums;
 
 	struct srtPreprocessData
 	{
@@ -507,10 +544,6 @@ private:
 
 	// pre-process heading height data
 	int m_preprocessHeadingHeight;
-
-	bool m_bPreprocessing;
-	bool m_bCheckPosition;
-	bool m_bPrintThePage;
 
 	// a sign to indicate whether we have done the preprocessing
 	bool m_bNeedPreprocessed;
@@ -543,36 +576,8 @@ protected:
 	UINT m_separateLineWidth;
 	UINT m_separateLineInterval;
 
-
-public:
-	// header and footer related methods
-	// the sequence in the array is important, which means the "left", "center" and "right" in sequence
-	// if not necessary, just leave the corresponding item with "type = EMPTY;"
-	void SetHeader(HEADERDEFINITIONS *header, int size);
-	void SetFooter(FOOTERDEFINITIONS *footer, int size);
-	// return the old value
-	bool NeedHeaderLine(bool bNeedHeaderLine = true);
-	bool NeedFooterLine(bool bNeedFooterLine = true);
-	// set the interval between the header and the table
-	UINT  SetSeparateLineInterval(UINT interval);
-	UINT  SetSeparateLineWidth(UINT width);	
-	// header and footer helpers
-	void GetContentOnType( int type, CString context, CString& strHeader );
-	// if bHeader is TRUE, means drawing header's line, or drawing footer's line
-	void DrawSeparetLine(BOOL bHeader);
-
-	// attributes set and get
-	void SetBodyPrinterFont(int nPointSize, LPCTSTR lpszFaceName);
-	void SetBodyScreenFont(int nPointSize, LPCTSTR lpszFaceName);
-	void SetHeaderFont(int nPointSize, LPCTSTR lpszFaceName);
-	void SetFooterFont(int nPointSize, LPCTSTR lpszFaceName);
-
-	// print metrics methods
-	PRINTUNITMETRICS GetMetrics();
-	void SetMetrics(PRINTUNITMETRICS pum);
-
-private:
-	void GetCurrentTimeAndDate( CString& date, CString& time );
+	// this is the index of m_vecColumnPage, to indicate which Columns page we are
+	int m_currentWorkingColums;
 
 	friend class GPrintJob;
 };
