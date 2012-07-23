@@ -100,6 +100,8 @@ public:
 	}
 };
 
+// the only difference between this MemDC and the CMemDC is CMyMemDC will not copy 
+// the DC's content to the original DC
 class CMyMemDC : public CMemDC
 {
 public:

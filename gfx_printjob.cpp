@@ -495,7 +495,7 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 	int totalPages = 0;
 	int unitPage = 0;
 	int base = 1;
-	for (int i = 0; from <= to && i < m_vecPrintUnitTasks.size(); i++)
+	for (int i = 0; from <= to && i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
 		int unitMaxPage = EvaluateOneUnitPages( pPreviewDC, i);
 
@@ -543,7 +543,7 @@ int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 	SetPreviewPrintDC(&memDC);
 
 	int totalNum = 0;
-	for (int i = 0; i < m_vecPrintUnitTasks.size(); i++)
+	for (int i = 0; i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
 		m_vecUnitPages[i] = PreviewOneUnit(memDC, i);
 		totalNum += m_vecUnitPages[i];
@@ -556,7 +556,7 @@ int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 
 int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex, int from /*= 1*/, int to /*= 65535 */ )
 {
-	if (unitIndex < 0 || unitIndex > m_vecPrintUnitTasks.size() - 1)
+	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
 		return -1;
 	}
@@ -578,7 +578,7 @@ int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex, int from /*= 1*/
 
 int GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, int to )
 {
-	if (unitIndex < 0 || unitIndex > m_vecPrintUnitTasks.size() - 1)
+	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
 		return -1;
 	}

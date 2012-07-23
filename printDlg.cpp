@@ -6,8 +6,9 @@
 #include "printDlg.h"
 #include "gfx_printjob.h"
 #include <sstream>
-#include "PrintUnitTable.h"
+#include "DataTableUnit.h"
 #include "PrintUnitFromDC.h"
+#include "BitmapTableUnit.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -191,6 +192,60 @@ public:
 };
 
 ///////////////////////////////////////////
+void LoadPictureFile(LPCTSTR szFile, CBitmap* pBitmap, CSize& mSize)
+{
+	// open file
+	HANDLE hFile = CreateFile(szFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+	_ASSERTE(INVALID_HANDLE_VALUE != hFile);
+
+	// get file size
+	DWORD dwFileSize = GetFileSize(hFile, NULL);
+	_ASSERTE(-1 != dwFileSize);
+
+	LPVOID pvData = NULL;
+	// alloc memory based on file size
+	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, dwFileSize);
+	_ASSERTE(NULL != hGlobal);
+
+	pvData = GlobalLock(hGlobal);
+	_ASSERTE(NULL != pvData);
+
+	DWORD dwBytesRead = 0;
+	// read file and store in global memory
+	BOOL bRead = ReadFile(hFile, pvData, dwFileSize, &dwBytesRead, NULL);
+	_ASSERTE(FALSE != bRead);
+	GlobalUnlock(hGlobal);
+	CloseHandle(hFile);
+
+	LPSTREAM pstm = NULL;
+	// create IStream* from global memory
+	HRESULT hr = CreateStreamOnHGlobal(hGlobal, TRUE, &pstm);
+	_ASSERTE(SUCCEEDED(hr) && pstm);
+
+	// Create IPicture from image file
+	LPPICTURE gpPicture;
+
+	hr = ::OleLoadPicture(pstm, dwFileSize, FALSE, IID_IPicture, (LPVOID *)&gpPicture);
+	_ASSERTE(SUCCEEDED(hr) && gpPicture); 
+	pstm->Release();
+
+	OLE_HANDLE m_picHandle;
+	/*
+	long hmWidth, hmHeight;
+	gpPicture->get_Width(&hmWidth);
+	gpPicture->get_Height(&hmHeight);
+	int nWidth = MulDiv(hmWidth, GetDeviceCaps(hdc, LOGPIXELSX), HIMETRIC_INCH);
+	int nHeight = MulDiv(hmHeight, GetDeviceCaps(hdc, LOGPIXELSY), HIMETRIC_INCH);
+	*/
+	gpPicture->get_Handle(&m_picHandle);
+	pBitmap->DeleteObject();
+	pBitmap->Attach((HGDIOBJ) m_picHandle);
+
+	BITMAP bm;
+	GetObject(pBitmap->m_hObject, sizeof(bm), &bm);
+	mSize.cx = bm.bmWidth; //nWidth;
+	mSize.cy = bm.bmHeight; //nHeight;
+}
 
 
 
@@ -273,7 +328,7 @@ void CPrintDlg::OnOK()
 	/////////////////////////////////////////////////////////////////////////////////
 	MyPrintJob job;
 	
-	CPrintUnitStandardTable unitTable1;
+	CDataTableUnit unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
 	unitTable1.SetPrintData(&vecParts);
 
@@ -304,61 +359,100 @@ void CPrintDlg::OnOK()
 	footer[1].content = L"我是三得利";
 	footer[2].type = TYPE_DATE;
 	footer[2].content = L"日期 ：";
-	// the SetFooter will deal at most 3 items currently
-	unitTable1.SetFooter(footer, 3);
+	//// the SetFooter will deal at most 3 items currently
+	//unitTable1.SetFooter(footer, 3);
 
-	unitTable1.SetSeparateLineInterval(10);
-	unitTable1.SetSeparateLineWidth(3);
+	//unitTable1.SetSeparateLineInterval(10);
+	//unitTable1.SetSeparateLineWidth(3);
 
-	job.InsertTask(&unitTable1);
+	//job.InsertTask(&unitTable1);
 
-	CPrintUnitStandardTable unitTable2;
-	unitTable2.DefineColumns(vecColumnDef);
-	unitTable2.SetPrintData(&vecParts);
-	unitTable2.SetHeader(footer, 3);
-	job.InsertTask(&unitTable2);
+	//CDataTableUnit unitTable2;
+	//unitTable2.DefineColumns(vecColumnDef);
+	//unitTable2.SetPrintData(&vecParts);
+	//unitTable2.SetHeader(footer, 3);
+	//job.InsertTask(&unitTable2);
 
-	//////////// test 1 : preview ////////////////////////////
-	// preview
-	CPrintDialog pd(FALSE); 
-	if(!pd.GetDefaults()) 
-	{ 
-		MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
-		return; 
-	} 
-	pd.GetDevMode()->dmOrientation=1; 
-	HDC hdc = pd.CreatePrinterDC(); 
-	CDC dc; 
-	HDC hDC = dc.GetSafeHdc();
-	dc.Attach(hdc);
-	hDC = dc.GetSafeHdc();
+	////////////// test 1 : preview ////////////////////////////
+	//// preview
+	//CPrintDialog pd(FALSE); 
+	//if(!pd.GetDefaults()) 
+	//{ 
+	//	MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
+	//	return; 
+	//} 
+	//pd.GetDevMode()->dmOrientation=1; 
+	//HDC hdc = pd.CreatePrinterDC(); 
+	//CDC dc; 
+	//HDC hDC = dc.GetSafeHdc();
+	//dc.Attach(hdc);
+	//hDC = dc.GetSafeHdc();
 
-	// use the preview function to get the total pages that will be printed
-	int totalPages = job.PreviewAll(&dc);
-	int unit0Pages = job.PreviewOneUnit(&dc, 0);
-	int unit1Pages = job.PreviewOneUnit(&dc, 1);
-	ASSERT(unit0Pages + unit1Pages == totalPages);
+	//// use the preview function to get the total pages that will be printed
+	//int totalPages = job.PreviewAll(&dc);
+	//int unit0Pages = job.PreviewOneUnit(&dc, 0);
+	//int unit1Pages = job.PreviewOneUnit(&dc, 1);
+	//ASSERT(unit0Pages + unit1Pages == totalPages);
 
-	COLUMNDEFINITIONS cd;
-	TCHAR buf[200];
-	_itow_s(100, buf, 10);
-	wstring str = buf;
-	str.append(TEXT("个列"));
-	cd.strName = str.c_str();
-	vecColumnDef.erase(vecColumnDef.end() - 1);
-	vecColumnDef.push_back(cd);
-	// need preprocess again
-	unitTable1.SetRowFormat(DT_LEFT);
-	// need check columns again
-	unitTable1.DefineColumns(vecColumnDef);
-	// only preview the first unit's page 1 to 2
-	totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
+	//COLUMNDEFINITIONS cd;
+	//TCHAR buf[200];
+	//_itow_s(100, buf, 10);
+	//wstring str = buf;
+	//str.append(TEXT("个列"));
+	//cd.strName = str.c_str();
+	//vecColumnDef.erase(vecColumnDef.end() - 1);
+	//vecColumnDef.push_back(cd);
+	//// need preprocess again
+	//unitTable1.SetRowFormat(DT_LEFT);
+	//// need check columns again
+	//unitTable1.DefineColumns(vecColumnDef);
+	//// only preview the first unit's page 1 to 2
+	//totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
 
 
-	//////////// test 3 : self-define page ////////////////////////////
-	// first to print in a compatible DC, then to copy it to the printer DC
-	CPrintUnitFromDC unitTable3;
-	job.InsertTask(&unitTable3);
+	////////////// test 3 : self-define page ////////////////////////////
+	//CPrintUnitFromDC userDefinedUnit;
+	//job.InsertTask(&userDefinedUnit);
+
+
+	//////////// test 4 : self-define page ////////////////////////////
+	CBitmapTableUnit unitBitmapTable;
+	unitBitmapTable.SetTitle(L"测试");
+	// add the margin around the title
+	unitBitmapTable.SetTitleMargin(10);
+	unitBitmapTable.SetTitlePen(140, L"楷体");
+
+	// ability inherited from the base class
+	unitBitmapTable.SetHeader(header, 3);
+	unitBitmapTable.SetFooter(footer, 3);
+
+	// set data
+	CBitmap bmp;
+	CSize mSize;
+	LoadPictureFile(L"D:\\我的文档\\桌面\\HSEP\\debug\\001.jpg", &bmp, mSize);
+
+	//
+	vector<vector<CBitmap* > > vecBmp;
+	int row = 10;
+	int columns = 3;
+	vecBmp.resize(row);
+	for (int i = 0; i < row; i++)
+	{
+		vecBmp[i].resize(columns);
+	}
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < vecBmp[i].size(); j++)
+		{
+			vecBmp[i][j] = &bmp;
+		}
+	}
+	unitBitmapTable.SetPrintData(&vecBmp);
+	// row in each page does not affect the result	
+	unitBitmapTable.SetRowsInEachPage(4);
+
+	
+	job.InsertTask(&unitBitmapTable);
 
 	//////////// test 4 : print ////////////////////////////
 	// actual printing
