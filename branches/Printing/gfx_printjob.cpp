@@ -477,7 +477,7 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 		|| from > to
 		)
 	{
-		return -1;
+		return 0;
 	}
 
 	SetPreviewPrintDC(pPreviewDC);
@@ -558,7 +558,7 @@ int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex, int from /*= 1*/
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
-		return -1;
+		return 0;
 	}
 
 	// allocate a new one in case the former is different
@@ -580,7 +580,7 @@ int GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, i
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
-		return -1;
+		return 0;
 	}
 
 	// need a temperate DC
