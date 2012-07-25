@@ -7109,11 +7109,7 @@ void CGridCtrl::OnBeginPrinting(CDC *pDC, CPrintInfo *pInfo)
         m_PaperSize = CSize(pDC->GetDeviceCaps(HORZRES), pDC->GetDeviceCaps(VERTRES));
 
         m_LogicalPageSize.cx = GetVirtualWidth()+nMargins;
-#ifdef _WIN32_WCE
-        m_LogicalPageSize.cy = (m_LogicalPageSize.cx * m_PaperSize.cy) / m_PaperSize.cx;
-#else
         m_LogicalPageSize.cy = MulDiv(m_LogicalPageSize.cx, m_PaperSize.cy, m_PaperSize.cx);
-#endif
     }
 
     m_nPageHeight = m_LogicalPageSize.cy - GetFixedRowHeight()
@@ -7307,7 +7303,10 @@ void CGridCtrl::OnPrint(CDC *pDC, CPrintInfo *pInfo)
         rect.top = rect.bottom+1;
         rect.bottom = rect.top + GetRowHeight(m_nCurrPrintRow) - 1;
 
-        if (rect.bottom > m_nPageHeight) break;            // Gone past end of page
+        if (rect.bottom > m_nPageHeight) 
+		{
+			break;            // Gone past end of page
+		}
 
         rect.right = -1;
 
@@ -7332,6 +7331,9 @@ void CGridCtrl::OnPrint(CDC *pDC, CPrintInfo *pInfo)
                 pDC->MoveTo(rect.left-Overlap, rect.bottom);
                 pDC->LineTo(rect.right, rect.bottom);
                 if (m_nCurrPrintRow == 0) {
+					// if it is the first row, we need draw the top line
+					// otherwise, the top line is the same as the bottom line of the 
+					// above cell
                     pDC->MoveTo(rect.left-Overlap, rect.top);
                     pDC->LineTo(rect.right, rect.top);
                 }
@@ -7342,7 +7344,10 @@ void CGridCtrl::OnPrint(CDC *pDC, CPrintInfo *pInfo)
                 pDC->MoveTo(rect.right, rect.top-Overlap);
                 pDC->LineTo(rect.right, rect.bottom);
                 if (col == 0) {
-                    pDC->MoveTo(rect.left, rect.top-Overlap);
+					// if it is the first column, we need draw the left line
+					// otherwise, the left line is the same as the right line of the 
+					// left cell
+					pDC->MoveTo(rect.left, rect.top-Overlap);
                     pDC->LineTo(rect.left, rect.bottom);
                 }
             }
@@ -7351,6 +7356,80 @@ void CGridCtrl::OnPrint(CDC *pDC, CPrintInfo *pInfo)
         m_nCurrPrintRow++;
         bFirstPrintedRow = FALSE;
     }
+
+	// draw the merged cell
+	m_bDrawingMergedCell = TRUE;
+	INT_PTR size = m_arMergedCells.GetSize();
+	if(size > 0)
+	{	
+		CRect rcMergeRect;
+		for(INT_PTR i = 0; i < size; i++)
+		{
+			m_nCurrentMergeID = i;
+			if(GetMergedCellRect(m_arMergedCells[i], rcMergeRect))
+			{
+				CGridCellBase* pCell = GetCell(m_arMergedCells[i].GetMinRow(), m_arMergedCells[i].GetMinCol());
+				if (pCell)
+				{
+					// first erase the background
+					CRect rect = rcMergeRect;
+				
+					int Overlap = (m_arMergedCells[i].GetMinCol() == 0)? 0:1;
+					rect.left -= Overlap;
+					Overlap = (m_arMergedCells[i].GetMinRow() == 0)? 0:1;
+					rect.top -= Overlap;
+					CBrush brush(RGB(255,255,255));
+					CBrush* oldBrush = pDC->SelectObject(&brush);
+					pDC->Rectangle(&rect);
+					pDC->SelectObject(oldBrush);
+
+					// next repaint the line
+					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_HORZ)
+					{
+						int Overlap = (m_arMergedCells[i].GetMinCol() == 0)? 0:1;
+						pDC->MoveTo(rcMergeRect.left-Overlap, rcMergeRect.bottom);
+						pDC->LineTo(rcMergeRect.right, rcMergeRect.bottom);
+						if (m_arMergedCells[i].GetMinRow() == 0) 
+						{
+							// if it is the first row, we need draw the top line
+							// otherwise, the top line is the same as the bottom line of the 
+							// above cell
+							pDC->MoveTo(rcMergeRect.left - Overlap, rcMergeRect.top);
+							pDC->LineTo(rcMergeRect.right, rcMergeRect.top);
+						}
+					}
+					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_VERT)
+					{
+						int Overlap = (m_arMergedCells[i].GetMinRow() == 0)? 0:1;
+						pDC->MoveTo(rcMergeRect.right, rcMergeRect.top - Overlap);
+						pDC->LineTo(rcMergeRect.right, rcMergeRect.bottom);
+						if (m_arMergedCells[i].GetMinCol() == 0) 
+						{
+							// if it is the first column, we need draw the left line
+							// otherwise, the left line is the same as the right line of the 
+							// left cell
+							pDC->MoveTo(rcMergeRect.left, rcMergeRect.top - Overlap);
+							pDC->LineTo(rcMergeRect.left, rcMergeRect.bottom);
+						}
+					}
+
+					if (m_arMergedCells[i].GetMinCol() == 0)
+					{
+						rcMergeRect.left++;
+					}
+					if (m_arMergedCells[i].GetMinRow() == 0)
+					{
+						rcMergeRect.top++;
+					}
+					rcMergeRect.right--;
+					rcMergeRect.bottom--;
+					pCell->Draw(pDC, m_arMergedCells[i].GetMinRow(), m_arMergedCells[i].GetMinCol(), rcMergeRect, TRUE);
+				}
+			}
+		}
+	}
+	m_bDrawingMergedCell = FALSE;	
+	m_nCurrentMergeID = -1;
 
 
     // Footer
