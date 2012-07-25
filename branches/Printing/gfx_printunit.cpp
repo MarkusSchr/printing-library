@@ -97,11 +97,64 @@ BOOL GPrintUnit::ContinuePrinting() const
 
 void GPrintUnit::CreatePrintFonts()
 {
+	LOGFONT logFont;
+	GMakeStructFillZero(logFont);
+
+	LPCTSTR lpszFaceName = _T("Arial");//I18nok
+
+	logFont.lfCharSet = DEFAULT_CHARSET;
+	logFont.lfHeight = 90;
+	lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
+	logFont.lfWeight = FW_BOLD;
+
+	m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
+	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
+	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
+	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
+	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
 }
 
 
 void GPrintUnit::InitPrintMetrics()
 {
+	TEXTMETRIC tm;
+
+	{
+		GSELECT_OBJECT(&JDC, &m_fontHeader);
+		JDC.GetTextMetrics(&tm);
+
+		m_pum.pumHeaderHeight = tm.tmHeight * 2;
+		m_pum.pumHeaderLineHeight = tm.tmHeight;
+	}
+
+	{
+		GSELECT_OBJECT(&JDC, &m_fontFooter);
+		JDC.GetTextMetrics(&tm);
+
+		m_pum.pumFooterHeight = tm.tmHeight * 2;
+		m_pum.pumFooterLineHeight = tm.tmHeight;
+	}
+
+	{
+		GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
+		JDC.GetTextMetrics(&tm);
+		m_pum.pumLineOfText = tm.tmHeight;
+	}
+
+	{
+		GSELECT_OBJECT(&JDC, &(m_fontHeading));
+		JDC.GetTextMetrics(&tm);
+		m_pum.pumHeadingHeight = tm.tmHeight;
+	}
+
+	// left and right margin
+	// both the margin is 1/20 of the page
+	{
+		m_pum.pumLeftMarginWidth = (JRECTDEV.right - JRECTDEV.left)/20;
+		m_pum.pumRightMarginWidth = m_pum.pumLeftMarginWidth;
+	}
+
+	RealizeMetrics();
 }
 
 
@@ -1107,7 +1160,7 @@ int GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine, bool bDrawOuterLine)
 
 int GPrintUnit::PrintTextLineEx( LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine )
 {
-	if(!lpTextLine)
+	if(!lpTextLine || lpTextLine->lpszText == L"")
 		return 0;
 
 	if(!lpTextLine->tmHeight)
@@ -1145,7 +1198,7 @@ int GPrintUnit::PrintTextLineEx( LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine 
 	BOOL bParse = TRUE;
 	GPTLTOKEN token;
 
-	int textHeight;
+	int textHeight = lpTextLine->tmHeight;
 	while(bParse)
 	{
 		BOOL bPrint = FALSE;
@@ -1797,7 +1850,11 @@ void GPrintUnit::ClearColumnOverflow()
 
 void GPrintUnit::DeleteDefaultFonts()
 {
-
+	m_fontHeading.DeleteObject();
+	m_fontPairBody.fontPrinter.DeleteObject();
+	m_fontPairBody.fontScreen.DeleteObject();
+	m_fontHeader.DeleteObject();
+	m_fontFooter.DeleteObject();
 }
 
 void GPrintUnit::OnBeginPrinting()

@@ -36,18 +36,11 @@ public:
 protected:
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
-	virtual void DeleteDefaultFonts();
-	virtual void InitPrintMetrics();
 	BOOL CheckCurrentDCCompatibleWithPrevious();
 	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 
 private:
-	void PrepareDefaultFonts();
-
-	void PrepareMetrics();
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
-	
-
 
 protected:
 	srtFont* m_pUserFontHeading;
@@ -88,67 +81,6 @@ CPrintUnitStandardTable<T>::CPrintUnitStandardTable( GPrintJob *pJob )
 }
 
 template<class T>
-void CPrintUnitStandardTable<T>::PrepareDefaultFonts()
-{
-	LOGFONT logFont;
-	GMakeStructFillZero(logFont);
-
-	LPCTSTR lpszFaceName = _T("Arial");//I18nok
-
-	logFont.lfCharSet = DEFAULT_CHARSET;
-	logFont.lfHeight = 90;
-	lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
-	logFont.lfWeight = FW_BOLD;
-
-	m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
-	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
-	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
-	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
-	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
-}
-
-template<class T>
-void CPrintUnitStandardTable<T>::PrepareMetrics()
-{
-	TEXTMETRIC tm;
-
-	{
-		GSELECT_OBJECT(&JDC, &m_fontHeader);
-		JDC.GetTextMetrics(&tm);
-
-		m_pum.pumHeaderHeight = tm.tmHeight * 2;
-		m_pum.pumHeaderLineHeight = tm.tmHeight;
-	}
-
-	{
-		GSELECT_OBJECT(&JDC, &m_fontFooter);
-		JDC.GetTextMetrics(&tm);
-
-		m_pum.pumFooterHeight = tm.tmHeight * 2;
-		m_pum.pumFooterLineHeight = tm.tmHeight;
-	}
-
-	{
-		GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
-		JDC.GetTextMetrics(&tm);
-		m_pum.pumLineOfText = tm.tmHeight;
-	}
-
-	{
-		GSELECT_OBJECT(&JDC, &(m_fontHeading));
-		JDC.GetTextMetrics(&tm);
-		m_pum.pumHeadingHeight = tm.tmHeight;
-	}
-
-	// left and right margin
-	// both the margin is 1/20 of the page
-	{
-		m_pum.pumLeftMarginWidth = (JRECTDEV.right - JRECTDEV.left)/20;
-		m_pum.pumRightMarginWidth = m_pum.pumLeftMarginWidth;
-	}
-}
-
-template<class T>
 void CPrintUnitStandardTable<T>::SetHeadingFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontHeading);
@@ -169,17 +101,9 @@ void CPrintUnitStandardTable<T>::DefineColumns( vector<COLUMNDEFINITIONS>& colum
 }
 
 template<class T>
-void CPrintUnitStandardTable<T>::InitPrintMetrics()
-{
-	PrepareMetrics();
-
-	RealizeMetrics();
-}
-
-template<class T>
 void CPrintUnitStandardTable<T>::CreatePrintFonts()
 {
-	PrepareDefaultFonts();
+	GPrintUnit::CreatePrintFonts();
 
 	if (m_pUserFontHeader)
 	{
@@ -261,16 +185,6 @@ BOOL CPrintUnitStandardTable<T>::SetRowFormat( UINT nFormat )
 	SetNeedPreprocessSign(true);
 
 	return TRUE;
-}
-
-template<class T>
-void CPrintUnitStandardTable<T>::DeleteDefaultFonts()
-{
-	m_fontHeading.DeleteObject();
-	m_fontPairBody.fontPrinter.DeleteObject();
-	m_fontPairBody.fontScreen.DeleteObject();
-	m_fontHeader.DeleteObject();
-	m_fontFooter.DeleteObject();
 }
 
 template<class T>

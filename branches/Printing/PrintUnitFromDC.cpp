@@ -18,11 +18,26 @@ int CPrintUnitFromDC::Paint( int from, int to )
 {
 	int beginPage = JINFO.m_nCurPage;
 	
+
 	EnvSetBeforePrinting();
 
-	if(m_pPrinter)
-		m_pPrinter->Print(&JDC, &JINFO);
+	// the following is all controlled by yourself
+	SetPreprocessValue(false);
+	// because this example only print one page, so just test form == 1 && to >= 1
+	if (from == 1 && to >= from)
+	{
+		m_bPrintThePage = true;
+	}
 
+	// attention that, it is the m_pPrinter that blocks print out the header and footer
+	// you can delete all the method invoking of m_pPrinter to test
+	StartPage();
+	if(m_pPrinter)
+	{
+		m_pPrinter->Print(&JDC, &JINFO);
+	}
+	EndPage();
+	
 	EnvCleanupAfterPrinting();
 
 	return JINFO.m_nCurPage - beginPage;
@@ -41,7 +56,9 @@ void CPrintUnitFromDC::OnBeginPrinting()
 void CPrintUnitFromDC::OnEndPrinting()
 {
 	if(m_pPrinter)
+	{
 		m_pPrinter->EndPrinting(&JDC, &JINFO);
+	}
 }
 
 int CPrintUnitFromDC::PreviewUnit( int from, int to )
