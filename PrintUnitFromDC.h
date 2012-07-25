@@ -7,6 +7,7 @@
 #include "HSECPrintPageConfig.h"
 #include "HSEPrinter.h"
 
+
 class CPrintUnitFromDC : public GPrintUnit
 {
 public:

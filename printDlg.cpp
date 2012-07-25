@@ -359,60 +359,62 @@ void CPrintDlg::OnOK()
 	footer[1].content = L"我是三得利";
 	footer[2].type = TYPE_DATE;
 	footer[2].content = L"日期 ：";
-	//// the SetFooter will deal at most 3 items currently
-	//unitTable1.SetFooter(footer, 3);
+	// the SetFooter will deal at most 3 items currently
+	unitTable1.SetFooter(footer, 3);
 
-	//unitTable1.SetSeparateLineInterval(10);
-	//unitTable1.SetSeparateLineWidth(3);
+	unitTable1.SetSeparateLineInterval(10);
+	unitTable1.SetSeparateLineWidth(3);
 
-	//job.InsertTask(&unitTable1);
+	job.InsertTask(&unitTable1);
 
-	//CDataTableUnit unitTable2;
-	//unitTable2.DefineColumns(vecColumnDef);
-	//unitTable2.SetPrintData(&vecParts);
-	//unitTable2.SetHeader(footer, 3);
-	//job.InsertTask(&unitTable2);
+	CDataTableUnit unitTable2;
+	unitTable2.DefineColumns(vecColumnDef);
+	unitTable2.SetPrintData(&vecParts);
+	unitTable2.SetHeader(footer, 3);
+	job.InsertTask(&unitTable2);
 
-	////////////// test 1 : preview ////////////////////////////
-	//// preview
-	//CPrintDialog pd(FALSE); 
-	//if(!pd.GetDefaults()) 
-	//{ 
-	//	MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
-	//	return; 
-	//} 
-	//pd.GetDevMode()->dmOrientation=1; 
-	//HDC hdc = pd.CreatePrinterDC(); 
-	//CDC dc; 
-	//HDC hDC = dc.GetSafeHdc();
-	//dc.Attach(hdc);
-	//hDC = dc.GetSafeHdc();
+	//////////// test 1 : preview ////////////////////////////
+	// preview
+	CPrintDialog pd(FALSE); 
+	if(!pd.GetDefaults()) 
+	{ 
+		MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
+		return; 
+	} 
+	pd.GetDevMode()->dmOrientation=1; 
+	HDC hdc = pd.CreatePrinterDC(); 
+	CDC dc; 
+	HDC hDC = dc.GetSafeHdc();
+	dc.Attach(hdc);
+	hDC = dc.GetSafeHdc();
 
-	//// use the preview function to get the total pages that will be printed
-	//int totalPages = job.PreviewAll(&dc);
-	//int unit0Pages = job.PreviewOneUnit(&dc, 0);
-	//int unit1Pages = job.PreviewOneUnit(&dc, 1);
-	//ASSERT(unit0Pages + unit1Pages == totalPages);
+	// use the preview function to get the total pages that will be printed
+	int totalPages = job.PreviewAll(&dc);
+	int unit0Pages = job.PreviewOneUnit(&dc, 0);
+	int unit1Pages = job.PreviewOneUnit(&dc, 1);
+	ASSERT(unit0Pages + unit1Pages == totalPages);
 
-	//COLUMNDEFINITIONS cd;
-	//TCHAR buf[200];
-	//_itow_s(100, buf, 10);
-	//wstring str = buf;
-	//str.append(TEXT("个列"));
-	//cd.strName = str.c_str();
-	//vecColumnDef.erase(vecColumnDef.end() - 1);
-	//vecColumnDef.push_back(cd);
-	//// need preprocess again
-	//unitTable1.SetRowFormat(DT_LEFT);
-	//// need check columns again
-	//unitTable1.DefineColumns(vecColumnDef);
-	//// only preview the first unit's page 1 to 2
-	//totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
+	COLUMNDEFINITIONS cd;
+	TCHAR buf[200];
+	_itow_s(100, buf, 10);
+	wstring str = buf;
+	str.append(TEXT("个列"));
+	cd.strName = str.c_str();
+	vecColumnDef.erase(vecColumnDef.end() - 1);
+	vecColumnDef.push_back(cd);
+	// need preprocess again
+	unitTable1.SetRowFormat(DT_LEFT);
+	// need check columns again
+	unitTable1.DefineColumns(vecColumnDef);
+	// only preview the first unit's page 1 to 2
+	totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
 
 
-	////////////// test 3 : self-define page ////////////////////////////
-	//CPrintUnitFromDC userDefinedUnit;
-	//job.InsertTask(&userDefinedUnit);
+	//////////// test 3 : self-define page ////////////////////////////
+	CPrintUnitFromDC userDefinedUnit;
+	userDefinedUnit.SetFooter(footer, 3);
+	userDefinedUnit.SetHeader(header, 3);
+	job.InsertTask(&userDefinedUnit);
 
 
 	//////////// test 4 : self-define page ////////////////////////////
@@ -450,7 +452,6 @@ void CPrintDlg::OnOK()
 	unitBitmapTable.SetPrintData(&vecBmp);
 	// row in each page does not affect the result	
 	unitBitmapTable.SetRowsInEachPage(4);
-
 	
 	job.InsertTask(&unitBitmapTable);
 

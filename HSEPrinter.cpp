@@ -148,15 +148,7 @@ void CHSEPrinter::Print(CDC* pDC, CPrintInfo* pInfo)
 {
 	static int i = 1;
 
-	if(3 <= pInfo->m_nCurPage)
-		PrintHead(pDC,pInfo);
-
 	PrintPage1st(pDC,pInfo);
-
-	PrintPageFoot(pDC,pInfo);
-
-	// ATTENTION: we have added a page, so we should add the current page
-	pInfo->m_nCurPage++;
 }
 
 void CHSEPrinter::EndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
