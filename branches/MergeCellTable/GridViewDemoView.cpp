@@ -136,10 +136,10 @@ void CGridViewDemoView::OnInitialUpdate()
 		m_pGridCtrl->EnableDragAndDrop(TRUE);
 
 		try {
-			m_pGridCtrl->SetFixedRowCount(1);
-			m_pGridCtrl->SetFixedColumnCount(1);
-			m_pGridCtrl->SetRowCount(500);
-			m_pGridCtrl->SetColumnCount(20);
+			m_pGridCtrl->SetFixedRowCount(0);
+			m_pGridCtrl->SetFixedColumnCount(0);
+			m_pGridCtrl->SetRowCount(6);
+			m_pGridCtrl->SetColumnCount(6);
 		}
 		catch (CMemoryException* e)
 		{
@@ -177,9 +177,27 @@ void CGridViewDemoView::OnInitialUpdate()
 				m_pGridCtrl->SetItem(&Item);
 			}
 		}
-		m_pGridCtrl->MergeCells(CCellRange(3,2,6,4));
-		m_pGridCtrl->SetItemText(3,2,_T(" 合并测试 "));
-		m_pGridCtrl->SetItemFormat(3,2,DT_CENTER|DT_VCENTER|DT_WORDBREAK);
+		// both not the first
+		m_pGridCtrl->MergeCells(CCellRange(1,1,1,2));
+		m_pGridCtrl->SetItemText(1,1,_T(" 合并测试1 "));
+		m_pGridCtrl->SetItemFormat(1,1,DT_CENTER | DT_VCENTER | DT_WORDBREAK | DT_SINGLELINE );
+
+		// both are the first
+		m_pGridCtrl->MergeCells(CCellRange(0,0,1,0));
+		m_pGridCtrl->SetItemText(0,0,_T(" 合并测试2 "));
+		m_pGridCtrl->SetItemFormat(0,0,DT_CENTER | DT_VCENTER | DT_WORDBREAK | DT_SINGLELINE );
+
+		// column is the first
+		m_pGridCtrl->MergeCells(CCellRange(0,4,0,5));
+		m_pGridCtrl->SetItemText(0,4,_T(" 合并测试3 "));
+		m_pGridCtrl->SetItemFormat(0,4,DT_CENTER | DT_VCENTER | DT_WORDBREAK | DT_SINGLELINE );
+
+		// row is the first
+		m_pGridCtrl->MergeCells(CCellRange(3,0,3,1));
+		m_pGridCtrl->SetItemText(3,0,_T(" 合并测试4 "));
+		m_pGridCtrl->SetItemFormat(3,0,DT_CENTER | DT_VCENTER | DT_WORDBREAK | DT_SINGLELINE );
+
+
 /*
 		GV_ITEM Item;
 		Item.mask = GVIF_TEXT|GVIF_FORMAT;

@@ -355,6 +355,34 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="GridCtrl"
+				>
+				<File
+					RelativePath=".\GridCtrl_src\GridCell.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl_src\GridCellBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl_src\GridCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl_src\GridDropTarget.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl_src\InPlaceEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl_src\TitleTip.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -389,42 +417,38 @@
 				>
 			</File>
 			<Filter
-				Name="Grid Header"
+				Name="GridCtrl"
 				>
 				<File
-					RelativePath="CellRange.h"
+					RelativePath=".\GridCtrl_src\CellRange.h"
 					>
 				</File>
 				<File
-					RelativePath="GridCell.h"
+					RelativePath=".\GridCtrl_src\GridCell.h"
 					>
 				</File>
 				<File
-					RelativePath="GridCellBase.h"
+					RelativePath=".\GridCtrl_src\GridCellBase.h"
 					>
 				</File>
 				<File
-					RelativePath="GridCtrl.h"
+					RelativePath=".\GridCtrl_src\GridCtrl.h"
 					>
 				</File>
 				<File
-					RelativePath="GridDropTarget.h"
+					RelativePath=".\GridCtrl_src\GridDropTarget.h"
 					>
 				</File>
 				<File
-					RelativePath="InPlaceEdit.h"
+					RelativePath=".\GridCtrl_src\InPlaceEdit.h"
 					>
 				</File>
 				<File
-					RelativePath="MemDC.h"
+					RelativePath=".\GridCtrl_src\MemDC.h"
 					>
 				</File>
 				<File
-					RelativePath="testlib.lib"
-					>
-				</File>
-				<File
-					RelativePath="TitleTip.h"
+					RelativePath=".\GridCtrl_src\TitleTip.h"
 					>
 				</File>
 			</Filter>
