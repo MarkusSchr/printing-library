@@ -14,6 +14,8 @@ CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
 	m_topMarginInLineOfText = m_bottomMarginInLineOfText = 0;
 
 	m_colFormat = m_rowFormat = DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE;
+
+	m_bDrawOuterLine = true;
 }
 
 CPrintUnitMergableTable::~CPrintUnitMergableTable()
@@ -104,6 +106,9 @@ void CPrintUnitMergableTable::CompleteAllColHeadingsDefinition()
 		SetGridCellContents();
 
 		SetItemFont();
+		
+		SetOuterLine();
+
 	}
 
 	// for this method will be called every time we've prepared the DC, following with the 
@@ -321,6 +326,18 @@ void CPrintUnitMergableTable::SetGridCellContents()
 	for (; itCellText != m_cellText.end(); itCellText++)
 	{
 		m_pGridCtrl->SetItemText( (*itCellText).first.row, (*itCellText).first.column, (*itCellText).second.c_str());
+	}
+}
+
+void CPrintUnitMergableTable::SetOuterLine()
+{
+	if (m_bDrawOuterLine == false)
+	{
+		m_pGridCtrl->SetGridLines(GVL_NONE);
+	}
+	else
+	{
+		m_pGridCtrl->SetGridLines(GVL_BOTH);
 	}
 }
 
