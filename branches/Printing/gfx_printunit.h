@@ -117,12 +117,17 @@ typedef struct tagPrintUnitMetrics
 {
 	int pumHeadingHeight;
 	int pumFooterHeight;
+	// the height of header
 	int pumHeaderHeight;
 	int pumRightMarginWidth;
 	int pumLeftMarginWidth;
+	// the height of the header and footer's seperate line
 	int pumFooterLineHeight;
 	int pumHeaderLineHeight;
 	int pumLineOfText;
+	// margin between the page top and the header
+	int pumHeaderMargin;
+	int pumFooterMargin;
 
 	tagPrintUnitMetrics()
 	{
@@ -134,7 +139,57 @@ typedef struct tagPrintUnitMetrics
 		pumFooterLineHeight = 0;
 		pumHeaderLineHeight = 0;
 		pumLineOfText = 0;
+		pumHeaderMargin = 0;
+		pumFooterMargin = 0;
 	}
+
+	tagPrintUnitMetrics& operator=(tagPrintUnitMetrics& pum)
+	{
+		if (pum.pumHeadingHeight > -1)
+		{
+			pumHeadingHeight = pum.pumHeaderHeight; 
+		}
+
+		if (pum.pumFooterHeight > -1)
+		{
+			pumFooterHeight = pum.pumFooterHeight; 
+		}
+		if (pum.pumHeaderHeight > -1)
+		{
+			pumHeaderHeight = pum.pumHeaderHeight; 
+		}
+		if (pum.pumRightMarginWidth > -1)
+		{
+			pumRightMarginWidth = pum.pumRightMarginWidth; 
+		}
+		if (pum.pumLeftMarginWidth > -1)
+		{
+			pumLeftMarginWidth = pum.pumLeftMarginWidth; 
+		}
+		if (pum.pumFooterLineHeight > -1)
+		{
+			pumFooterLineHeight = pum.pumFooterLineHeight; 
+		}
+		if (pum.pumHeaderLineHeight > -1)
+		{
+			pumHeaderLineHeight = pum.pumHeaderLineHeight; 
+		}
+		if (pum.pumLineOfText > -1)
+		{
+			pumLineOfText = pum.pumLineOfText; 
+		}
+		if (pum.pumHeaderMargin > -1)
+		{
+			pumHeaderMargin = pum.pumHeaderMargin; 
+		}
+		if (pum.pumFooterMargin > -1)
+		{
+			pumFooterMargin = pum.pumFooterMargin; 
+		}
+
+		return *this;
+	}
+
 } PRINTUNITMETRICS, *LPPRINTUNITMETRICS;
 
 
@@ -359,14 +414,13 @@ public:
 
 	// print metrics methods
 	PRINTUNITMETRICS GetMetrics();
+	// set -1 to use default
 	void SetMetrics(PRINTUNITMETRICS pum);
 
 public:
 	GPrintUnit(GPrintJob *pJob=NULL);
 	virtual ~GPrintUnit();
 
-	// call to set the print job that owns this unit
-	void SetJob(GPrintJob *pJob);
 	GPrintJob *GetJob() const;
 	virtual BOOL EnvSetBeforePrinting();
 	virtual BOOL EnvCleanupAfterPrinting();
@@ -382,7 +436,20 @@ protected:
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
 	virtual void DeleteDefaultFonts();
+	struct srtFont
+	{
+		int nPointSize;
+		wstring name;
+
+		srtFont(int size, wstring name)
+		{
+			this->nPointSize = size;
+			this->name = name;
+		}
+	};
+	virtual void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 	virtual void InitPrintMetrics();
+	
 	// the nHeading in the following functions means the number of the column set.
 	// there can be many column set, within which there are many columns
 	virtual void InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct=0.0, UINT nFormat = 0, int nHeading=0);
@@ -462,7 +529,7 @@ protected:
 
 	// for all the deprived print unit task to override
 	// return the pages this unit task will print
-	virtual int PreviewUnit(int from, int to) = 0;
+	virtual int PreviewUnit(BOOL bGetPageOnly, int from, int to) = 0;
 
 	void SetNeedPreprocessSign(bool bNeedPreprocess);
 	bool GetNeedPreprocessSign();
@@ -480,6 +547,32 @@ protected:
 	// 'to' may exceed the whole range
 	virtual int Paint(int from, int to) = 0;
 	void GetCurrentTimeAndDate( CString& date, CString& time );
+
+//////////////////////////////////////////////////////////////////////////////////////
+// title related methods
+public:
+	void SetTitle(LPCTSTR title, UINT nFormat = DT_CENTER);
+	void SetTitlePen(int nPointSize, LPCTSTR lpszFaceName);
+	// set the interval between the title , header and the table contents
+	// in height of line_of_text
+	int SetTitleMargin(int titleMarginInLineOfText);
+	void NeedPrintTitleExcpetFirstPage(bool bNeed) {m_bNeedPrintTitleExcpetFirstPage = bNeed;}
+protected:
+	int PrintTitleAndMoveCursor();
+	int PrintTitle();
+protected:
+	// title related attributes
+	wstring m_title;
+	UINT m_nTitleFormat;
+	CFont m_FontTitle;
+	srtFont * m_pFontTileSrt;
+	int m_titleMargin;
+	bool m_bNeedPrintTitleExcpetFirstPage;
+////////////////////////////////////////////////////////////////////////////////////////
+
+private:
+	// call to set the print job that owns this unit
+	void SetJob(GPrintJob *pJob);
 
 protected:
 	CTypedPtrArray <CPtrArray, LPPRINTCOLUMNDEF> m_colDefs;
@@ -548,6 +641,7 @@ private:
 	// a sign to indicate whether we have done the preprocessing
 	bool m_bNeedPreprocessed;
 
+
 protected:
 	// header contents
 	HEADERDEFINITIONS m_header[MAX_HEADER_COUNT];
@@ -557,17 +651,7 @@ protected:
 	bool m_bNeedHeaderSeparateLine;
 	bool m_bNeedFooterSeperateLine;
 
-	struct srtFont
-	{
-		int nPointSize;
-		wstring name;
 
-		srtFont(int size, wstring name)
-		{
-			this->nPointSize = size;
-			this->name = name;
-		}
-	};
 	srtFont* m_pUserFontHeader;
 	srtFont* m_pUserFontFooter;
 	srtFont* m_pUserFontPrinter;

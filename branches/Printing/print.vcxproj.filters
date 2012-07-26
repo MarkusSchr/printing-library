@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8f855158-0d77-4d13-bafb-bade5b035b21}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\HSE">
+      <UniqueIdentifier>{4594db1a-335b-462f-a94d-44a3f44fc71a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GridCtrl">
+      <UniqueIdentifier>{b82b58b7-1205-40d2-bcd2-31c5f011ff72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{a909e837-e946-4632-a40e-d78db5451451}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Header Files\GridCtrl">
+      <UniqueIdentifier>{29cea36a-f05a-4771-9bd0-66fec7009c61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{b5c12a91-e9a2-49e7-bab1-788fd7064f26}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BitmapTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx_printjob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gfx_printunit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MergableTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="printDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintUnitFromDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintUnitMergableTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HSECPrintPageConfig.cpp">
+      <Filter>Source Files\HSE</Filter>
+    </ClCompile>
+    <ClCompile Include="HSEPrinter.cpp">
+      <Filter>Source Files\HSE</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCell.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCellBase.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCtrl.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\InPlaceEdit.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\TitleTip.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridDropTarget.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="print.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HSECPrintPageConfig.h">
+      <Filter>Source Files\HSE</Filter>
+    </ClInclude>
+    <ClInclude Include="HSEPrinter.h">
+      <Filter>Source Files\HSE</Filter>
+    </ClInclude>
+    <ClInclude Include="BitmapTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_printjob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gfx_printunit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MergableTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="print.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="printDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitFromDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitMergableTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\CellRange.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCell.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCellBase.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCtrl.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridDropTarget.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\InPlaceEdit.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\TitleTip.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\print.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\print.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

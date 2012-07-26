@@ -41,6 +41,12 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_pUserFontPrinter = NULL;
 	m_pUserFontScreen = NULL;
 
+	// title related variables
+	m_nTitleFormat = DT_CENTER;
+	m_titleMargin = 10;
+	m_pFontTileSrt = new srtFont(120, L"ËÎÌו");
+	m_bNeedPrintTitleExcpetFirstPage = FALSE;
+
 	SetNeedPreprocessSign(true);
 }
 
@@ -112,8 +118,35 @@ void GPrintUnit::CreatePrintFonts()
 	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
 	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
 	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
+
+
+	if (m_pUserFontHeader)
+	{
+		CreateUserDefinedFont(m_fontHeader, m_pUserFontHeader);
+	}
+	if (m_pUserFontFooter)
+	{
+		CreateUserDefinedFont(m_fontFooter, m_pUserFontFooter);
+	}
+	if (m_pUserFontPrinter)
+	{
+		CreateUserDefinedFont(m_fontPairBody.fontPrinter, m_pUserFontPrinter);
+	}
+	if (m_pUserFontScreen)
+	{
+		CreateUserDefinedFont(m_fontPairBody.fontScreen, m_pUserFontScreen);
+	}
+	if (m_pFontTileSrt)
+	{
+		CreateUserDefinedFont(m_FontTitle, m_pFontTileSrt);
+	}
 }
 
+void GPrintUnit::CreateUserDefinedFont( CFont& fontDes, srtFont *fontSource )
+{
+	fontDes.DeleteObject();	
+	fontDes.CreatePointFont(fontSource->nPointSize, fontSource->name.c_str(), &JDC);
+}
 
 void GPrintUnit::InitPrintMetrics()
 {
@@ -145,6 +178,7 @@ void GPrintUnit::InitPrintMetrics()
 		GSELECT_OBJECT(&JDC, &(m_fontHeading));
 		JDC.GetTextMetrics(&tm);
 		m_pum.pumHeadingHeight = tm.tmHeight;
+		m_pum.pumFooterHeight = tm.tmHeight;
 	}
 
 	// left and right margin
@@ -152,6 +186,12 @@ void GPrintUnit::InitPrintMetrics()
 	{
 		m_pum.pumLeftMarginWidth = (JRECTDEV.right - JRECTDEV.left)/20;
 		m_pum.pumRightMarginWidth = m_pum.pumLeftMarginWidth;
+	}
+
+	// top/header and bottom/footer margin
+	{
+		m_pum.pumHeaderMargin = 10;
+		m_pum.pumFooterMargin = 10;
 	}
 
 	RealizeMetrics();
@@ -237,6 +277,9 @@ int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRow
 	
 	// do the actual job
 	bool bNewPage = StartPage();
+
+	// print the title
+	PrintTitleAndMoveCursor();
 
 	// now check whether this page should be printed
 	int currentPage = 1;
@@ -394,6 +437,12 @@ int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRow
 					&& m_currentWorkingColums == (int)m_vecColumnPage.size() - 1) )
 				{
 					StartPage();
+
+					if (m_bNeedPrintTitleExcpetFirstPage)
+					{
+						// print the title
+						PrintTitleAndMoveCursor();
+					}
 				}
 				else
 				{
@@ -1028,8 +1077,8 @@ void GPrintUnit::RealizeMetrics()
 {
 	JRECT = JINFO.m_rectDraw;
 
-	JRECT.top += m_pum.pumHeaderHeight;
-	JRECT.bottom -= m_pum.pumFooterHeight;
+	JRECT.top += (m_pum.pumHeaderHeight + m_pum.pumHeaderMargin + 2 * m_pum.pumHeaderLineHeight);
+	JRECT.bottom -= (m_pum.pumFooterHeight + m_pum.pumFooterMargin + 2 * m_pum.pumFooterLineHeight);
 	JRECT.left += m_pum.pumLeftMarginWidth;
 	JRECT.right -= m_pum.pumRightMarginWidth;
 
@@ -1075,7 +1124,7 @@ void GPrintUnit::PrintFooter()
 		DrawSeparetLine(FALSE);
 	}
 
-	strFooter += HFC_NEWLINE;
+	//strFooter += HFC_NEWLINE;
 	for (int i = 0; i < MAX_FOOTER_COUNT; i++)
 	{
 		GetContentOnType(m_footer[i].type, m_footer[i].content.c_str(), strFooter);
@@ -1094,12 +1143,12 @@ void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 	GMakeStructFillZero(ptl);
 
 	ptl.lpszText = lpszText;
-	ptl.tmHeight = m_pum.pumFooterLineHeight;
+	ptl.tmHeight = m_pum.pumFooterHeight;
 
 	ptl.rectText.left = JRECT.left;
 	ptl.rectText.right = JRECT.right;
-	ptl.rectText.top = JRECT.bottom;
-	ptl.rectText.bottom = 0;
+	ptl.rectText.top = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight;
+	ptl.rectText.bottom = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin;
 
 	g_StartEndRow = FALSE;
 	PrintTextLine(&ptl);
@@ -1113,19 +1162,16 @@ void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 	GMakeStructFillZero(ptl);
 
 	ptl.lpszText = lpszText;
-	ptl.tmHeight = m_pum.pumHeaderLineHeight;
+	ptl.tmHeight = m_pum.pumHeaderHeight;
 
 	ptl.rectText.left = JRECT.left;
 	ptl.rectText.right = JRECT.right;
-	ptl.rectText.top = JRECT.top - m_pum.pumHeaderHeight;
-	ptl.rectText.bottom = 0;
+	ptl.rectText.top = m_pum.pumHeaderMargin;
+	ptl.rectText.bottom = m_pum.pumHeaderMargin + ptl.tmHeight;
 
 	g_StartEndRow = FALSE;
 	PrintTextLine(&ptl);
 }
-
-
-
 
 int GPrintUnit::PrintTextLine(
 	LPCTSTR lpszText, 
@@ -1490,11 +1536,11 @@ void GPrintUnit::DrawSeparetLine( BOOL bHeader )
 	int linePosY;
 	if (bHeader == TRUE)
 	{
-		linePosY = JRECT.top - m_separateLineInterval;
+		linePosY = JINFO.m_rectDraw.top + m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + m_separateLineInterval;
 	}
 	else
 	{
-		linePosY = JRECT.bottom + m_separateLineInterval;
+		linePosY = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight - m_separateLineInterval;
 	}
 
 	JDC.MoveTo(JCUR.x, linePosY);
@@ -1728,7 +1774,7 @@ void GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 
 void GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
 {
-	memcpy(&m_pum, &pum, sizeof(PRINTUNITMETRICS));
+	m_pum = pum;
 
 	SetNeedPreprocessSign(true);
 }
@@ -1855,6 +1901,8 @@ void GPrintUnit::DeleteDefaultFonts()
 	m_fontPairBody.fontScreen.DeleteObject();
 	m_fontHeader.DeleteObject();
 	m_fontFooter.DeleteObject();
+
+	m_FontTitle.DeleteObject();
 }
 
 void GPrintUnit::OnBeginPrinting()
@@ -1874,6 +1922,69 @@ bool GPrintUnit::GetPreprocessValue()
 {
 	return m_bPreprocessing;
 }
+
+void GPrintUnit::SetTitle( LPCTSTR title, UINT nFormat /*= DT_CENTER*/ )
+{
+	m_title = title;
+	m_nTitleFormat = nFormat;
+	SetNeedPreprocessSign(true);
+}
+
+void GPrintUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
+{
+	DELETE_IF_NOT_NULL(m_pFontTileSrt);
+
+	m_pFontTileSrt = new srtFont(nPointSize, lpszFaceName);
+
+	SetNeedPreprocessSign(true);
+}
+
+int GPrintUnit::PrintTitle()
+{
+	int height = 0;
+
+	if (!m_title.empty())
+	{
+		GSELECT_OBJECT(&JDC, &m_FontTitle);
+		height = PrintTextLine(m_title.c_str(), m_nTitleFormat, JRECT.bottom, FALSE);
+	}
+
+	return height;
+}
+
+int GPrintUnit::PrintTitleAndMoveCursor()
+{
+	int originY = JCUR.y;
+
+	// traverse the height of the interval
+	JCUR.y += m_titleMargin;
+
+	// print title first
+	// attention that heading is a kind of row
+	if (!m_title.empty())
+	{
+		JCUR.y += PrintTitle();
+	}
+
+	// traverse the height of the interval
+	JCUR.y += m_titleMargin;
+
+	return JCUR.y - originY;
+}
+
+int GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
+{
+	int old = m_titleMargin;
+	m_titleMargin = titleMarginInLineOfText * m_pum.pumLineOfText;
+
+	if (old != m_titleMargin)
+	{
+		SetNeedPreprocessSign(true);
+	}
+
+	return old;	
+}
+
 
 ///////////////////////////////////////////////////////////////////////
 

@@ -16,7 +16,7 @@ public:
 
 private:
 	// printing
-	virtual int PreviewUnit(int from, int to);
+	virtual int PreviewUnit(BOOL bGetPageOnly, int from, int to);
 	virtual int Paint(int from, int to);
 
 	// called when the print job is ready to begin

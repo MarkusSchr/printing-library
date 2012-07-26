@@ -9,6 +9,7 @@
 #include "DataTableUnit.h"
 #include "PrintUnitFromDC.h"
 #include "BitmapTableUnit.h"
+#include "MergableTableUnit.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -365,6 +366,7 @@ void CPrintDlg::OnOK()
 	unitTable1.SetSeparateLineInterval(10);
 	unitTable1.SetSeparateLineWidth(3);
 
+	unitTable1.SetTitle(L"数据1");
 	job.InsertTask(&unitTable1);
 
 	CDataTableUnit unitTable2;
@@ -390,8 +392,8 @@ void CPrintDlg::OnOK()
 
 	// use the preview function to get the total pages that will be printed
 	int totalPages = job.PreviewAll(&dc);
-	int unit0Pages = job.PreviewOneUnit(&dc, 0);
-	int unit1Pages = job.PreviewOneUnit(&dc, 1);
+	int unit0Pages = job.PreviewOneUnit(&dc, 0, TRUE);
+	int unit1Pages = job.PreviewOneUnit(&dc, 1, TRUE);
 	ASSERT(unit0Pages + unit1Pages == totalPages);
 
 	COLUMNDEFINITIONS cd;
@@ -407,14 +409,14 @@ void CPrintDlg::OnOK()
 	// need check columns again
 	unitTable1.DefineColumns(vecColumnDef);
 	// only preview the first unit's page 1 to 2
-	totalPages = job.PreviewOneUnit(&dc, 0, 1, 2);
+	totalPages = job.PreviewOneUnit(&dc, 0, TRUE, 1, 2);
 
 
 	//////////// test 3 : self-define page ////////////////////////////
 	CPrintUnitFromDC userDefinedUnit;
 	userDefinedUnit.SetFooter(footer, 3);
 	userDefinedUnit.SetHeader(header, 3);
-	job.InsertTask(&userDefinedUnit);
+	// job.InsertTask(&userDefinedUnit);
 
 
 	//////////// test 4 : self-define page ////////////////////////////
@@ -431,7 +433,7 @@ void CPrintDlg::OnOK()
 	// set data
 	CBitmap bmp;
 	CSize mSize;
-	LoadPictureFile(L"D:\\我的文档\\桌面\\HSEP\\debug\\001.jpg", &bmp, mSize);
+	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\test\\Debug\\001.jpg", &bmp, mSize);
 
 	//
 	vector<vector<CBitmap* > > vecBmp;
@@ -452,15 +454,49 @@ void CPrintDlg::OnOK()
 	unitBitmapTable.SetPrintData(&vecBmp);
 	// row in each page does not affect the result	
 	unitBitmapTable.SetRowsInEachPage(4);
-	
 	job.InsertTask(&unitBitmapTable);
+
+	//////////// test 5 : unform table ////////////////////////////
+	CMergableTableUnit mergeUnit;
+	mergeUnit.DefineColumns(vecColumnDef);
+	rowNum = 100;
+	mergeUnit.SetRowNum(rowNum);
+	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
+	{
+		mergeUnit.SetRowHeight(i, 3);
+	}
+	
+	mergeUnit.MergeCell(1,0,2,2);
+	mergeUnit.MergeCell(3,3,4,4);
+	mergeUnit.MergeCell(7,3,7,4);
+	mergeUnit.MergeCell(24,3,70,4);
+	mergeUnit.SetCellText(1,0, L"你好");
+	mergeUnit.SetCellText(3,3, L"世界");
+	mergeUnit.SetCellText(2,3, L"中文简体，蒋介石");
+	mergeUnit.SetCellText(6,8, L"abcde!!!");
+	mergeUnit.SetCellText(rowNum - 1, 3, L"asdffdsa");
+	mergeUnit.SetCellText(24, 3, L"画皮2");
+	mergeUnit.SetHeader(header, 3);
+	mergeUnit.SetFooter(footer, 3);
+	// set the margin between header and main context by 4 * heightOfLineText
+	// mergeUnit.SetTopMarginInLineOfText(4);
+	
+	// to set the row format as "DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE"
+	// which is also the default value, just to show we can do it.
+	mergeUnit.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
+	mergeUnit.SetAllRowsFont(120, L"宋体");
+	mergeUnit.SetRowFont(3, 30, L"黑体");
+	mergeUnit.SetHeadingFont(90, L"楷体");
+	mergeUnit.SetCellFont(1, 0, 150, L"黑体");
+
+	// set title
+	mergeUnit.SetTitle(L"男人总是不关心女人的感受");
+
+	job.InsertTask(&mergeUnit);
 
 	//////////// test 4 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.PrintFollowingPrintDialog();
-
-
-	//DeleteDC(hdc);
 }
 
