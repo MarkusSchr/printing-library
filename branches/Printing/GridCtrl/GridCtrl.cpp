@@ -7225,7 +7225,7 @@ void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
         rect.top = rect.bottom+1;
         rect.bottom = rect.top + GetRowHeight(m_nCurrPrintRow) - 1;
 
-        if (rect.bottom > m_nPageHeight) 
+        if (rect.bottom > clientRect.bottom - clientRect.top) 
 		{
 			break;            // Gone past end of page
 		}
@@ -7321,7 +7321,9 @@ void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
 					rect.top -= Overlap;
 					CBrush brush(RGB(255,255,255));
 					CBrush* oldBrush = pDC->SelectObject(&brush);
+					CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
 					pDC->Rectangle(&rect);
+					pDC->SelectObject(pOldPen);
 					pDC->SelectObject(oldBrush);
 
 					// next repaint the line

@@ -36,6 +36,9 @@ public:
 	void SetTopMarginInLineOfText(int topMarginInLineOfText);
 	void SetBottomMargin(int bottomMarginInLineOfText);
 
+	// switch to drawing line
+	void NeedDrawTableOuterline(bool bNeedOterLine) {m_bDrawOuterLine = bNeedOterLine; }
+
 	// font related methods
 	// inherited from base class
 	// void SetHeadingFont(int nPointSize, LPCTSTR lpszFaceName);
@@ -57,6 +60,7 @@ private:
 	void AdjustTopAndBottomMargin();
 	void SetGridCellContents();
 	void MergeGridCells();
+	void SetOuterLine();
 
 
 protected:
@@ -119,4 +123,7 @@ protected:
 	// row, column and special cell's format
 	UINT m_rowFormat, m_colFormat;
 	map<tagCell, UINT, ltCell> m_cellFormat;
+
+	// switch to draw outer line
+	bool m_bDrawOuterLine;
 };
