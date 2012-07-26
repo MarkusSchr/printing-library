@@ -6,9 +6,6 @@ CBitmapTableUnit::CBitmapTableUnit(GPrintJob *pJob)
 	:CPrintUnitStandardTable(pJob)
 {
 	m_nRowInEachPage = 3;
-	m_nTitleFormat = DT_CENTER;
-	m_titleMargin = 10;
-	m_pFontTileSrt = new srtFont(90, L"ËÎÌו");
 	m_nColumnsInEachPage = 3;
 	m_pictureMargin = 2;
 	m_currentWorkingColums = 0;
@@ -18,10 +15,9 @@ CBitmapTableUnit::CBitmapTableUnit(GPrintJob *pJob)
 
 CBitmapTableUnit::~CBitmapTableUnit(void)
 {
-	DELETE_IF_NOT_NULL(m_pFontTileSrt);
 }
 
-int CBitmapTableUnit::PreviewUnit( int from, int to )
+int CBitmapTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 {
 	return Paint(from, to);
 }
@@ -48,10 +44,8 @@ int CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenCha
 	// if we have precalculate before, just skip
 	if (GetNeedPreprocessSign() == true)
 	{
-		CreateUserDefinedFont(m_FontTitle, m_pFontTileSrt);
-
 		// all the preprocess stage will not increase the pages
-		PreCalRowStartPosition(from , to, bPrintHeadingWhenChangePage);
+		PreCalColumnWidth(from , to, bPrintHeadingWhenChangePage);
 		PreCalRowHeight(from , to, bPrintHeadingWhenChangePage);
 		
 		SetNeedPreprocessSign(false);
@@ -60,7 +54,7 @@ int CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenCha
 	// here it will actually print, and increase the pages
 	// set preprocessing mode in order not to print pages that are before 'from'
 	SetPreprocessValue(false);
-	return DrawTableBitmaps(from , to, bPrintHeadingWhenChangePage);
+	return DrawTableBitmaps(from , to, m_bNeedPrintTitleExcpetFirstPage);
 }
 
 void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhenChangePage )
@@ -81,7 +75,7 @@ void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhen
 	m_rowHeight = (int)((double)(totalHeight - textHeight - 2 * m_titleMargin)/(double)(m_nRowInEachPage));
 }
 
-void CBitmapTableUnit::PreCalRowStartPosition( int from, int to, BOOL bPrintHeadingWhenChangePage )
+void CBitmapTableUnit::PreCalColumnWidth( int from, int to, BOOL bPrintHeadingWhenChangePage )
 {
 	int clientWidth = abs(JRECT.right - JRECT.left);
 	m_rowWidth = clientWidth / m_nColumnsInEachPage;
@@ -102,21 +96,6 @@ int CBitmapTableUnit::SetRowsInEachPage( int rowInEachPage )
 	return old;
 }
 
-void CBitmapTableUnit::SetTitle( LPCTSTR title, UINT nFormat /*= DT_CENTER*/ )
-{
-	m_title = title;
-	m_nTitleFormat = nFormat;
-	SetNeedPreprocessSign(true);
-}
-
-void CBitmapTableUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
-{
-	DELETE_IF_NOT_NULL(m_pFontTileSrt);
-
-	m_pFontTileSrt = new srtFont(nPointSize, lpszFaceName);
-
-	SetNeedPreprocessSign(true);
-}
 
 int CBitmapTableUnit::SetColumnsInEachPage( int columns )
 {
@@ -157,7 +136,7 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 		// do the actual job
 		StartPage();
 		printedPages++;
-		if (bPrintTitleWhenChangePage)
+		if (printedRows == 0 || bPrintTitleWhenChangePage)
 		{
 			PrintTitleAndMoveCursor();
 		}
@@ -166,10 +145,9 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 		int rowInThisPage = 0;	
 		while(rowInThisPage < m_nRowInEachPage && printedRows < nRows)
 		{
-			// deal different pages' columns, attention that columns 
-			// can be printed in different pages.
-			int currentWorkingColums = 0;
+			StartRow();
 
+			int currentWorkingColums = 0;
 			while(currentWorkingColums < m_nColumnsInEachPage)
 			{
 				//paint the bitmap
@@ -195,35 +173,6 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 	}
 
 	return currentPage - from + 1;
-}
-
-int CBitmapTableUnit::PrintTitle()
-{
-	int height = 0;
-
-	if (!m_title.empty())
-	{
-		GSELECT_OBJECT(&JDC, &m_FontTitle);
-		height = PrintTextLine(m_title.c_str(), m_nTitleFormat, JRECT.bottom, FALSE);
-	}
-
-	return height;
-}
-
-void CBitmapTableUnit::PrintTitleAndMoveCursor()
-{
-	// traverse the height of the interval
-	JCUR.y += m_titleMargin;
-
-	// print title first
-	// attention that heading is a kind of row
-	if (!m_title.empty())
-	{
-		PrintTitle();
-	}
-
-	// traverse the height of the interval
-	JCUR.y += m_titleMargin;
 }
 
 void CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
@@ -262,18 +211,6 @@ void CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
 	JCUR.x += m_rowWidth;
 }
 
-int CBitmapTableUnit::SetTitleMargin( int titleMargin )
-{
-	int old = m_titleMargin;
-	m_titleMargin = titleMargin;
-
-	if (old != m_titleMargin)
-	{
-		SetNeedPreprocessSign(true);
-	}
-
-	return old;	
-}
 
 BOOL CBitmapTableUnit::SetPrintData( vector<vector<CBitmap*>> *data )
 {

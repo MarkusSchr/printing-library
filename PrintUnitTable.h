@@ -25,10 +25,10 @@ public:
 
 public:
 	// define columns
-	void DefineColumns(vector<COLUMNDEFINITIONS>& columns);
+	virtual void DefineColumns(vector<COLUMNDEFINITIONS>& columns);
 
-	virtual BOOL SetPrintData(vector<vector<T*>> *data);
-	BOOL SetRowFormat(UINT nFormat);
+	BOOL SetPrintData(vector<vector<T*>> *data);
+	virtual BOOL SetRowFormat(UINT nFormat);
 
 	// font related methods
 	void SetHeadingFont(int nPointSize, LPCTSTR lpszFaceName);
@@ -36,8 +36,8 @@ public:
 protected:
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
+	virtual void DeleteDefaultFonts();
 	BOOL CheckCurrentDCCompatibleWithPrevious();
-	void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
 
 private:
 	void GetCurrentTimeAndDate(CString& strDate, CString& time);
@@ -105,26 +105,18 @@ void CPrintUnitStandardTable<T>::CreatePrintFonts()
 {
 	GPrintUnit::CreatePrintFonts();
 
-	if (m_pUserFontHeader)
-	{
-		CreateUserDefinedFont(m_fontHeader, m_pUserFontHeader);
-	}
-	if (m_pUserFontFooter)
-	{
-		CreateUserDefinedFont(m_fontFooter, m_pUserFontFooter);
-	}
-	if (m_pUserFontPrinter)
-	{
-		CreateUserDefinedFont(m_fontPairBody.fontPrinter, m_pUserFontPrinter);
-	}
-	if (m_pUserFontScreen)
-	{
-		CreateUserDefinedFont(m_fontPairBody.fontScreen, m_pUserFontScreen);
-	}
 	if (m_pUserFontHeading)
 	{
 		CreateUserDefinedFont(m_fontHeading, m_pUserFontHeading);
 	}
+}
+
+template<class T>
+void CPrintUnitStandardTable<T>::DeleteDefaultFonts()
+{
+	m_fontHeading.DeleteObject();
+
+	GPrintUnit::DeleteDefaultFonts();
 }
 
 template<class T>
@@ -147,16 +139,10 @@ void CPrintUnitStandardTable<T>::CompleteAllColHeadingsDefinition()
 }
 
 template<class T>
-void CPrintUnitStandardTable<T>::CreateUserDefinedFont( CFont& fontDes, srtFont *fontSource )
-{
-	fontDes.DeleteObject();	
-	fontDes.CreatePointFont(fontSource->nPointSize, fontSource->name.c_str(), &JDC);
-}
-
-template<class T>
 CPrintUnitStandardTable<T>::~CPrintUnitStandardTable()
 {
 	DELETE_IF_NOT_NULL(m_pUserFontHeading);
+	DELETE_IF_NOT_NULL(m_pFontTileSrt);
 }
 
 template<class T>
@@ -205,3 +191,4 @@ BOOL CPrintUnitStandardTable<T>::CheckCurrentDCCompatibleWithPrevious()
 		return false;
 	}
 }
+
