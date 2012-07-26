@@ -61,7 +61,7 @@ void CPrintUnitFromDC::OnEndPrinting()
 	}
 }
 
-int CPrintUnitFromDC::PreviewUnit( int from, int to )
+int CPrintUnitFromDC::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 {
 	return Paint(from, to);
 }

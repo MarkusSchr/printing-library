@@ -508,7 +508,7 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 			// this unit needs to be drawn
 			int newfrom = from - base + 1;
 			int newto = to -base + 1;
-			int acturalPrintedPage = PreviewOneUnit(pPreviewDC, i, newfrom, newto);
+			int acturalPrintedPage = PreviewOneUnit(pPreviewDC, i, FALSE, newfrom, newto);
 			from += acturalPrintedPage;
 			base += unitMaxPage;
 			totalPages += acturalPrintedPage;
@@ -545,7 +545,7 @@ int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 	int totalNum = 0;
 	for (int i = 0; i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
-		m_vecUnitPages[i] = PreviewOneUnit(memDC, i);
+		m_vecUnitPages[i] = PreviewOneUnit(memDC, i, TRUE);
 		totalNum += m_vecUnitPages[i];
 	}
 	
@@ -554,7 +554,7 @@ int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 	return totalNum;
 }
 
-int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex, int from /*= 1*/, int to /*= 65535 */ )
+int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGetPageOnly /*= FALSE*/, int from /*= 1*/, int to /*= 65535 */ )
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
@@ -568,7 +568,7 @@ int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex, int from /*= 1*/
 	InitPrintDC();
 	InitPrintInfo();
 	m_vecPrintUnitTasks[unitIndex]->OnBeginPrinting();
-	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(from, to);
+	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(bGetPageOnly, from, to);
 	m_vecPrintUnitTasks[unitIndex]->OnEndPrinting();
 	delete m_pInfo;
 	m_pInfo = old;
@@ -588,7 +588,7 @@ int GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, i
 
 	SetPreviewPrintDC(&memDC);
 	
-	int totalNum = PreviewOneUnit(&memDC, unitIndex, from, to);
+	int totalNum = PreviewOneUnit(&memDC, unitIndex, TRUE, from, to);
 
 	SetPreviewPrintDC(pPreviewDC);
 
