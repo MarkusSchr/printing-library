@@ -172,7 +172,7 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 		}
 	}
 
-	return currentPage - from + 1;
+	return currentPage - from;
 }
 
 void CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
