@@ -501,7 +501,7 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 
 		if (from > unitMaxPage + base - 1)
 		{
-			continue;
+			// empty
 		}
 		else
 		{
@@ -510,9 +510,9 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 			int newto = to -base + 1;
 			int acturalPrintedPage = PreviewOneUnit(pPreviewDC, i, FALSE, newfrom, newto);
 			from += acturalPrintedPage;
-			base += unitMaxPage;
 			totalPages += acturalPrintedPage;
 		}
+		base += unitMaxPage;
 	}
 
 	delete m_pInfo;
@@ -564,14 +564,28 @@ int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGe
 	// allocate a new one in case the former is different
 	GPrintInfo* old = m_pInfo;
 	m_pInfo = new GPrintInfo;
+	if (old != NULL)
+	{
+		m_pInfo->m_nCurPage = old->m_nCurPage;
+	}
 
 	InitPrintDC();
 	InitPrintInfo();
 	m_vecPrintUnitTasks[unitIndex]->OnBeginPrinting();
 	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(bGetPageOnly, from, to);
 	m_vecPrintUnitTasks[unitIndex]->OnEndPrinting();
+	
+	int currentPage = 1;
+	if (!bGetPageOnly)
+	{
+		currentPage = m_pInfo->m_nCurPage;
+	}
 	delete m_pInfo;
 	m_pInfo = old;
+	if (!bGetPageOnly)
+	{
+		m_pInfo->m_nCurPage = currentPage;
+	}
 
 	return pages;
 }
