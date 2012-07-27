@@ -61,13 +61,13 @@ int CMergableTableUnit::Paint( int from, int to )
 	m_bPrintThePage = true;
 
 	int movedHeight = 0;
-	UINT page = from;
+	int page = from;
 	for (; page <= to && bContinuePrinting; page++)
 	{
 		StartPage();      
 		
 		// print title
-		if (page == from || m_bNeedPrintTitleExcpetFirstPage)
+		if (page == 1 || m_bNeedPrintTitleExcpetFirstPage)
 		{
 			movedHeight = PrintTitleAndMoveCursor();
 			// this unit is special for not using JCUR.y to print, we need to adjust JRECT instead
