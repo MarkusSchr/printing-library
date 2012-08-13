@@ -11,6 +11,8 @@
 #include "BitmapTableUnit.h"
 #include "MergableTableUnit.h"
 
+#include "MultiTablesUnit.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -327,7 +329,7 @@ void CPrintDlg::OnOK()
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
-	MyPrintJob job;
+	GPrintJob job;
 	
 	CDataTableUnit unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
@@ -367,9 +369,11 @@ void CPrintDlg::OnOK()
 	unitTable1.SetSeparateLineWidth(3);
 
 	unitTable1.SetTitle(L"数据1");
+	unitTable1.NeedPrintTitleExcpetFirstPage(true);
 	job.InsertTask(&unitTable1);
 
 	CDataTableUnit unitTable2;
+	unitTable2.SetTitle(L"数据2");
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
 	unitTable2.SetHeader(footer, 3);
@@ -416,7 +420,7 @@ void CPrintDlg::OnOK()
 	CPrintUnitFromDC userDefinedUnit;
 	userDefinedUnit.SetFooter(footer, 3);
 	userDefinedUnit.SetHeader(header, 3);
-	//job.InsertTask(&userDefinedUnit);
+	job.InsertTask(&userDefinedUnit);
 
 
 	//////////// test 4 : self-define page ////////////////////////////
@@ -425,6 +429,7 @@ void CPrintDlg::OnOK()
 	// add the margin around the title
 	unitBitmapTable.SetTitleMargin(10);
 	unitBitmapTable.SetTitlePen(140, L"楷体");
+	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
 
 	// ability inherited from the base class
 	unitBitmapTable.SetHeader(header, 3);
@@ -433,11 +438,11 @@ void CPrintDlg::OnOK()
 	// set data
 	CBitmap bmp;
 	CSize mSize;
-	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\test\\Debug\\001.jpg", &bmp, mSize);
+	LoadPictureFile(L"D:\\我的文档\\桌面\\Aicro's work\\printing\\bmp\\001.jpg", &bmp, mSize);
 
 	//
 	vector<vector<CBitmap* > > vecBmp;
-	int row = 20;
+	int row = 10;
 	int columns = 3;
 	vecBmp.resize(row);
 	for (int i = 0; i < row; i++)
@@ -465,7 +470,7 @@ void CPrintDlg::OnOK()
 	}
 
 	mergeUnit.DefineColumns(vecColumnDef);
-	rowNum = 100;
+	rowNum = 15;
 	mergeUnit.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{
@@ -501,7 +506,105 @@ void CPrintDlg::OnOK()
 
 	job.InsertTask(&mergeUnit);
 
-	//////////// test 4 : print ////////////////////////////
+	//////////// test 4 : print multi-tables in one printing unit ////////////////////////////
+	// table 1
+	CPrintUnitMergableTable t1;
+	double fPrt2 = (double)((double)1 / (double)vecColumnDef.size());
+	for (int i = 0; i < vecColumnDef.size(); i++)
+	{
+		vecColumnDef[i].fPct = fPrt2;
+	}
+
+	t1.DefineColumns(vecColumnDef);
+	rowNum = 10;
+	t1.SetRowNum(rowNum);
+	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
+	{
+		t1.SetRowHeight(i, 3);
+	}
+	t1.MergeCell(1,0,2,2);
+	t1.SetCellText(1,0, L"桂林");
+	t1.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
+	t1.SetAllRowsFont(30, L"宋体");
+	t1.SetRowFont(3, 30, L"黑体");
+	t1.SetHeadingFont(30, L"楷体");
+	t1.SetCellFont(1, 0, 30, L"黑体");
+	t1.SetTitle(L"桂林山水甲天下");
+	t1.NeedDrawTableOuterline(true);
+	
+
+	// table 2
+	CPrintUnitMergableTable t2;
+	double fPrt3 = (double)((double)1 / (double)vecColumnDef.size());
+	for (int i = 0; i < vecColumnDef.size(); i++)
+	{
+		vecColumnDef[i].fPct = fPrt3;
+	}
+
+	t2.DefineColumns(vecColumnDef);
+	rowNum = 20;
+	t2.SetRowNum(rowNum);
+	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
+	{
+		t2.SetRowHeight(i, 3);
+	}
+	t2.SetTitle(L"广西壮族自治区");
+	for (int i = 0; i < rowNum + 1; i++)
+	{
+		for (int j = 0; j < vecColumnDef.size(); j++)
+		{
+			wstring str = L"广西-";
+			WCHAR t[256];
+			wsprintf(t, L"%d-", i);
+			str.append(t);
+			wsprintf(t, L"%d", j);
+			str.append(t);
+			t2.SetCellText(i,j, str.c_str());
+		}
+	}
+	
+
+	// table 3
+	CPrintUnitMergableTable t3;
+	t3.SetTitle(L"广东");
+	double fPrt4 = (double)((double)1 / (double)vecColumnDef.size());
+	for (int i = 0; i < vecColumnDef.size(); i++)
+	{
+		vecColumnDef[i].fPct = fPrt4;
+	}
+
+	t3.DefineColumns(vecColumnDef);
+	rowNum = 20;
+	t3.SetRowNum(rowNum);
+	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
+	{
+		t3.SetRowHeight(i, 3);
+	}
+	for (int i = 0; i < rowNum + 1; i++)
+	{
+		for (int j = 0; j < vecColumnDef.size(); j++)
+		{
+			wstring str = L"世界-";
+			WCHAR t[256];
+			wsprintf(t, L"%d-", i);
+			str.append(t);
+			wsprintf(t, L"%d", j);
+			str.append(t);
+			t3.SetCellText(i,j, str.c_str());
+		}
+	}
+
+	CMultiTablesUnit multiTableUnit;
+	multiTableUnit.InsertTables(t1);
+	multiTableUnit.InsertTables(t2);
+	multiTableUnit.InsertTables(t3);
+	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
+	multiTableUnit.SetTableIntervalInLineOfText(5);
+	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
+
+	job.InsertTask(&multiTableUnit);
+
+	//////////// test 5 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.PrintFollowingPrintDialog();

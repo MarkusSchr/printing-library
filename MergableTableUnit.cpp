@@ -18,9 +18,10 @@ int CMergableTableUnit::PreviewUnit(BOOL bGetPageOnly, int from, int to )
 	EnvSetBeforePrinting();
 	if (bGetPageOnly == TRUE)
 	{
-		m_pGridCtrl->SetPrintFont(&m_fontPairBody.fontPrinter);
+		CPrintUnitMergableTable::SetPrintFont(&m_fontPairBody.fontPrinter);
+		
 		// preview how many pages do we need
-		m_printPagesTotal = m_pGridCtrl->OnBeginPrinting(&JDC, &JINFO, JRECT);
+		m_printPagesTotal = CPrintUnitMergableTable::BeginPrinting(&JDC, &JINFO, JRECT);
 		
 		if (from > m_printPagesTotal)
 		{
@@ -69,12 +70,12 @@ int CMergableTableUnit::Paint( int from, int to )
 		// print title
 		if (page == 1 || m_bNeedPrintTitleExcpetFirstPage)
 		{
-			movedHeight = PrintTitleAndMoveCursor();
+			movedHeight = PrintTitleAndMoveCursor(!(page == 1));
 			// this unit is special for not using JCUR.y to print, we need to adjust JRECT instead
 			JRECT.top += movedHeight;
 		}
 
-		m_pGridCtrl->OnPrint(&JDC, page, JRECT);   
+		CPrintUnitMergableTable::Paint(&JDC, page, JRECT);
 
 		// we need to change the JCUR back
 		if (movedHeight != 0)

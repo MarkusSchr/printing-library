@@ -234,7 +234,7 @@ void CPrintUnitMergableTable::DefineRowsAndColumns()
 		Item.col = col;
 		Item.nFormat = m_colFormat;
 		Item.strText = m_vecColumnDef[col].strName.c_str();
-		m_pGridCtrl->SetColumnWidth(col, JRECT.Width() * m_vecColumnDef[col].fPct);
+		m_pGridCtrl->SetColumnWidth(col, (int)(JRECT.Width() * m_vecColumnDef[col].fPct));
 		m_pGridCtrl->SetItem(&Item);
 	}
 }
@@ -313,7 +313,7 @@ void CPrintUnitMergableTable::AdjustTopAndBottomMargin()
 void CPrintUnitMergableTable::MergeGridCells()
 {
 	// merge cell
-	for (int i = 0 ; i < m_mergeCellPos.size(); i++)
+	for (int i = 0 ; i < (int)(m_mergeCellPos.size()); i++)
 	{
 		m_pGridCtrl->MergeCells(m_mergeCellPos[i]);
 	}
@@ -339,6 +339,26 @@ void CPrintUnitMergableTable::SetOuterLine()
 	{
 		m_pGridCtrl->SetGridLines(GVL_BOTH);
 	}
+}
+
+void CPrintUnitMergableTable::SetPrintFont( CFont* font )
+{
+	m_pGridCtrl->SetPrintFont(font);
+}
+
+int CPrintUnitMergableTable::BeginPrinting( CDC* pDc, GPrintInfo* info, CRect rect )
+{
+	return m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
+}
+
+void CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PrintEndResult *result )
+{
+	m_pGridCtrl->OnPrint(pDc, page, rect, result);   
+}
+
+int CPrintUnitMergableTable::PrintTitleAndMoveCursor( BOOL bNeedPrintContinue )
+{
+	return GPrintUnit::PrintTitleAndMoveCursor(bNeedPrintContinue);
 }
 
 
