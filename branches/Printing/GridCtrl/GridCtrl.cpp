@@ -7094,7 +7094,7 @@ int CGridCtrl::OnBeginPrinting( CDC *pDC, CPrintInfo *pInfo, CRect clientRect )
 	return m_nNumPages;
 }
 
-void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
+void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect , PrintEndResult* printedEndReslt)
 {
     if (!pDC || !m_pPrinterFont)
         return;
@@ -7227,6 +7227,13 @@ void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
 
         if (rect.bottom > clientRect.bottom - clientRect.top) 
 		{
+			// roll back the rect's bottom
+			rect.bottom = rect.top; 
+
+			if (printedEndReslt)
+			{
+				printedEndReslt->bEndOfPage = true;
+			}
 			break;            // Gone past end of page
 		}
 
@@ -7280,6 +7287,21 @@ void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
         bFirstPrintedRow = FALSE;
     }
 
+	// check whether we have reached the end of the table
+	if (m_nCurrPrintRow == GetRowCount())
+	{
+		if (printedEndReslt)
+		{
+			printedEndReslt->bEndOfTable = true;
+		}
+	}
+
+	// record the pixel of the bottom
+	if (printedEndReslt)
+	{
+		printedEndReslt->pixelOfBottom = rect.bottom + clientRect.top;
+	}
+
 	// draw the merged cell
 	m_bDrawingMergedCell = TRUE;
 	INT_PTR size = m_arMergedCells.GetSize();
@@ -7321,9 +7343,9 @@ void CGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect clientRect )
 					rect.top -= Overlap;
 					CBrush brush(RGB(255,255,255));
 					CBrush* oldBrush = pDC->SelectObject(&brush);
-					CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
+					//CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
 					pDC->Rectangle(&rect);
-					pDC->SelectObject(pOldPen);
+					//pDC->SelectObject(pOldPen);
 					pDC->SelectObject(oldBrush);
 
 					// next repaint the line

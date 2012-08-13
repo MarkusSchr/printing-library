@@ -13,6 +13,8 @@ class GPrintUnit;
 #include <vector>
 using namespace std;
 
+#include "IPrintable.h"
+
 /////////////////////////////////////////
 // misc helpers 
 // NUL character
@@ -382,7 +384,7 @@ typedef LPHEADERDEFINITIONS LPFOOTERDEFINITIONS;
 ///////////////////////////////////////////////////
 
 
-class GPrintUnit : public CObject
+class GPrintUnit : public CObject, IPrintable
 {
 	friend GSelectActivePair;
 
@@ -431,11 +433,15 @@ protected:
 	// called when the unit's print job has ended.
 	virtual void OnEndPrinting();
 
+public:
 	// before calling this method, call InsertPrintCol() to insert 
 	// the columns' definitions and calculate the start positions of all the columns
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
 	virtual void DeleteDefaultFonts();
+	virtual void InitPrintMetrics();
+	
+protected:
 	struct srtFont
 	{
 		int nPointSize;
@@ -448,7 +454,7 @@ protected:
 		}
 	};
 	virtual void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
-	virtual void InitPrintMetrics();
+
 	
 	// the nHeading in the following functions means the number of the column set.
 	// there can be many column set, within which there are many columns
@@ -527,10 +533,6 @@ protected:
 	virtual void GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel);
 	void AddIndexItem(INDEXITEM *pII);
 
-	// for all the deprived print unit task to override
-	// return the pages this unit task will print
-	virtual int PreviewUnit(BOOL bGetPageOnly, int from, int to) = 0;
-
 	void SetNeedPreprocessSign(bool bNeedPreprocess);
 	bool GetNeedPreprocessSign();
 
@@ -542,10 +544,7 @@ protected:
 	PARAFORMAT ConfirmRichEditParaFormat( UINT nFormat );
 	int DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = FALSE);
 	void ClearColumnOverflow();
-	// call to print the job, returns FALSE if printing should stop
-	// 'from' is the page index based on the current unit, beginning with 1
-	// 'to' may exceed the whole range
-	virtual int Paint(int from, int to) = 0;
+
 	void GetCurrentTimeAndDate( CString& date, CString& time );
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -558,8 +557,8 @@ public:
 	int SetTitleMargin(int titleMarginInLineOfText);
 	void NeedPrintTitleExcpetFirstPage(bool bNeed) {m_bNeedPrintTitleExcpetFirstPage = bNeed;}
 protected:
-	int PrintTitleAndMoveCursor();
-	int PrintTitle();
+	int PrintTitleAndMoveCursor(BOOL bShowContinued);
+	int PrintTitle(BOOL bShowContinued);
 protected:
 	// title related attributes
 	wstring m_title;

@@ -223,7 +223,7 @@
 				>
 			</File>
 			<File
-				RelativePath="gfx_printjob.cpp"
+				RelativePath=".\Gfx_printjob.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -243,7 +243,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="gfx_printunit.cpp"
+				RelativePath=".\Gfx_printunit.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -261,6 +261,14 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\MergableTableUnit.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MultiTablesUnit.cpp"
+				>
 			</File>
 			<File
 				RelativePath="print.cpp"
@@ -327,6 +335,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PrintUnitMergableTable.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -368,6 +380,34 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="GridCtrl"
+				>
+				<File
+					RelativePath=".\GridCtrl\GridCell.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridCellBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridCtrl.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridDropTarget.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\InPlaceEdit.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\TitleTip.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -382,15 +422,27 @@
 				>
 			</File>
 			<File
-				RelativePath="gfx_printjob.h"
+				RelativePath=".\Gfx_printjob.h"
 				>
 			</File>
 			<File
-				RelativePath="gfx_printunit.h"
+				RelativePath=".\Gfx_printunit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IPrintable.h"
 				>
 			</File>
 			<File
 				RelativePath=".\MemDC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MergableTableUnit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MultiTablesUnit.h"
 				>
 			</File>
 			<File
@@ -406,6 +458,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PrintUnitMergableTable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PrintUnitTable.h"
 				>
 			</File>
@@ -417,6 +473,38 @@
 				RelativePath="StdAfx.h"
 				>
 			</File>
+			<Filter
+				Name="GridCtrl"
+				>
+				<File
+					RelativePath=".\GridCtrl\CellRange.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridCell.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridCellBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridCtrl.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\GridDropTarget.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\InPlaceEdit.h"
+					>
+				</File>
+				<File
+					RelativePath=".\GridCtrl\TitleTip.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

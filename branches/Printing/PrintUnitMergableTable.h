@@ -11,6 +11,10 @@ public:
 	CPrintUnitMergableTable(GPrintJob *pJob = NULL);
 	virtual ~CPrintUnitMergableTable();
 
+private:
+	virtual int PreviewUnit(BOOL bGetPageOnly, int from, int to) {return -1;}
+	virtual int Paint(int from, int to) {return -1;}
+
 public:
 	// call this method before any merge methods
 	virtual void DefineColumns(vector<COLUMNDEFINITIONS>& columns);
@@ -49,7 +53,13 @@ public:
 	void SetColFont(int nColIndex, int nPointSize, LPCTSTR lpszFaceName);
 	void SetCellFont(int nRowIndex, int nColIndex, int nPointSize, LPCTSTR lpszFaceName);
 
-protected:
+public:
+	void SetPrintFont(CFont* font);
+	int BeginPrinting(CDC* pDc, GPrintInfo* info, CRect rect);
+	void Paint(CDC* pDc, int page, CRect rect, PrintEndResult *result = NULL);
+	int PrintTitleAndMoveCursor(BOOL bNeedPrintContinue);
+
+public:
 	virtual void CompleteAllColHeadingsDefinition();
 
 private:
