@@ -1,0 +1,232 @@
+#include "StdAfx.h"
+#include "MultiTablesUnit.h"
+#include "MemDC.h"
+
+CMultiTablesUnit::CMultiTablesUnit( GPrintJob *pJob /*= NULL*/ )
+	:CPrintUnitStandardTable(pJob)
+{
+	m_intervalBetweenTables = 1;
+	m_intervalBetweenFirstTable = 1;
+
+	m_printPagesTotal = 0;
+}
+
+CMultiTablesUnit::~CMultiTablesUnit()
+{
+}
+
+void CMultiTablesUnit::InsertTables( CPrintUnitMergableTable& table )
+{
+	m_vecTables.push_back(&table);
+}
+
+void CMultiTablesUnit::ClearTables()
+{
+	m_vecTables.clear();
+}
+
+int CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+{
+	int printedPages = 1;
+
+	//if (bGetPageOnly)
+	//{
+	//	int printedHeight = 0 - m_intervalBetweenTables * m_pum.pumLineOfText; // in case the first table
+	//	int clientHeight = JRECT.bottom - JRECT.top - m_intervalBetweenFirstTable * m_pum.pumLineOfText;
+
+	//	for (int i = 0; i < m_vecTables.size(); i++)
+	//	{
+	//		if (to <= printedPages)
+	//		{
+	//			printedPages = to;
+	//			break;
+	//		}
+
+	//		// add the interval between tables
+	//		printedHeight += m_intervalBetweenTables * m_pum.pumLineOfText;
+
+	//		printedHeight += m_vecTables[i].GetPrintedHeight();
+
+	//		while (printedHeight > clientHeight)
+	//		{
+	//			// another page
+	//			printedPages++;
+	//			printedHeight = printedHeight - clientHeight;
+	//		}
+	//	}
+
+	//	m_printPagesTotal = printedPages - from + 1;
+	//}
+	//else
+	//{
+	//	m_printPagesTotal = this->Paint(from, to);
+	//}
+
+	CDC* oldDC = m_pJob->m_pDC;
+	CMyMemDC dc(&JDC);
+
+	if (bGetPageOnly)
+	{
+		oldDC = &JDC;
+		m_pJob->m_pDC = &dc;
+	}
+
+	EnvSetBeforePrinting();
+	m_printPagesTotal = this->Paint(from, to);
+	EnvCleanupAfterPrinting();
+	
+	if (bGetPageOnly)
+	{
+		m_pJob->m_pDC = oldDC;
+	}
+	
+	return m_printPagesTotal;
+}
+
+int CMultiTablesUnit::Paint( int from, int to )
+{
+	bool bContinuePrinting = true;
+
+	int beginPage = JINFO.m_nCurPage;
+
+	SetPreprocessValue(false);
+	m_bPrintThePage = true;
+
+	int movedHeight = 0;
+	int page = from;
+	int iTable = 0;
+	bool bNeedPreview = true;
+
+	int basePage = page;
+	for (; page <= to && iTable != m_vecTables.size(); page++)
+	{
+		StartPage();
+		// adjust the top margin
+		JRECT.top += m_intervalBetweenFirstTable * m_pum.pumLineOfText;
+
+		CRect oldRect = JRECT;
+		bool bReachPageBottom = false;
+		while (!bReachPageBottom && iTable != m_vecTables.size())
+		{
+			// we have not reached the bottom of the page
+
+			// print title
+			m_vecTables[iTable]->SetPrintFont(&m_fontPairBody.fontPrinter);
+			m_vecTables[iTable]->m_pJob->m_ptCursor = JRECT.TopLeft();
+			if (bNeedPreview || m_bNeedPrintTitleExcpetFirstPage)
+			{
+				// the first time to print this table
+				movedHeight = m_vecTables[iTable]->PrintTitleAndMoveCursor(!bNeedPreview);
+			}
+			JRECT.top += movedHeight;
+
+			if (bNeedPreview)
+			{
+				m_vecTables[iTable]->BeginPrinting(&JDC, &JINFO, JRECT);
+				bNeedPreview = false;
+			}
+
+			PrintEndResult printEndResult;
+			m_vecTables[iTable]->Paint(&JDC, page - basePage + 1, JRECT, &printEndResult); 
+
+			if (printEndResult.bEndOfTable)
+			{
+				iTable++;
+				basePage = page;
+
+				bNeedPreview = true;
+			}
+
+			bReachPageBottom = printEndResult.bEndOfPage;
+
+			// print another table
+			JRECT.top = printEndResult.pixelOfBottom;
+			JRECT.top += m_intervalBetweenTables * m_pum.pumLineOfText;
+		}
+
+		// we need to change the JCUR back
+		JRECT = oldRect;
+		JRECT.top -= m_intervalBetweenFirstTable * m_pum.pumLineOfText;
+
+		EndPage();
+
+		if (page == m_printPagesTotal)
+		{
+			bContinuePrinting = false;
+		}
+	}
+
+	return page - from;	
+}
+
+void CMultiTablesUnit::SetTableIntervalInLineOfText( int intervalInLineOfText )
+{
+	if (intervalInLineOfText <= 1)
+	{
+		m_intervalBetweenTables = 1;
+	}
+	else
+	{
+		m_intervalBetweenTables = intervalInLineOfText;
+	}
+}
+
+void CMultiTablesUnit::SetIntervalBetweenFirstTableInLineOfText( int intervalInLineOfText )
+{
+	if (intervalInLineOfText <= 1)
+	{
+		m_intervalBetweenFirstTable = 1;
+	}
+	else
+	{
+		m_intervalBetweenFirstTable = intervalInLineOfText;
+	}
+}
+
+void CMultiTablesUnit::CreatePrintFonts()
+{
+	// for the unit itself
+	CPrintUnitStandardTable<CONST WCHAR>::CreatePrintFonts();
+
+	for (int i = 0; i < m_vecTables.size(); i++)
+	{
+		m_vecTables[i]->m_pJob = this->m_pJob;
+		m_vecTables[i]->CreatePrintFonts();
+	}
+}
+
+void CMultiTablesUnit::InitPrintMetrics()
+{
+	// for the unit itself
+	CPrintUnitStandardTable<CONST WCHAR>::InitPrintMetrics();
+
+	// for each table
+	for (int i = 0; i < m_vecTables.size(); i++)
+	{
+		m_vecTables[i]->m_pJob = this->m_pJob;
+		m_vecTables[i]->InitPrintMetrics();
+	}
+}
+
+void CMultiTablesUnit::DeleteDefaultFonts()
+{
+	// for the unit itself
+	CPrintUnitStandardTable<CONST WCHAR>::DeleteDefaultFonts();
+
+	for (int i = 0; i < m_vecTables.size(); i++)
+	{
+		m_vecTables[i]->m_pJob = this->m_pJob;
+		m_vecTables[i]->DeleteDefaultFonts();
+	}
+}
+
+void CMultiTablesUnit::CompleteAllColHeadingsDefinition()
+{
+	CPrintUnitStandardTable<CONST WCHAR>::CompleteAllColHeadingsDefinition();
+
+	for (int i = 0; i < m_vecTables.size(); i++)
+	{
+		m_vecTables[i]->m_pJob = this->m_pJob;
+		m_vecTables[i]->CompleteAllColHeadingsDefinition();
+	}
+}

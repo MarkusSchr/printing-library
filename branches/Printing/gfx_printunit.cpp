@@ -279,7 +279,7 @@ int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRow
 	bool bNewPage = StartPage();
 
 	// print the title
-	PrintTitleAndMoveCursor();
+	PrintTitleAndMoveCursor(FALSE);
 
 	// now check whether this page should be printed
 	int currentPage = 1;
@@ -441,7 +441,7 @@ int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRow
 					if (m_bNeedPrintTitleExcpetFirstPage)
 					{
 						// print the title
-						PrintTitleAndMoveCursor();
+						PrintTitleAndMoveCursor(m_bNeedPrintTitleExcpetFirstPage && !GetPreprocessValue());
 					}
 				}
 				else
@@ -1939,20 +1939,27 @@ void GPrintUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-int GPrintUnit::PrintTitle()
+int GPrintUnit::PrintTitle( BOOL bShowContinued )
 {
 	int height = 0;
 
 	if (!m_title.empty())
 	{
+		wstring temp = m_title;
+		if (bShowContinued)
+		{
+			// attach the "Ðø¡±
+			temp.append(L"(Ðø)");
+		}
+
 		GSELECT_OBJECT(&JDC, &m_FontTitle);
-		height = PrintTextLine(m_title.c_str(), m_nTitleFormat, JRECT.bottom, FALSE);
+		height = PrintTextLine(temp.c_str(), m_nTitleFormat, JRECT.bottom, FALSE);
 	}
 
 	return height;
 }
 
-int GPrintUnit::PrintTitleAndMoveCursor()
+int GPrintUnit::PrintTitleAndMoveCursor( BOOL bShowContinued )
 {
 	int originY = JCUR.y;
 
@@ -1963,7 +1970,7 @@ int GPrintUnit::PrintTitleAndMoveCursor()
 	// attention that heading is a kind of row
 	if (!m_title.empty())
 	{
-		JCUR.y += PrintTitle();
+		JCUR.y += PrintTitle(bShowContinued);
 	}
 
 	// traverse the height of the interval
@@ -1984,7 +1991,6 @@ int GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
 
 	return old;	
 }
-
 
 ///////////////////////////////////////////////////////////////////////
 

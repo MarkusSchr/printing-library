@@ -68,7 +68,7 @@ void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhen
 		CMyMemDC dc(&JDC);
 		CDC* oldDC = m_pJob->m_pDC;
 		m_pJob->m_pDC = &dc;
-		textHeight = PrintTitle();
+		textHeight = PrintTitle(FALSE);
 		m_pJob->m_pDC = oldDC;
 	}
 
@@ -138,7 +138,7 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 		printedPages++;
 		if (printedRows == 0 || bPrintTitleWhenChangePage)
 		{
-			PrintTitleAndMoveCursor();
+			PrintTitleAndMoveCursor(!(printedRows == 0) && !GetPreprocessValue());
 		}
 
 		// traverse all the data

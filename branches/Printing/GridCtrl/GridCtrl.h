@@ -195,6 +195,22 @@ class CGridCtrl;
 
 typedef bool (*PVIRTUALCOMPARE)(int, int);
 
+
+// struct that indicates how the printing is ended
+struct PrintEndResult
+{
+	bool bEndOfPage; // print this page end for reach the bottom of the page
+	bool bEndOfTable;// print this page end for reach the last row of the table
+	int pixelOfBottom; // the pixel of the bottom at the end of this round's printing 
+
+	PrintEndResult()
+	{
+		bEndOfPage = false;
+		bEndOfTable = false;
+		pixelOfBottom = 0;
+	}
+};
+
 class CGridCtrl : public CWnd
 {
     DECLARE_DYNCREATE(CGridCtrl)
@@ -650,7 +666,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////
 public:
 	virtual int OnBeginPrinting(CDC *pDC, CPrintInfo *pInfo, CRect clientRect);
-	virtual void OnPrint(CDC *pDC, int currentPageNum, CRect clientRect);
+	virtual void OnPrint(CDC *pDC, int currentPageNum, CRect clientRect, PrintEndResult* printedEndReslt = NULL);
     virtual void OnEndPrinting(CDC *pDC, CPrintInfo *pInfo);
 
 #endif // #if !defined(_WIN32_WCE_NO_PRINTING) && !defined(GRIDCONTROL_NO_PRINTING)

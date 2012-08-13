@@ -33,7 +33,7 @@ public:
 	// font related methods
 	void SetHeadingFont(int nPointSize, LPCTSTR lpszFaceName);
 
-protected:
+public:
 	virtual void CompleteAllColHeadingsDefinition();
 	virtual void CreatePrintFonts();
 	virtual void DeleteDefaultFonts();
