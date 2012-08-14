@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BitmapTableUnit.h"
-#include "MemDC.h"
+#include "MemDCForPrint.h"
 
 using namespace Printing;
 
@@ -67,7 +67,7 @@ void Printing::CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintH
 	// to test the height of the text
 	int textHeight = 0;
 	{
-		Printing::CMyMemDC dc(&JDC);
+		Printing::CMemDcNotDraw dc(&JDC);
 		CDC* oldDC = m_pJob->m_pDC;
 		m_pJob->m_pDC = &dc;
 		textHeight = PrintTitle(FALSE);

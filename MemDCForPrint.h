@@ -3,28 +3,6 @@
 #ifndef _MEMDC_H_
 #define _MEMDC_H_
 
-//////////////////////////////////////////////////
-// CMemDC - memory DC
-//
-// Author: Keith Rule
-// Email:  
-// Copyright 1996-1999, Keith Rule
-//
-// You may freely use or modify this code provided this
-// Copyright is included in all derived versions.
-//
-// History - 10/3/97 Fixed scrolling bug.
-//                   Added print support. - KR
-//
-//           11/3/99 Fixed most common complaint. Added
-//                   background color fill. - KR
-//
-//           11/3/99 Added support for mapping modes other than
-//                   MM_TEXT as suggested by Lee Sang Hun. - KR
-//
-// This class implements a memory Device Context which allows
-// flicker free drawing.
-
 namespace Printing
 {
 	class CMemDCUsedForPrinter : public CDC {
@@ -104,12 +82,12 @@ namespace Printing
 
 	// the only difference between this MemDC and the CMemDC is CMyMemDC will not copy 
 	// the DC's content to the original DC
-	class CMyMemDC : public CMemDCUsedForPrinter
+	class CMemDcNotDraw : public CMemDCUsedForPrinter
 	{
 	public:
-		CMyMemDC(CDC* pDC) : CMemDCUsedForPrinter(pDC) {  }
-		CMyMemDC(CDC* pDC, const RECT& rect) : CMemDCUsedForPrinter(pDC, rect) {  }
-		virtual ~CMyMemDC()
+		CMemDcNotDraw(CDC* pDC) : CMemDCUsedForPrinter(pDC) {  }
+		CMemDcNotDraw(CDC* pDC, const RECT& rect) : CMemDCUsedForPrinter(pDC, rect) {  }
+		virtual ~CMemDcNotDraw()
 		{   
 			SelectObject(m_oldBitmap);
 			m_bMemDC = false;

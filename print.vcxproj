@@ -139,15 +139,16 @@
   <ItemGroup>
     <ClCompile Include="BitmapTableUnit.cpp" />
     <ClCompile Include="DataTableUnit.cpp" />
-    <ClCompile Include="gfx_printjob.cpp">
+    <ClCompile Include="Gfx_printjob.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="gfx_printunit.cpp">
+    <ClCompile Include="Gfx_printunit.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MergableTableUnit.cpp" />
+    <ClCompile Include="MultiTablesUnit.cpp" />
     <ClCompile Include="print.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -184,10 +185,12 @@
     <ClInclude Include="HSEPrinter.h" />
     <ClInclude Include="BitmapTableUnit.h" />
     <ClInclude Include="DataTableUnit.h" />
-    <ClInclude Include="gfx_printjob.h" />
-    <ClInclude Include="gfx_printunit.h" />
-    <ClInclude Include="MemDC.h" />
+    <ClInclude Include="Gfx_printjob.h" />
+    <ClInclude Include="Gfx_printunit.h" />
+    <ClInclude Include="IPrintable.h" />
+    <ClInclude Include="MemDCForPrint.h" />
     <ClInclude Include="MergableTableUnit.h" />
+    <ClInclude Include="MultiTablesUnit.h" />
     <ClInclude Include="print.h" />
     <ClInclude Include="printDlg.h" />
     <ClInclude Include="PrintUnitFromDC.h" />
