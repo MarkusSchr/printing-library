@@ -7,8 +7,8 @@
 #include "HSECPrintPageConfig.h"
 #include "HSEPrinter.h"
 
-
-class CPrintUnitFromDC : public GPrintUnit
+using namespace Printing;
+class CPrintUnitFromDC : public Printing::GPrintUnit
 {
 public:
 	CPrintUnitFromDC(GPrintJob *pJob = NULL);

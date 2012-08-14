@@ -25,94 +25,98 @@
 // This class implements a memory Device Context which allows
 // flicker free drawing.
 
-class CMemDC : public CDC {
-protected:
-	CBitmap  m_bitmap;       // Offscreen bitmap
-	CBitmap* m_oldBitmap;    // bitmap originally found in CMemDC
-	CDC*     m_pDC;          // Saves CDC passed in constructor
-	CRect    m_rect;         // Rectangle of drawing area. in logical coordinates 
-	BOOL     m_bMemDC;       // TRUE if CDC really is a Memory DC.
+namespace Printing
+{
+	class CMemDCUsedForPrinter : public CDC {
+	protected:
+		CBitmap  m_bitmap;       // Offscreen bitmap
+		CBitmap* m_oldBitmap;    // bitmap originally found in CMemDC
+		CDC*     m_pDC;          // Saves CDC passed in constructor
+		CRect    m_rect;         // Rectangle of drawing area. in logical coordinates 
+		BOOL     m_bMemDC;       // TRUE if CDC really is a Memory DC.
 
-	void Construct(CDC* pDC)
-	{
-		ASSERT(pDC != NULL); 
+		void Construct(CDC* pDC)
+		{
+			ASSERT(pDC != NULL); 
 
-		// Some initialization
-		m_pDC = pDC;
-		m_oldBitmap = NULL;
-		m_bMemDC = pDC->IsPrinting();
+			// Some initialization
+			m_pDC = pDC;
+			m_oldBitmap = NULL;
+			m_bMemDC = pDC->IsPrinting();
 
-		if (m_bMemDC) {
-			// Create a Memory DC
-			CreateCompatibleDC(pDC);
-			pDC->LPtoDP(&m_rect);
+			if (m_bMemDC) {
+				// Create a Memory DC
+				CreateCompatibleDC(pDC);
+				pDC->LPtoDP(&m_rect);
 
-			m_bitmap.CreateCompatibleBitmap(pDC, m_rect.Width(), m_rect.Height());
-			m_oldBitmap = SelectObject(&m_bitmap);
+				m_bitmap.CreateCompatibleBitmap(pDC, m_rect.Width(), m_rect.Height());
+				m_oldBitmap = SelectObject(&m_bitmap);
 
-			SetMapMode(pDC->GetMapMode());
-			pDC->DPtoLP(&m_rect);
-			SetWindowOrg(m_rect.left, m_rect.top);
-		} else {
-			// Make a copy of the relavent parts of the current DC for printing
-			m_bPrinting = pDC->m_bPrinting;
-			m_hDC       = pDC->m_hDC;
-			m_hAttribDC = pDC->m_hAttribDC;
+				SetMapMode(pDC->GetMapMode());
+				pDC->DPtoLP(&m_rect);
+				SetWindowOrg(m_rect.left, m_rect.top);
+			} else {
+				// Make a copy of the relavent parts of the current DC for printing
+				m_bPrinting = pDC->m_bPrinting;
+				m_hDC       = pDC->m_hDC;
+				m_hAttribDC = pDC->m_hAttribDC;
+			}
+
+			// Fill background 
+			FillSolidRect(m_rect, pDC->GetBkColor());
 		}
 
-		// Fill background 
-		FillSolidRect(m_rect, pDC->GetBkColor());
-	}
+		// TRK begin
+	public:
+		CMemDCUsedForPrinter(CDC* pDC                  ) : CDC() { pDC->GetClipBox(&m_rect); Construct(pDC); }
+		CMemDCUsedForPrinter(CDC* pDC, const RECT& rect) : CDC() { m_rect = rect           ; Construct(pDC); }
+		// TRK end
 
-	// TRK begin
-public:
-	CMemDC(CDC* pDC                  ) : CDC() { pDC->GetClipBox(&m_rect); Construct(pDC); }
-	CMemDC(CDC* pDC, const RECT& rect) : CDC() { m_rect = rect           ; Construct(pDC); }
-	// TRK end
+		virtual ~CMemDCUsedForPrinter()
+		{        
+			if (m_bMemDC) {
+				// Copy the offscreen bitmap onto the screen.
+				m_pDC->BitBlt(m_rect.left, m_rect.top, m_rect.Width(), m_rect.Height(),
+					this, m_rect.left, m_rect.top, SRCCOPY);            
 
-	virtual ~CMemDC()
-	{        
-		if (m_bMemDC) {
-			// Copy the offscreen bitmap onto the screen.
-			m_pDC->BitBlt(m_rect.left, m_rect.top, m_rect.Width(), m_rect.Height(),
-				this, m_rect.left, m_rect.top, SRCCOPY);            
+				//Swap back the original bitmap.
+				SelectObject(m_oldBitmap);        
+			} else {
+				// All we need to do is replace the DC with an illegal value,
+				// this keeps us from accidently deleting the handles associated with
+				// the CDC that was passed to the constructor.            
+				m_hDC = m_hAttribDC = NULL;
+			}    
+		}
 
-			//Swap back the original bitmap.
-			SelectObject(m_oldBitmap);        
-		} else {
-			// All we need to do is replace the DC with an illegal value,
-			// this keeps us from accidently deleting the handles associated with
-			// the CDC that was passed to the constructor.            
-			m_hDC = m_hAttribDC = NULL;
+		// Allow usage as a pointer    
+		CMemDCUsedForPrinter* operator->() 
+		{
+			return this;
 		}    
-	}
 
-	// Allow usage as a pointer    
-	CMemDC* operator->() 
+		// Allow usage as a pointer    
+		operator CMemDCUsedForPrinter*() 
+		{
+			return this;
+		}
+	};
+
+	// the only difference between this MemDC and the CMemDC is CMyMemDC will not copy 
+	// the DC's content to the original DC
+	class CMyMemDC : public CMemDCUsedForPrinter
 	{
-		return this;
-	}    
+	public:
+		CMyMemDC(CDC* pDC) : CMemDCUsedForPrinter(pDC) {  }
+		CMyMemDC(CDC* pDC, const RECT& rect) : CMemDCUsedForPrinter(pDC, rect) {  }
+		virtual ~CMyMemDC()
+		{   
+			SelectObject(m_oldBitmap);
+			m_bMemDC = false;
+		}
+	};
+}
 
-	// Allow usage as a pointer    
-	operator CMemDC*() 
-	{
-		return this;
-	}
-};
-
-// the only difference between this MemDC and the CMemDC is CMyMemDC will not copy 
-// the DC's content to the original DC
-class CMyMemDC : public CMemDC
-{
-public:
-	CMyMemDC(CDC* pDC) : CMemDC(pDC) {  }
-	CMyMemDC(CDC* pDC, const RECT& rect) : CMemDC(pDC, rect) {  }
-	virtual ~CMyMemDC()
-	{   
-		SelectObject(m_oldBitmap);
-		m_bMemDC = false;
-	}
-};
 
 #endif
 

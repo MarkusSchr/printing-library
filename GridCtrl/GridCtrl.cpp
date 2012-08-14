@@ -150,6 +150,8 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(CGridCtrl, CWnd)
 
 
+using namespace Printing;
+
 // Get the number of lines to scroll with each mouse wheel notch
 // Why doesn't windows give us this function???
 UINT GetMouseScrollLines()
@@ -635,7 +637,7 @@ void CGridCtrl::OnPaint()
 
     if (m_bDoubleBuffer)    // Use a memory DC to remove flicker
     {
-        CMemDC MemDC(&dc);
+        CMemDCUsedForPrinter MemDC(&dc);
         OnDraw(&MemDC);
     }
     else                    // Draw raw - this helps in debugging vis problems.
