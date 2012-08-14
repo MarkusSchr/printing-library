@@ -2,7 +2,7 @@
 #include "PrintUnitMergableTable.h"
 #include <algorithm>
 
-CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
+Printing::CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
 	:CPrintUnitStandardTable(pJob)
 {
 	m_bHasDefinedColumns = false;
@@ -18,12 +18,12 @@ CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
 	m_bDrawOuterLine = true;
 }
 
-CPrintUnitMergableTable::~CPrintUnitMergableTable()
+Printing::CPrintUnitMergableTable::~CPrintUnitMergableTable()
 {
 	DELETE_IF_NOT_NULL(m_pGridCtrl);
 }
 
-void CPrintUnitMergableTable::DefineColumns( vector<COLUMNDEFINITIONS>& columns )
+void Printing::CPrintUnitMergableTable::DefineColumns( vector<COLUMNDEFINITIONS>& columns )
 {
 	m_vecColumnDef.clear();
 	m_vecColumnDef.resize(columns.size());
@@ -35,7 +35,7 @@ void CPrintUnitMergableTable::DefineColumns( vector<COLUMNDEFINITIONS>& columns 
 	m_bHasDefinedColumns = true;
 }
 
-void CPrintUnitMergableTable::SetRowNum(int nRowNum)
+void Printing::CPrintUnitMergableTable::SetRowNum(int nRowNum)
 {
 	if (nRowNum == m_nRows)
 		return;
@@ -49,7 +49,7 @@ void CPrintUnitMergableTable::SetRowNum(int nRowNum)
 	m_bHasChangedRowOrColumns = true;
 }
 
-BOOL CPrintUnitMergableTable::MergeCell( int minRow, int minColumn, int maxRow, int maxColumn )
+BOOL Printing::CPrintUnitMergableTable::MergeCell( int minRow, int minColumn, int maxRow, int maxColumn )
 {
 	ASSERT(m_nRows != 0 && m_nColumns != 0);
 
@@ -68,7 +68,7 @@ BOOL CPrintUnitMergableTable::MergeCell( int minRow, int minColumn, int maxRow, 
 	return bLegal;
 }
 
-BOOL CPrintUnitMergableTable::SetCellText( int row, int column, LPCTSTR text )
+BOOL Printing::CPrintUnitMergableTable::SetCellText( int row, int column, LPCTSTR text )
 {
 	bool bLegal = (row >= 0 && row <= m_nRows) && (column >= 0 && column <= m_nColumns);
 	if (bLegal == false)
@@ -88,7 +88,7 @@ BOOL CPrintUnitMergableTable::SetCellText( int row, int column, LPCTSTR text )
 	return TRUE;
 }
 
-void CPrintUnitMergableTable::CompleteAllColHeadingsDefinition()
+void Printing::CPrintUnitMergableTable::CompleteAllColHeadingsDefinition()
 {
 	if (m_bHasChangedRowOrColumns == true)
 	{
@@ -119,7 +119,7 @@ void CPrintUnitMergableTable::CompleteAllColHeadingsDefinition()
 	CPrintUnitStandardTable::CompleteAllColHeadingsDefinition();
 }
 
-BOOL CPrintUnitMergableTable::SetCellFormat( int row, int column, UINT nFormat )
+BOOL Printing::CPrintUnitMergableTable::SetCellFormat( int row, int column, UINT nFormat )
 {
 	bool bLegal = (row >= 0 && row <= m_nRows) && (column >= 0 && column <= m_nColumns);
 	if (bLegal == false)
@@ -139,37 +139,37 @@ BOOL CPrintUnitMergableTable::SetCellFormat( int row, int column, UINT nFormat )
 	return TRUE;
 }
 
-void CPrintUnitMergableTable::SetColumnRowHeight( int heightInLineOfText )
+void Printing::CPrintUnitMergableTable::SetColumnRowHeight( int heightInLineOfText )
 {
 	SetRowHeight(0, heightInLineOfText);
 }
 
-void CPrintUnitMergableTable::SetRowHeight( int nRow, int heightInLineOfText )
+void Printing::CPrintUnitMergableTable::SetRowHeight( int nRow, int heightInLineOfText )
 {
 	m_rowHeight[nRow] = heightInLineOfText;
 }
 
-void CPrintUnitMergableTable::SetTopMarginInLineOfText( int topMarginInLineOfText )
+void Printing::CPrintUnitMergableTable::SetTopMarginInLineOfText( int topMarginInLineOfText )
 {
 	m_topMarginInLineOfText = topMarginInLineOfText;
 }
 
-void CPrintUnitMergableTable::SetBottomMargin( int bottomMarginInLineOfText )
+void Printing::CPrintUnitMergableTable::SetBottomMargin( int bottomMarginInLineOfText )
 {
 	m_bottomMarginInLineOfText = bottomMarginInLineOfText;
 }
 
-BOOL CPrintUnitMergableTable::SetRowFormat( UINT nFormat )
+BOOL Printing::CPrintUnitMergableTable::SetRowFormat( UINT nFormat )
 {
 	return m_rowFormat = nFormat;
 }
 
-BOOL CPrintUnitMergableTable::SetColFormat( UINT nFormat )
+BOOL Printing::CPrintUnitMergableTable::SetColFormat( UINT nFormat )
 {
 	return m_colFormat = nFormat;
 }
 
-void CPrintUnitMergableTable::SetTableTextFormat()
+void Printing::CPrintUnitMergableTable::SetTableTextFormat()
 {
 	// set row format
 	for (int i = 1; i < m_nRows + 1; i++)
@@ -194,7 +194,7 @@ void CPrintUnitMergableTable::SetTableTextFormat()
 	}
 }
 
-void CPrintUnitMergableTable::CreateGridCtrl()
+void Printing::CPrintUnitMergableTable::CreateGridCtrl()
 {
 	// first delete the former instance
 	DELETE_IF_NOT_NULL(m_pGridCtrl);
@@ -208,7 +208,7 @@ void CPrintUnitMergableTable::CreateGridCtrl()
 	m_pGridCtrl->EnableDragAndDrop(FALSE);
 }
 
-void CPrintUnitMergableTable::DefineRowsAndColumns()
+void Printing::CPrintUnitMergableTable::DefineRowsAndColumns()
 {
 	// define rows
 	m_pGridCtrl->SetRowCount(m_nRows + 1); // '1' means column row
@@ -239,7 +239,7 @@ void CPrintUnitMergableTable::DefineRowsAndColumns()
 	}
 }
 
-void CPrintUnitMergableTable::SetAllRowsFont( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::CPrintUnitMergableTable::SetAllRowsFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	for (int i = 0; i < m_nRows + 1; i++)
 	{
@@ -247,7 +247,7 @@ void CPrintUnitMergableTable::SetAllRowsFont( int nPointSize, LPCTSTR lpszFaceNa
 	}
 }
 
-void CPrintUnitMergableTable::SetRowFont( int nRowIndex, int nPointSize, LPCTSTR lpszFaceName )
+void Printing::CPrintUnitMergableTable::SetRowFont( int nRowIndex, int nPointSize, LPCTSTR lpszFaceName )
 {
 	for (int i = 0; i < m_nColumns; i++)
 	{
@@ -255,7 +255,7 @@ void CPrintUnitMergableTable::SetRowFont( int nRowIndex, int nPointSize, LPCTSTR
 	}
 }
 
-void CPrintUnitMergableTable::SetColFont( int nColIndex, int nPointSize, LPCTSTR lpszFaceName )
+void Printing::CPrintUnitMergableTable::SetColFont( int nColIndex, int nPointSize, LPCTSTR lpszFaceName )
 {
 	for (int i = 0; i < m_nRows; i++)
 	{
@@ -263,7 +263,7 @@ void CPrintUnitMergableTable::SetColFont( int nColIndex, int nPointSize, LPCTSTR
 	}
 }
 
-void CPrintUnitMergableTable::SetCellFont( int nRowIndex, int nColIndex, int nPointSize, LPCTSTR inLpszFaceName )
+void Printing::CPrintUnitMergableTable::SetCellFont( int nRowIndex, int nColIndex, int nPointSize, LPCTSTR inLpszFaceName )
 {
 	LOGFONT logFont;
 	GMakeStructFillZero(logFont);
@@ -282,7 +282,7 @@ void CPrintUnitMergableTable::SetCellFont( int nRowIndex, int nColIndex, int nPo
 	m_cellLogFont.insert(std::make_pair(tempCell, logFont));
 }
 
-void CPrintUnitMergableTable::SetItemFont()
+void Printing::CPrintUnitMergableTable::SetItemFont()
 {
 	// if we have changed the heading font
 	if (NULL != m_pUserFontHeading)
@@ -304,13 +304,13 @@ void CPrintUnitMergableTable::SetItemFont()
 	}
 }
 
-void CPrintUnitMergableTable::AdjustTopAndBottomMargin()
+void Printing::CPrintUnitMergableTable::AdjustTopAndBottomMargin()
 {
 	JRECT.top += m_topMarginInLineOfText * m_pum.pumLineOfText;
 	JRECT.bottom -= m_bottomMarginInLineOfText * m_pum.pumLineOfText;
 }
 
-void CPrintUnitMergableTable::MergeGridCells()
+void Printing::CPrintUnitMergableTable::MergeGridCells()
 {
 	// merge cell
 	for (int i = 0 ; i < (int)(m_mergeCellPos.size()); i++)
@@ -319,7 +319,7 @@ void CPrintUnitMergableTable::MergeGridCells()
 	}
 }
 
-void CPrintUnitMergableTable::SetGridCellContents()
+void Printing::CPrintUnitMergableTable::SetGridCellContents()
 {
 	// set cell contents
 	map<tagCell, wstring, ltCell>::iterator itCellText = m_cellText.begin();
@@ -329,7 +329,7 @@ void CPrintUnitMergableTable::SetGridCellContents()
 	}
 }
 
-void CPrintUnitMergableTable::SetOuterLine()
+void Printing::CPrintUnitMergableTable::SetOuterLine()
 {
 	if (m_bDrawOuterLine == false)
 	{
@@ -341,22 +341,22 @@ void CPrintUnitMergableTable::SetOuterLine()
 	}
 }
 
-void CPrintUnitMergableTable::SetPrintFont( CFont* font )
+void Printing::CPrintUnitMergableTable::SetPrintFont( CFont* font )
 {
 	m_pGridCtrl->SetPrintFont(font);
 }
 
-int CPrintUnitMergableTable::BeginPrinting( CDC* pDc, GPrintInfo* info, CRect rect )
+int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, GPrintInfo* info, CRect rect )
 {
 	return m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
 }
 
-void CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PrintEndResult *result )
+void Printing::CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PrintEndResult *result )
 {
 	m_pGridCtrl->OnPrint(pDc, page, rect, result);   
 }
 
-int CPrintUnitMergableTable::PrintTitleAndMoveCursor( BOOL bNeedPrintContinue )
+int Printing::CPrintUnitMergableTable::PrintTitleAndMoveCursor( BOOL bNeedPrintContinue )
 {
 	return GPrintUnit::PrintTitleAndMoveCursor(bNeedPrintContinue);
 }
