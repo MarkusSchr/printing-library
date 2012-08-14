@@ -14,11 +14,9 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+using namespace Printing;
 
-IMPLEMENT_DYNAMIC(GPrintJob, CObject)
-
-
-GPrintJob::GPrintJob()
+Printing::GPrintJob::GPrintJob()
 {
 	m_pDC = NULL;
 	m_pDialog = NULL;
@@ -35,7 +33,7 @@ GPrintJob::GPrintJob()
 
 
 
-GPrintJob::~GPrintJob()
+Printing::GPrintJob::~GPrintJob()
 {
 	if((m_dwFlags & PJF_ALLOCATEDPD) && m_pPD)
 	{
@@ -67,7 +65,7 @@ GPrintJob::~GPrintJob()
 
 
 
-int GPrintJob::PrintFollowingPrintDialog()
+int Printing::GPrintJob::PrintFollowingPrintDialog()
 {
 	int nPrintCode = PRINTJOB_READY;
 
@@ -133,7 +131,7 @@ int GPrintJob::PrintFollowingPrintDialog()
 
 
 
-void GPrintJob::InitDocInfo(DOCINFO& docInfo)
+void Printing::GPrintJob::InitDocInfo(DOCINFO& docInfo)
 {
 	GMakeStructFillZero(docInfo);
 	docInfo.cbSize = sizeof(docInfo);
@@ -147,7 +145,7 @@ void GPrintJob::InitDocInfo(DOCINFO& docInfo)
 
 
 
-CDialog *GPrintJob::CreatePrintDialog()
+CDialog *Printing::GPrintJob::CreatePrintDialog()
 {
 	return m_pInfo->m_pPD;
 }
@@ -156,7 +154,7 @@ CDialog *GPrintJob::CreatePrintDialog()
 
 
 
-BOOL GPrintJob::IsUsingDefaultPrintDialog()
+BOOL Printing::GPrintJob::IsUsingDefaultPrintDialog()
 {
 	if(m_pDialog && m_pInfo && (m_pDialog == m_pInfo->m_pPD))
 		return TRUE;
@@ -167,7 +165,7 @@ BOOL GPrintJob::IsUsingDefaultPrintDialog()
 
 
 
-BOOL GPrintJob::InitPrintDialog()
+BOOL Printing::GPrintJob::InitPrintDialog()
 {
 	if(IsUsingDefaultPrintDialog())
 	{
@@ -188,7 +186,7 @@ BOOL GPrintJob::InitPrintDialog()
 }
 
 
-int GPrintJob::DoPrintDialog()
+int Printing::GPrintJob::DoPrintDialog()
 {
 	int nRC = IDCANCEL;
 
@@ -231,7 +229,7 @@ public:
 
 
 
-void GPrintJob::UseDefaults()
+void Printing::GPrintJob::UseDefaults()
 {
 	if(m_pPD)
 	{
@@ -271,7 +269,7 @@ void GPrintJob::UseDefaults()
 
 
 
-BOOL GPrintJob::DoPrintToFileDialog(CString& strFileName)
+BOOL Printing::GPrintJob::DoPrintToFileDialog(CString& strFileName)
 {
 	BOOL bRC = TRUE;
 
@@ -299,7 +297,7 @@ BOOL GPrintJob::DoPrintToFileDialog(CString& strFileName)
 
 
 
-CDC *GPrintJob::CreatePrintDC()
+CDC *Printing::GPrintJob::CreatePrintDC()
 {
 	static CDC *pDC = NULL;
 	
@@ -320,13 +318,13 @@ CDC *GPrintJob::CreatePrintDC()
 
 
 
-void GPrintJob::OnBeginPrinting()
+void Printing::GPrintJob::OnBeginPrinting()
 {
 }
 
 
 
-void GPrintJob::OnEndPrinting(BOOL bError)
+void Printing::GPrintJob::OnEndPrinting(BOOL bError)
 {
 	if(!bError)
 	{
@@ -345,7 +343,7 @@ void GPrintJob::OnEndPrinting(BOOL bError)
 
 
 
-BOOL GPrintJob::StartDocPrinting(DOCINFO& docInfo)
+BOOL Printing::GPrintJob::StartDocPrinting(DOCINFO& docInfo)
 {
 	if(!m_pDC || m_pDC->StartDoc(&docInfo) == SP_ERROR)
 	{
@@ -361,7 +359,7 @@ BOOL GPrintJob::StartDocPrinting(DOCINFO& docInfo)
 
 
 
-void GPrintJob::EndDocPrinting(BOOL bError)
+void Printing::GPrintJob::EndDocPrinting(BOOL bError)
 {
 	if(bError)
 	{
@@ -380,7 +378,7 @@ void GPrintJob::EndDocPrinting(BOOL bError)
 
 
 
-void GPrintJob::InitPrintDC()
+void Printing::GPrintJob::InitPrintDC()
 {
 	if(m_pDC)
 	{
@@ -391,7 +389,7 @@ void GPrintJob::InitPrintDC()
 
 
 
-void GPrintJob::InitPrintInfo()
+void Printing::GPrintJob::InitPrintInfo()
 {
 	if(m_pInfo && m_pDC)
 	{
@@ -420,12 +418,12 @@ void GPrintJob::InitPrintInfo()
 
 
 
-BOOL GPrintJob::GetPageSetupMargins(CRect& rectMargins)
+BOOL Printing::GPrintJob::GetPageSetupMargins(CRect& rectMargins)
 {
 	return FALSE;
 }
 
-void GPrintJob::GetDeviceNames(LPGDEVNAMES pDevNames)
+void Printing::GPrintJob::GetDeviceNames(LPGDEVNAMES pDevNames)
 {
 	if(pDevNames)
 	{
@@ -443,7 +441,7 @@ void GPrintJob::GetDeviceNames(LPGDEVNAMES pDevNames)
 
 
 
-void GPrintJob::AddIndexItem(INDEXITEM *pII)
+void Printing::GPrintJob::AddIndexItem(INDEXITEM *pII)
 {
 	if(m_pActiveTree)
 	{
@@ -458,19 +456,19 @@ void GPrintJob::AddIndexItem(INDEXITEM *pII)
 
 
 
-BOOL GPrintJob::IsEndPagePending() const
+BOOL Printing::GPrintJob::IsEndPagePending() const
 {
 	return (m_dwFlags & PJF_ENDPAGEPENDING) ? TRUE : FALSE;
 }
 
 
-void GPrintJob::SetEndPagePending(BOOL bPending)
+void Printing::GPrintJob::SetEndPagePending(BOOL bPending)
 {
 	GSET_BIT(m_dwFlags, PJF_ENDPAGEPENDING, bPending);
 }
 
 
-int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
+int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 {
 	if (pPreviewDC == NULL 
 		|| pPreviewDC->GetSafeHdc() == NULL 
@@ -521,12 +519,12 @@ int GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 	return totalPages;
 }
 
-void GPrintJob::SetPreviewPrintDC( CDC* dc, BOOL needPreprocessing /*= FALSE*/ )
+void Printing::GPrintJob::SetPreviewPrintDC( CDC* dc, BOOL needPreprocessing /*= FALSE*/ )
 {
 	m_pDC = dc;
 }
 
-void GPrintJob::InsertTask( GPrintUnit* task )
+void Printing::GPrintJob::InsertTask( GPrintUnit* task )
 {
 	task->SetJob(this);
 	m_vecPrintUnitTasks.push_back(task);
@@ -535,7 +533,7 @@ void GPrintJob::InsertTask( GPrintUnit* task )
 	m_vecUnitPages.push_back(0);
 }
 
-int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
+int Printing::GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 {
 	// need a temperate DC
 	CMyMemDC memDC(pPreviewDC);
@@ -554,7 +552,7 @@ int GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 	return totalNum;
 }
 
-int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGetPageOnly /*= FALSE*/, int from /*= 1*/, int to /*= 65535 */ )
+int Printing::GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGetPageOnly /*= FALSE*/, int from /*= 1*/, int to /*= 65535 */ )
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
@@ -590,7 +588,7 @@ int GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGe
 	return pages;
 }
 
-int GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, int to )
+int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, int to )
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
@@ -616,7 +614,7 @@ int GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, int from, i
 
 
 
-GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(GPrintJob *pJob, GPrintIndexTree **pTree)
+Printing::GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(Printing::GPrintJob *pJob, GPrintIndexTree **pTree)
 {
 	m_pJob = pJob;
 	m_pOldTree = m_pJob->m_pActiveTree;
@@ -624,7 +622,7 @@ GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(GPrintJob *pJob, GPrintIndexT
 }
 
 
-GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(GPrintUnit *pUnit, GPrintIndexTree **pTree) 
+Printing::GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(GPrintUnit *pUnit, GPrintIndexTree **pTree) 
 {
 	m_pJob = pUnit->GetJob();
 	m_pOldTree = m_pJob->m_pActiveTree;
@@ -632,7 +630,7 @@ GSelectPrintJobIndexTree::GSelectPrintJobIndexTree(GPrintUnit *pUnit, GPrintInde
 }
 
 
-GSelectPrintJobIndexTree::~GSelectPrintJobIndexTree()
+Printing::GSelectPrintJobIndexTree::~GSelectPrintJobIndexTree()
 {
 	// restore the old tree
 	m_pJob->m_pActiveTree = m_pOldTree;
@@ -644,12 +642,15 @@ GSelectPrintJobIndexTree::~GSelectPrintJobIndexTree()
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-GPrintInfo::GPrintInfo()
+Printing::GPrintInfo::GPrintInfo()
 {
 	m_nPhysicalCurPage = 1;
 }
 
-GPrintInfo::~GPrintInfo()
+Printing::GPrintInfo::~GPrintInfo()
 {
 }
+
+
+IMPLEMENT_DYNAMIC(GPrintJob, CObject)
 

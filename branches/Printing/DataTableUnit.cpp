@@ -1,16 +1,16 @@
 #include "stdafx.h"
 #include "DataTableUnit.h"
 
-CDataTableUnit::CDataTableUnit(GPrintJob *pJob)
+Printing::CDataTableUnit::CDataTableUnit(GPrintJob *pJob)
 	: CPrintUnitStandardTable<CONST WCHAR>(pJob)
 {
 }
 
-CDataTableUnit::~CDataTableUnit(void)
+Printing::CDataTableUnit::~CDataTableUnit(void)
 {
 }
 
-int CDataTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CDataTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 {
 	// it is the user's responsible to check whether the column can match the data
 	if (m_pData == NULL || m_vecColumnDef.size() == 0 || from > to)
@@ -24,7 +24,7 @@ int CDataTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 	return Paint(from, to);
 }
 
-int CDataTableUnit::Paint( int from, int to )
+int Printing::CDataTableUnit::Paint( int from, int to )
 {
 	if (m_pData == NULL || m_vecColumnDef.size() == 0)
 	{

@@ -2,7 +2,9 @@
 #include "BitmapTableUnit.h"
 #include "MemDC.h"
 
-CBitmapTableUnit::CBitmapTableUnit(GPrintJob *pJob)
+using namespace Printing;
+
+Printing::CBitmapTableUnit::CBitmapTableUnit(Printing::GPrintJob *pJob)
 	:CPrintUnitStandardTable(pJob)
 {
 	m_nRowInEachPage = 3;
@@ -13,16 +15,16 @@ CBitmapTableUnit::CBitmapTableUnit(GPrintJob *pJob)
 	SetNeedPreprocessSign(true);
 }
 
-CBitmapTableUnit::~CBitmapTableUnit(void)
+Printing::CBitmapTableUnit::~CBitmapTableUnit(void)
 {
 }
 
-int CBitmapTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CBitmapTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 {
 	return Paint(from, to);
 }
 
-int CBitmapTableUnit::Paint( int from, int to )
+int Printing::CBitmapTableUnit::Paint( int from, int to )
 {
 	if (m_pData == NULL)
 	{
@@ -39,7 +41,7 @@ int CBitmapTableUnit::Paint( int from, int to )
 }
 
 
-int CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
+int Printing::CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
 	// if we have precalculate before, just skip
 	if (GetNeedPreprocessSign() == true)
@@ -57,7 +59,7 @@ int CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenCha
 	return DrawTableBitmaps(from , to, m_bNeedPrintTitleExcpetFirstPage);
 }
 
-void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhenChangePage )
+void Printing::CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhenChangePage )
 {
 	RECT rectClient = JRECT;
 	int totalHeight = abs(rectClient.bottom - rectClient.top);
@@ -65,7 +67,7 @@ void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhen
 	// to test the height of the text
 	int textHeight = 0;
 	{
-		CMyMemDC dc(&JDC);
+		Printing::CMyMemDC dc(&JDC);
 		CDC* oldDC = m_pJob->m_pDC;
 		m_pJob->m_pDC = &dc;
 		textHeight = PrintTitle(FALSE);
@@ -75,13 +77,13 @@ void CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintHeadingWhen
 	m_rowHeight = (int)((double)(totalHeight - textHeight - 2 * m_titleMargin)/(double)(m_nRowInEachPage));
 }
 
-void CBitmapTableUnit::PreCalColumnWidth( int from, int to, BOOL bPrintHeadingWhenChangePage )
+void Printing::CBitmapTableUnit::PreCalColumnWidth( int from, int to, BOOL bPrintHeadingWhenChangePage )
 {
 	int clientWidth = abs(JRECT.right - JRECT.left);
 	m_rowWidth = clientWidth / m_nColumnsInEachPage;
 }
 
-int CBitmapTableUnit::SetRowsInEachPage( int rowInEachPage )
+int Printing::CBitmapTableUnit::SetRowsInEachPage( int rowInEachPage )
 {
 	ASSERT(rowInEachPage > 0);
 
@@ -97,7 +99,7 @@ int CBitmapTableUnit::SetRowsInEachPage( int rowInEachPage )
 }
 
 
-int CBitmapTableUnit::SetColumnsInEachPage( int columns )
+int Printing::CBitmapTableUnit::SetColumnsInEachPage( int columns )
 {
 	int old = m_nColumnsInEachPage;
 	m_nColumnsInEachPage = columns;
@@ -121,7 +123,7 @@ int CBitmapTableUnit::SetColumnsInEachPage( int columns )
 	return old;
 }
 
-int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenChangePage /*= FALSE*/ )
+int Printing::CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenChangePage /*= FALSE*/ )
 {
 	int nRows = m_pData->size();
 
@@ -175,7 +177,7 @@ int CBitmapTableUnit::DrawTableBitmaps( int from, int to, BOOL bPrintTitleWhenCh
 	return currentPage - from;
 }
 
-void CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
+void Printing::CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
 {
 	RECT rectToPaint;
 	rectToPaint.left = JCUR.x + m_pictureMargin;
@@ -212,7 +214,7 @@ void CBitmapTableUnit::PrintBitmap( int printedRows, int currentWorkingColums )
 }
 
 
-BOOL CBitmapTableUnit::SetPrintData( vector<vector<CBitmap*>> *data )
+BOOL Printing::CBitmapTableUnit::SetPrintData( vector<vector<CBitmap*>> *data )
 {
 	SetColumnsInEachPage((*data)[0].size());
 	return CPrintUnitStandardTable::SetPrintData(data);

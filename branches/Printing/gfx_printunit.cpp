@@ -14,11 +14,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-IMPLEMENT_DYNAMIC(GPrintUnit, CObject)
-
-
-GPrintUnit::GPrintUnit(GPrintJob *pJob)
+using namespace Printing;
+Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 {
 	m_pJob = pJob;
 
@@ -51,7 +48,7 @@ GPrintUnit::GPrintUnit(GPrintJob *pJob)
 }
 
 
-GPrintUnit::~GPrintUnit()
+Printing::GPrintUnit::~GPrintUnit()
 {
 	ClearColumnSet();
 
@@ -62,24 +59,24 @@ GPrintUnit::~GPrintUnit()
 }
 
 
-void GPrintUnit::SetActiveHeading(int nHeading)
+void Printing::GPrintUnit::SetActiveHeading(int nHeading)
 {
 	m_lpActiveColDefs = m_headings.GetAt(nHeading);
 }
 
 
-void GPrintUnit::SetJob(GPrintJob *pJob)
+void Printing::GPrintUnit::SetJob(GPrintJob *pJob)
 {
 	m_pJob = pJob;
 }
 
 
-GPrintJob *GPrintUnit::GetJob() const
+GPrintJob *Printing::GPrintUnit::GetJob() const
 {
 	return m_pJob;
 }
 
-BOOL GPrintUnit::EnvSetBeforePrinting()
+BOOL Printing::GPrintUnit::EnvSetBeforePrinting()
 {
 	CreatePrintFonts();
 	InitPrintMetrics();
@@ -89,19 +86,19 @@ BOOL GPrintUnit::EnvSetBeforePrinting()
 	return TRUE;
 }
 
-BOOL GPrintUnit::EnvCleanupAfterPrinting()
+BOOL Printing::GPrintUnit::EnvCleanupAfterPrinting()
 {
 	DeleteDefaultFonts();
 
 	return TRUE;
 }
 
-BOOL GPrintUnit::ContinuePrinting() const
+BOOL Printing::GPrintUnit::ContinuePrinting() const
 {
 	return (m_pJob && m_pJob->m_pInfo && JINFO.m_bContinuePrinting) ? TRUE : FALSE;
 }
 
-void GPrintUnit::CreatePrintFonts()
+void Printing::GPrintUnit::CreatePrintFonts()
 {
 	LOGFONT logFont;
 	GMakeStructFillZero(logFont);
@@ -142,13 +139,13 @@ void GPrintUnit::CreatePrintFonts()
 	}
 }
 
-void GPrintUnit::CreateUserDefinedFont( CFont& fontDes, srtFont *fontSource )
+void Printing::GPrintUnit::CreateUserDefinedFont( CFont& fontDes, srtFont *fontSource )
 {
 	fontDes.DeleteObject();	
 	fontDes.CreatePointFont(fontSource->nPointSize, fontSource->name.c_str(), &JDC);
 }
 
-void GPrintUnit::InitPrintMetrics()
+void Printing::GPrintUnit::InitPrintMetrics()
 {
 	TEXTMETRIC tm;
 
@@ -199,7 +196,7 @@ void GPrintUnit::InitPrintMetrics()
 
 
 
-void GPrintUnit::CompleteAllColHeadingsDefinition()
+void Printing::GPrintUnit::CompleteAllColHeadingsDefinition()
 {
 	int nHeadings = m_headings.GetSize();
 
@@ -269,7 +266,7 @@ void GPrintUnit::CompleteAllColHeadingsDefinition()
 }
 
 // it is the user's responsible to check whether all the columns have been set the value
-int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage /*= FALSE*/ )
+int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage /*= FALSE*/ )
 {
 	int nRows = contents.size();
 	// the row num ahead the first row to be printed before changing page
@@ -510,7 +507,7 @@ int GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents, UINT nRow
 	return printedPages;
 }
 
-int GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
+int Printing::GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
 	// if we have precalculate before, just skip
 	if (GetNeedPreprocessSign() == true)
@@ -526,7 +523,7 @@ int GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nR
 	return DrawTableContents(*pContents, nRowFormat, from , to, bPrintHeadingWhenChangePage);
 }
 
-void GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, UINT nFormat, int nHeading)
+void Printing::GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, UINT nFormat, int nHeading)
 {
 	// assert the column' percentage must below 1.0
 	assert(fColPct <= 1.0);
@@ -545,7 +542,7 @@ void GPrintUnit::InsertPrintCol(int nPos, LPCTSTR lpszName, double fColPct, UINT
 	InsertPrintCol(&pc, nHeading);
 }
 
-void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
+void Printing::GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
 {
 	ASSERT(pCol);
 	if(!pCol)
@@ -606,7 +603,7 @@ void GPrintUnit::InsertPrintCol(LPPRINTCOLUMN pCol, int nHeading)
 
 
 
-LPPRINTCOLUMNDEF GPrintUnit::GetPrintColDef(int nCol, int nHeading)
+LPPRINTCOLUMNDEF Printing::GPrintUnit::GetPrintColDef(int nCol, int nHeading)
 {
 	LPPRINTUNITCOLDEFS pColDefs = NULL;
 
@@ -631,7 +628,7 @@ LPPRINTCOLUMNDEF GPrintUnit::GetPrintColDef(int nCol, int nHeading)
 
 
 
-void GPrintUnit::SaveDim(LPJOBUNITDIM pDim)
+void Printing::GPrintUnit::SaveDim(LPJOBUNITDIM pDim)
 {
 	pDim->pum = m_pum;
 	pDim->ptJCUR = JCUR;
@@ -640,7 +637,7 @@ void GPrintUnit::SaveDim(LPJOBUNITDIM pDim)
 }
 
 
-void GPrintUnit::RestoreDim(LPJOBUNITDIM pDim)
+void Printing::GPrintUnit::RestoreDim(LPJOBUNITDIM pDim)
 {
 	m_pum = pDim->pum;
 	JCUR = pDim->ptJCUR;
@@ -650,7 +647,7 @@ void GPrintUnit::RestoreDim(LPJOBUNITDIM pDim)
 
 
 
-bool GPrintUnit::StartPage()
+bool Printing::GPrintUnit::StartPage()
 {
 	ASSERT(!m_pJob->IsEndPagePending());
 
@@ -668,7 +665,7 @@ bool GPrintUnit::StartPage()
 }
 
 
-void GPrintUnit::EndPage()
+void Printing::GPrintUnit::EndPage()
 {
 	m_pJob->SetEndPagePending(FALSE);
 
@@ -684,7 +681,7 @@ void GPrintUnit::EndPage()
 
 
 
-void GPrintUnit::AdvancePage(BOOL bIncPageNo)
+void Printing::GPrintUnit::AdvancePage(BOOL bIncPageNo)
 {
 	JCUR = JRECT.TopLeft();
 
@@ -701,7 +698,7 @@ void GPrintUnit::AdvancePage(BOOL bIncPageNo)
 
 
 
-int GPrintUnit::StartRow( int nHeight/*=PT_LINEOFTEXT*/ )
+int Printing::GPrintUnit::StartRow( int nHeight/*=PT_LINEOFTEXT*/ )
 {
 	// just a symbol, not any use at all
 	int nRC = SR_NULL;
@@ -726,7 +723,7 @@ int GPrintUnit::StartRow( int nHeight/*=PT_LINEOFTEXT*/ )
 
 // this method will end the row by calculating the height of the row 
 // and print the overflow if necessary
-int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= TRUE*/ )
+int Printing::GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= TRUE*/ )
 {
 	int nRC = ER_NULL;
 
@@ -775,7 +772,7 @@ int GPrintUnit::EndRow( BOOL bCheckForOverflow/*=TRUE*/, BOOL bDrawOutline /*= T
 
 
 // return true, if
-bool GPrintUnit::OnContinueRow()
+bool Printing::GPrintUnit::OnContinueRow()
 {
 	EndPage();
 	return StartPage();
@@ -783,7 +780,7 @@ bool GPrintUnit::OnContinueRow()
 
 
 
-int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
+int Printing::GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 {
 	int tmHeight = 0;
 
@@ -807,7 +804,7 @@ int GPrintUnit::PumTypeToHeight(PUMTYPE pt) const
 
 
 // return true if this column need to change row
-bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height )
+bool Printing::GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, UINT top, UINT height )
 {
 	bool bNeedChangeRow = false;
 
@@ -843,7 +840,7 @@ bool GPrintUnit::PrintColumnContent( int nCol, LPCTSTR lpszText, UINT nFormat, U
 
 
 
-int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef )
+int Printing::GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nFormat, int nCol, LPPRINTCOLUMNDEF lpDef )
 {
 	int nHeight = 0;
 	int nWidth = rect.Width();
@@ -950,7 +947,7 @@ int GPrintUnit::DrawColText( LPCTSTR lpszText, int nLen, CRect rect, UINT nForma
 		return rectCopy.bottom - rectCopy.top;
 }
 
-void GPrintUnit::PrintColHeadings( vector<int>& headings, UINT nEffects/*=0*/ )
+void Printing::GPrintUnit::PrintColHeadings( vector<int>& headings, UINT nEffects/*=0*/ )
 {
 	// Since most derived units will call this from an overidden StartPage(), and
 	// we call StartRow() which can trigger a StartPage(), this boolean prevents
@@ -1017,7 +1014,7 @@ void GPrintUnit::PrintColHeadings( vector<int>& headings, UINT nEffects/*=0*/ )
 
 
 
-void GPrintUnit::PrintColHeading( LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects )
+void Printing::GPrintUnit::PrintColHeading( LPCTSTR lpszName, int nLen, CRect r, UINT nFormat, UINT nEffects )
 {
 	// compute the width and height of a line of text 
 	// using the current font to determine the dimensions.
@@ -1038,21 +1035,21 @@ void GPrintUnit::PrintColHeading( LPCTSTR lpszName, int nLen, CRect r, UINT nFor
 
 
 
-void GPrintUnit::DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
+void Printing::GPrintUnit::DoHeadingEffect(int nCol, LPCTSTR lpszName, int nLen, CRect r,
 								 UINT nFormat, UINT nEffects)
 {
 }
 
 
 
-void GPrintUnit::DrawSeperateLine(LPRECT lpRect)
+void Printing::GPrintUnit::DrawSeperateLine(LPRECT lpRect)
 {
 	TCHAR chDot = _T('-');//I18nOK
 	DrawRepeatChar(chDot, lpRect);
 }
 
 
-void GPrintUnit::DrawRepeatChar(TCHAR ch, LPRECT lpRect) 
+void Printing::GPrintUnit::DrawRepeatChar(TCHAR ch, LPRECT lpRect) 
 {
 	if(!lpRect)
 		return;
@@ -1073,7 +1070,7 @@ void GPrintUnit::DrawRepeatChar(TCHAR ch, LPRECT lpRect)
 }
 
 // change the client rect size according to the metrics
-void GPrintUnit::RealizeMetrics()
+void Printing::GPrintUnit::RealizeMetrics()
 {
 	JRECT = JINFO.m_rectDraw;
 
@@ -1086,7 +1083,7 @@ void GPrintUnit::RealizeMetrics()
 	JRECT.NormalizeRect();
 }
 
-void GPrintUnit::PrintHeader()
+void Printing::GPrintUnit::PrintHeader()
 {
 	GSELECT_OBJECT(&JDC, &m_fontHeader);
 
@@ -1111,7 +1108,7 @@ void GPrintUnit::PrintHeader()
 	}
 }
 
-void GPrintUnit::PrintFooter()
+void Printing::GPrintUnit::PrintFooter()
 {
 	GSELECT_OBJECT(&JDC, &m_fontFooter);
 
@@ -1137,7 +1134,7 @@ void GPrintUnit::PrintFooter()
 
 static BOOL g_StartEndRow = TRUE;
 
-void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
+void Printing::GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 {
 	PRINTTEXTLINE ptl;
 	GMakeStructFillZero(ptl);
@@ -1156,7 +1153,7 @@ void GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 
 
 
-void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
+void Printing::GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 {
 	PRINTTEXTLINE ptl;
 	GMakeStructFillZero(ptl);
@@ -1173,7 +1170,7 @@ void GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
 	PrintTextLine(&ptl);
 }
 
-int GPrintUnit::PrintTextLine(
+int Printing::GPrintUnit::PrintTextLine(
 	LPCTSTR lpszText, 
 	UINT nFormat, 
 	int tmHeight,
@@ -1198,13 +1195,13 @@ int GPrintUnit::PrintTextLine(
 
 
 
-int GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine, bool bDrawOuterLine)
+int Printing::GPrintUnit::PrintTextLine(LPPRINTTEXTLINE lpTextLine, bool bDrawOuterLine)
 {
 	return PrintTextLineEx(lpTextLine, bDrawOuterLine);
 }
 
 
-int GPrintUnit::PrintTextLineEx( LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine )
+int Printing::GPrintUnit::PrintTextLineEx( LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine )
 {
 	if(!lpTextLine || lpTextLine->lpszText == L"")
 		return 0;
@@ -1308,7 +1305,7 @@ int GPrintUnit::PrintTextLineEx( LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine 
 
 
 
-int GPrintUnit::SetMapMode(int nMapMode)
+int Printing::GPrintUnit::SetMapMode(int nMapMode)
 {
 	CPoint ptTemp(0,0);
 
@@ -1436,7 +1433,7 @@ int GPrintUnit::SetMapMode(int nMapMode)
 }
 
 
-void GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
+void Printing::GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
 {
 	// get the current time
 	SYSTEMTIME sysTime;
@@ -1452,7 +1449,7 @@ void GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
 	date = szBuf;	
 }
 
-void GPrintUnit::GetContentOnType( int type, CString context, CString& str )
+void Printing::GPrintUnit::GetContentOnType( int type, CString context, CString& str )
 {
 	switch (type)
 	{
@@ -1497,7 +1494,7 @@ void GPrintUnit::GetContentOnType( int type, CString context, CString& str )
 }
 
 
-UINT GPrintUnit::SetSeparateLineInterval( UINT interval )
+UINT Printing::GPrintUnit::SetSeparateLineInterval( UINT interval )
 {
 	UINT old = m_separateLineInterval;
 	m_separateLineInterval = interval;
@@ -1506,7 +1503,7 @@ UINT GPrintUnit::SetSeparateLineInterval( UINT interval )
 
 #define SEPATATELINE_WIDTH_MAX 5
 
-UINT GPrintUnit::SetSeparateLineWidth( UINT width )
+UINT Printing::GPrintUnit::SetSeparateLineWidth( UINT width )
 {
 	if (width > SEPATATELINE_WIDTH_MAX)
 	{
@@ -1517,7 +1514,7 @@ UINT GPrintUnit::SetSeparateLineWidth( UINT width )
 	return old;
 }
 
-void GPrintUnit::DrawSeparetLine( BOOL bHeader )
+void Printing::GPrintUnit::DrawSeparetLine( BOOL bHeader )
 {
 	// adjust the separeteline interval in case the user has entered an invalid value
 	if (bHeader == TRUE && (int)m_separateLineInterval >= m_pum.pumHeaderLineHeight)
@@ -1550,7 +1547,7 @@ void GPrintUnit::DrawSeparetLine( BOOL bHeader )
 /////////////////////////////
 // print index stuff
 
-void GPrintUnit::PrintTree(GPrintIndexTree *pObj, int nLevel)
+void Printing::GPrintUnit::PrintTree(GPrintIndexTree *pObj, int nLevel)
 {
 	int nSize = pObj->GetSize();
 	for(int i = 0; i < nSize; i++)
@@ -1567,7 +1564,7 @@ void GPrintUnit::PrintTree(GPrintIndexTree *pObj, int nLevel)
 
 
 
-void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
+void Printing::GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
 {
 	CString strLineText(lpIndex->strName);
 	CString strPage;
@@ -1629,7 +1626,7 @@ void GPrintUnit::PrintTreeItem(LPINDEXITEM lpIndex, int nLevel)
 
 
 
-void GPrintUnit::GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel)
+void Printing::GPrintUnit::GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLevel)
 {
 	li.pFont = NULL;
 	li.nIndent = nLevel * 100;
@@ -1638,14 +1635,14 @@ void GPrintUnit::GetLevelInfo(INDEXLEVELINFO& li, LPINDEXITEM lpIndex, int nLeve
 
 
 
-void GPrintUnit::AddIndexItem(INDEXITEM *pII)
+void Printing::GPrintUnit::AddIndexItem(INDEXITEM *pII)
 {
 	if(m_pJob)
 		m_pJob->AddIndexItem(pII);
 }
 
 // draw the outer line of the row
-void GPrintUnit::DrawOuterLine()
+void Printing::GPrintUnit::DrawOuterLine()
 {
 	// get the rect's left-top and right-top
 	int nSize = m_vecColumnPage[m_currentWorkingColums].size();
@@ -1670,7 +1667,7 @@ void GPrintUnit::DrawOuterLine()
 	}
 }
 
-BOOL GPrintUnit::IsPreviousRowOverflow()
+BOOL Printing::GPrintUnit::IsPreviousRowOverflow()
 {
 	BOOL bOverFlow = FALSE;
 
@@ -1694,7 +1691,7 @@ BOOL GPrintUnit::IsPreviousRowOverflow()
 	return bOverFlow;
 }
 
-void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, UINT nFormat )
+void Printing::GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, UINT nFormat )
 {
 	LPPRINTCOLUMNDEF lpDef = m_lpActiveColDefs->GetAt(nCol);
 	if(lpDef && !lpDef->strOverflow.IsEmpty())
@@ -1712,7 +1709,7 @@ void GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, UINT nForm
 	}
 }
 
-void GPrintUnit::PreCalculateRowHeight( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
+void Printing::GPrintUnit::PreCalculateRowHeight( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
 {
 	SetPreprocessValue(true);
 	m_bCheckPosition = false;
@@ -1722,7 +1719,7 @@ void GPrintUnit::PreCalculateRowHeight( vector<vector<LPCTSTR> >& contents, UINT
 	SetPreprocessValue(false);
 }
 
-void GPrintUnit::PreCalculateRowStartPosition( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
+void Printing::GPrintUnit::PreCalculateRowStartPosition( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
 {
 	SetPreprocessValue(true);
 	m_bCheckPosition = true;
@@ -1736,7 +1733,7 @@ void GPrintUnit::PreCalculateRowStartPosition( vector<vector<LPCTSTR> >& content
 	SetPreprocessValue(false);
 }
 
-void GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontPrinter);
 
@@ -1745,7 +1742,7 @@ void GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetBodyScreenFont( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::GPrintUnit::SetBodyScreenFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontScreen);
 
@@ -1754,7 +1751,7 @@ void GPrintUnit::SetBodyScreenFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontHeader);
 
@@ -1763,7 +1760,7 @@ void GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontFooter);
 
@@ -1772,14 +1769,14 @@ void GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
+void Printing::GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
 {
 	m_pum = pum;
 
 	SetNeedPreprocessSign(true);
 }
 
-bool GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
+bool Printing::GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
 {
 	bool bOld = m_bNeedHeaderSeparateLine;
 	m_bNeedHeaderSeparateLine = bNeedHeaderLine;
@@ -1787,7 +1784,7 @@ bool GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
 	return bOld;
 }
 
-bool GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
+bool Printing::GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
 {
 	bool bOld = m_bNeedFooterSeperateLine;
 	m_bNeedFooterSeperateLine = bNeedFooterLine;
@@ -1795,7 +1792,7 @@ bool GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
 	return bOld;
 }
 
-void GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
+void Printing::GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
 {
 	int minSize = MAX_HEADER_COUNT >= size? size : MAX_HEADER_COUNT;
 	for (int i = 0; i < minSize; i++)
@@ -1807,7 +1804,7 @@ void GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
+void Printing::GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
 {
 	int minSize = MAX_FOOTER_COUNT >= size? size : MAX_FOOTER_COUNT;
 	for (int i = 0; i < minSize; i++)
@@ -1819,17 +1816,17 @@ void GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetNeedPreprocessSign( bool bNeedPreprocess )
+void Printing::GPrintUnit::SetNeedPreprocessSign( bool bNeedPreprocess )
 {
 	m_bNeedPreprocessed = bNeedPreprocess;
 }
 
-bool GPrintUnit::GetNeedPreprocessSign()
+bool Printing::GPrintUnit::GetNeedPreprocessSign()
 {
 	return m_bNeedPreprocessed;
 }
 
-void GPrintUnit::ClearColumnSet()
+void Printing::GPrintUnit::ClearColumnSet()
 {
 	int nHeadings = m_headings.GetSize();
 
@@ -1851,7 +1848,7 @@ void GPrintUnit::ClearColumnSet()
 	m_headings.RemoveAll();
 }
 
-PARAFORMAT GPrintUnit::ConfirmRichEditParaFormat( UINT nFormat )
+PARAFORMAT Printing::GPrintUnit::ConfirmRichEditParaFormat( UINT nFormat )
 {
 	UINT tempFormat = 0;
 
@@ -1879,7 +1876,7 @@ PARAFORMAT GPrintUnit::ConfirmRichEditParaFormat( UINT nFormat )
 	return pf;
 }
 
-void GPrintUnit::ClearColumnOverflow()
+void Printing::GPrintUnit::ClearColumnOverflow()
 {
 	// clear the overflow str
 	for (int i = 0; i < m_lpActiveColDefs->GetSize(); i++)
@@ -1894,7 +1891,7 @@ void GPrintUnit::ClearColumnOverflow()
 	}
 }
 
-void GPrintUnit::DeleteDefaultFonts()
+void Printing::GPrintUnit::DeleteDefaultFonts()
 {
 	m_fontHeading.DeleteObject();
 	m_fontPairBody.fontPrinter.DeleteObject();
@@ -1905,32 +1902,32 @@ void GPrintUnit::DeleteDefaultFonts()
 	m_FontTitle.DeleteObject();
 }
 
-void GPrintUnit::OnBeginPrinting()
+void Printing::GPrintUnit::OnBeginPrinting()
 {
 }
 
-void GPrintUnit::OnEndPrinting()
+void Printing::GPrintUnit::OnEndPrinting()
 {
 }
 
-void GPrintUnit::SetPreprocessValue( bool bPreprocess )
+void Printing::GPrintUnit::SetPreprocessValue( bool bPreprocess )
 {
 	m_bPreprocessing = bPreprocess;
 }
 
-bool GPrintUnit::GetPreprocessValue()
+bool Printing::GPrintUnit::GetPreprocessValue()
 {
 	return m_bPreprocessing;
 }
 
-void GPrintUnit::SetTitle( LPCTSTR title, UINT nFormat /*= DT_CENTER*/ )
+void Printing::GPrintUnit::SetTitle( LPCTSTR title, UINT nFormat /*= DT_CENTER*/ )
 {
 	m_title = title;
 	m_nTitleFormat = nFormat;
 	SetNeedPreprocessSign(true);
 }
 
-void GPrintUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
+void Printing::GPrintUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pFontTileSrt);
 
@@ -1939,7 +1936,7 @@ void GPrintUnit::SetTitlePen( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
-int GPrintUnit::PrintTitle( BOOL bShowContinued )
+int Printing::GPrintUnit::PrintTitle( BOOL bShowContinued )
 {
 	int height = 0;
 
@@ -1959,7 +1956,7 @@ int GPrintUnit::PrintTitle( BOOL bShowContinued )
 	return height;
 }
 
-int GPrintUnit::PrintTitleAndMoveCursor( BOOL bShowContinued )
+int Printing::GPrintUnit::PrintTitleAndMoveCursor( BOOL bShowContinued )
 {
 	int originY = JCUR.y;
 
@@ -1979,7 +1976,7 @@ int GPrintUnit::PrintTitleAndMoveCursor( BOOL bShowContinued )
 	return JCUR.y - originY;
 }
 
-int GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
+int Printing::GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
 {
 	int old = m_titleMargin;
 	m_titleMargin = titleMarginInLineOfText * m_pum.pumLineOfText;
@@ -1995,20 +1992,20 @@ int GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
 ///////////////////////////////////////////////////////////////////////
 
 
-GPrintIndexTree::GPrintIndexTree() 
+Printing::GPrintIndexTree::GPrintIndexTree() 
 {
 
 }
 
 
-GPrintIndexTree::~GPrintIndexTree() 
+Printing::GPrintIndexTree::~GPrintIndexTree() 
 {
 	DeletePrintIndexTree(this);
 }
 
 
 
-void GPrintIndexTree::DeletePrintIndexTree(GPrintIndexTree *pTree)
+void Printing::GPrintIndexTree::DeletePrintIndexTree(GPrintIndexTree *pTree)
 {
 	int nSize = pTree->GetSize();
 
@@ -2031,7 +2028,7 @@ void GPrintIndexTree::DeletePrintIndexTree(GPrintIndexTree *pTree)
 //////////////////////////////////////////////////////////////////////////
 
 
-GSelectActivePair::GSelectActivePair(GPrintUnit *pUnit, LPPUFONTPAIR pPair)
+Printing::GSelectActivePair::GSelectActivePair(Printing::GPrintUnit *pUnit, LPPUFONTPAIR pPair)
 {
 	if(pUnit)
 	{
@@ -2042,7 +2039,7 @@ GSelectActivePair::GSelectActivePair(GPrintUnit *pUnit, LPPUFONTPAIR pPair)
 }
 
 
-GSelectActivePair::~GSelectActivePair()
+Printing::GSelectActivePair::~GSelectActivePair()
 {
 	if(m_pUnit)
 	{
@@ -2054,7 +2051,7 @@ GSelectActivePair::~GSelectActivePair()
 /////////////////////////////////////////////////////////////////////
 
 
-GIndexItem::GIndexItem()
+Printing::GIndexItem::GIndexItem()
 {
 	nFlags = 0;
 	pChildren = NULL; 
@@ -2068,7 +2065,7 @@ GIndexItem::GIndexItem()
 // text line parser
 
 
-GPrintTextLineParser::GPrintTextLineParser()
+Printing::GPrintTextLineParser::GPrintTextLineParser()
 {
 	m_lpszCurChar = NULL;
 	m_nSkipChars = 0;
@@ -2079,12 +2076,12 @@ GPrintTextLineParser::GPrintTextLineParser()
 }
 
 
-GPrintTextLineParser::~GPrintTextLineParser()
+Printing::GPrintTextLineParser::~GPrintTextLineParser()
 {
 }
 
 
-BOOL GPrintTextLineParser::GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile)
+BOOL Printing::GPrintTextLineParser::GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile)
 {
 	BOOL bProfile = FALSE;
 
@@ -2100,7 +2097,7 @@ BOOL GPrintTextLineParser::GetProfile(LPCTSTR lpszText, GPTLPROFILE& profile)
 
 
 
-GNTRESULT GPrintTextLineParser::GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token)
+GNTRESULT Printing::GPrintTextLineParser::GetNextToken(LPCTSTR lpszText, GPTLTOKEN& token)
 {
 	GNTRESULT result = GNTR_ERROR;
 
@@ -2336,7 +2333,7 @@ int GfxCountLines(LPCTSTR lpszText)
 
 ///////////////////////////////////////////////////////////////
 
-GSelectGdiObject::GSelectGdiObject(CDC *pDC, CGdiObject *pObject)
+Printing::GSelectGdiObject::GSelectGdiObject(CDC *pDC, CGdiObject *pObject)
 {
 	m_hOldGdiObject = NULL;
 	m_pDC = NULL;
@@ -2360,7 +2357,7 @@ GSelectGdiObject::GSelectGdiObject(CDC *pDC, CGdiObject *pObject)
 }
 
 
-GSelectGdiObject::~GSelectGdiObject()
+Printing::GSelectGdiObject::~GSelectGdiObject()
 {
 	if(m_hOldGdiObject && m_pDC)
 	{
@@ -2373,3 +2370,6 @@ GSelectGdiObject::~GSelectGdiObject()
 			::SelectObject(hAttribDC, m_hOldGdiObject);
 	}
 }
+
+
+IMPLEMENT_DYNAMIC(GPrintUnit, CObject)
