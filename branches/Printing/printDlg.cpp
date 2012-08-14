@@ -601,6 +601,7 @@ void CPrintDlg::OnOK()
 	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
 	multiTableUnit.SetTableIntervalInLineOfText(5);
 	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
+	multiTableUnit.SetHeader(header, 3);
 
 	job.InsertTask(&multiTableUnit);
 
