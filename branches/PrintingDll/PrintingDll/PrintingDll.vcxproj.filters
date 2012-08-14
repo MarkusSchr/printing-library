@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Printing">
+      <UniqueIdentifier>{2821be5f-cb84-43a4-b6ea-63bae4aaa124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GridCtrl">
+      <UniqueIdentifier>{70c8eec6-81fd-4016-b785-a60fa5e1b4a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -30,6 +36,48 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Printing\BitmapTableUnit.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\DataTableUnit.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\gfx_printjob.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\gfx_printunit.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\MergableTableUnit.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\MultiTablesUnit.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\PrintUnitMergableTable.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\GridCell.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\GridCellBase.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\GridCtrl.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\GridDropTarget.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\InPlaceEdit.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\GridCtrl\TitleTip.cpp">
+      <Filter>GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Printing\PrintUnitTable.cpp">
+      <Filter>Printing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PrintingDll.h">
@@ -43,6 +91,57 @@
     </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\BitmapTableUnit.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\DataTableUnit.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\gfx_printjob.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\gfx_printunit.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\IPrintable.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\MemDCForPrint.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\MergableTableUnit.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\MultiTablesUnit.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\PrintUnitMergableTable.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\PrintUnitTable.h">
+      <Filter>Printing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\CellRange.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\GridCell.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\GridCellBase.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\GridCtrl.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\GridDropTarget.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\InPlaceEdit.h">
+      <Filter>GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Printing\GridCtrl\TitleTip.h">
+      <Filter>GridCtrl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
