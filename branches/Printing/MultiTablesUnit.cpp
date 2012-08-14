@@ -2,7 +2,7 @@
 #include "MultiTablesUnit.h"
 #include "MemDCForPrint.h"
 
-CMultiTablesUnit::CMultiTablesUnit( GPrintJob *pJob /*= NULL*/ )
+Printing::CMultiTablesUnit::CMultiTablesUnit( GPrintJob *pJob /*= NULL*/ )
 	:CPrintUnitStandardTable(pJob)
 {
 	m_intervalBetweenTables = 1;
@@ -11,56 +11,23 @@ CMultiTablesUnit::CMultiTablesUnit( GPrintJob *pJob /*= NULL*/ )
 	m_printPagesTotal = 0;
 }
 
-CMultiTablesUnit::~CMultiTablesUnit()
+Printing::CMultiTablesUnit::~CMultiTablesUnit()
 {
 }
 
-void CMultiTablesUnit::InsertTables( CPrintUnitMergableTable& table )
+void Printing::CMultiTablesUnit::InsertTables( CPrintUnitMergableTable& table )
 {
 	m_vecTables.push_back(&table);
 }
 
-void CMultiTablesUnit::ClearTables()
+void Printing::CMultiTablesUnit::ClearTables()
 {
 	m_vecTables.clear();
 }
 
-int CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 {
 	int printedPages = 1;
-
-	//if (bGetPageOnly)
-	//{
-	//	int printedHeight = 0 - m_intervalBetweenTables * m_pum.pumLineOfText; // in case the first table
-	//	int clientHeight = JRECT.bottom - JRECT.top - m_intervalBetweenFirstTable * m_pum.pumLineOfText;
-
-	//	for (int i = 0; i < m_vecTables.size(); i++)
-	//	{
-	//		if (to <= printedPages)
-	//		{
-	//			printedPages = to;
-	//			break;
-	//		}
-
-	//		// add the interval between tables
-	//		printedHeight += m_intervalBetweenTables * m_pum.pumLineOfText;
-
-	//		printedHeight += m_vecTables[i].GetPrintedHeight();
-
-	//		while (printedHeight > clientHeight)
-	//		{
-	//			// another page
-	//			printedPages++;
-	//			printedHeight = printedHeight - clientHeight;
-	//		}
-	//	}
-
-	//	m_printPagesTotal = printedPages - from + 1;
-	//}
-	//else
-	//{
-	//	m_printPagesTotal = this->Paint(from, to);
-	//}
 
 	CDC* oldDC = m_pJob->m_pDC;
 	CMemDcNotDraw dc(&JDC);
@@ -83,7 +50,7 @@ int CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 	return m_printPagesTotal;
 }
 
-int CMultiTablesUnit::Paint( int from, int to )
+int Printing::CMultiTablesUnit::Paint( int from, int to )
 {
 	bool bContinuePrinting = true;
 
@@ -176,7 +143,7 @@ int CMultiTablesUnit::Paint( int from, int to )
 	return page - from;	
 }
 
-void CMultiTablesUnit::SetTableIntervalInLineOfText( int intervalInLineOfText )
+void Printing::CMultiTablesUnit::SetTableIntervalInLineOfText( int intervalInLineOfText )
 {
 	if (intervalInLineOfText <= 1)
 	{
@@ -188,7 +155,7 @@ void CMultiTablesUnit::SetTableIntervalInLineOfText( int intervalInLineOfText )
 	}
 }
 
-void CMultiTablesUnit::SetIntervalBetweenFirstTableInLineOfText( int intervalInLineOfText )
+void Printing::CMultiTablesUnit::SetIntervalBetweenFirstTableInLineOfText( int intervalInLineOfText )
 {
 	if (intervalInLineOfText <= 1)
 	{
@@ -200,7 +167,7 @@ void CMultiTablesUnit::SetIntervalBetweenFirstTableInLineOfText( int intervalInL
 	}
 }
 
-void CMultiTablesUnit::CreatePrintFonts()
+void Printing::CMultiTablesUnit::CreatePrintFonts()
 {
 	// for the unit itself
 	CPrintUnitStandardTable<CONST WCHAR>::CreatePrintFonts();
@@ -212,7 +179,7 @@ void CMultiTablesUnit::CreatePrintFonts()
 	}
 }
 
-void CMultiTablesUnit::InitPrintMetrics()
+void Printing::CMultiTablesUnit::InitPrintMetrics()
 {
 	// for the unit itself
 	CPrintUnitStandardTable<CONST WCHAR>::InitPrintMetrics();
@@ -225,7 +192,7 @@ void CMultiTablesUnit::InitPrintMetrics()
 	}
 }
 
-void CMultiTablesUnit::DeleteDefaultFonts()
+void Printing::CMultiTablesUnit::DeleteDefaultFonts()
 {
 	// for the unit itself
 	CPrintUnitStandardTable<CONST WCHAR>::DeleteDefaultFonts();
@@ -237,7 +204,7 @@ void CMultiTablesUnit::DeleteDefaultFonts()
 	}
 }
 
-void CMultiTablesUnit::CompleteAllColHeadingsDefinition()
+void Printing::CMultiTablesUnit::CompleteAllColHeadingsDefinition()
 {
 	CPrintUnitStandardTable<CONST WCHAR>::CompleteAllColHeadingsDefinition();
 
