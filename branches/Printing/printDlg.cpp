@@ -4,14 +4,17 @@
 #include "stdafx.h"
 #include "print.h"
 #include "printDlg.h"
-#include "gfx_printjob.h"
+
 #include <sstream>
+
+#include "gfx_printjob.h"
 #include "DataTableUnit.h"
-#include "PrintUnitFromDC.h"
 #include "BitmapTableUnit.h"
 #include "MergableTableUnit.h"
-
 #include "MultiTablesUnit.h"
+////////////////////////////////////
+#include "PrintUnitFromDC.h"
+////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
