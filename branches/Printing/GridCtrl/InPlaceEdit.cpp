@@ -58,7 +58,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CInPlaceEdit
 
-CInPlaceEdit::CInPlaceEdit(CWnd* pParent, CRect& rect, DWORD dwStyle, UINT nID,
+Printing::CInPlaceEdit::CInPlaceEdit(CWnd* pParent, CRect& rect, DWORD dwStyle, UINT nID,
                            int nRow, int nColumn, CString sInitText, 
                            UINT nFirstChar)
 {
@@ -105,11 +105,11 @@ CInPlaceEdit::CInPlaceEdit(CWnd* pParent, CRect& rect, DWORD dwStyle, UINT nID,
         PostMessage(WM_IME_CHAR, nFirstChar);
 }
 
-CInPlaceEdit::~CInPlaceEdit()
+Printing::CInPlaceEdit::~CInPlaceEdit()
 {
 }
 
-BEGIN_MESSAGE_MAP(CInPlaceEdit, CEdit)
+BEGIN_MESSAGE_MAP(Printing::CInPlaceEdit, CEdit)
     //{{AFX_MSG_MAP(CInPlaceEdit)
     ON_WM_KILLFOCUS()
     ON_WM_CHAR()
@@ -125,7 +125,7 @@ END_MESSAGE_MAP()
 // If an arrow key (or associated) is pressed, then exit if
 //  a) The Ctrl key was down, or
 //  b) m_bExitOnArrows == TRUE
-void CInPlaceEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+void Printing::CInPlaceEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
     if ((nChar == VK_PRIOR || nChar == VK_NEXT ||
         nChar == VK_DOWN  || nChar == VK_UP   ||
@@ -141,13 +141,13 @@ void CInPlaceEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 // As soon as this edit loses focus, kill it.
-void CInPlaceEdit::OnKillFocus(CWnd* pNewWnd)
+void Printing::CInPlaceEdit::OnKillFocus(CWnd* pNewWnd)
 {
     CEdit::OnKillFocus(pNewWnd);
     EndEdit();
 }
 
-void CInPlaceEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+void Printing::CInPlaceEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
     if (nChar == VK_TAB || nChar == VK_RETURN)
     {
@@ -195,7 +195,7 @@ void CInPlaceEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
     }
 }
 
-UINT CInPlaceEdit::OnGetDlgCode() 
+UINT Printing::CInPlaceEdit::OnGetDlgCode() 
 {
     return DLGC_WANTALLKEYS;
 }
@@ -204,7 +204,7 @@ UINT CInPlaceEdit::OnGetDlgCode()
 // CInPlaceEdit overrides
 
 // Stoopid win95 accelerator key problem workaround - Matt Weagle.
-BOOL CInPlaceEdit::PreTranslateMessage(MSG* pMsg) 
+BOOL Printing::CInPlaceEdit::PreTranslateMessage(MSG* pMsg) 
 {
     // Catch the Alt key so we don't choke if focus is going to an owner drawn button
     if (pMsg->message == WM_SYSCHAR)
@@ -214,7 +214,7 @@ BOOL CInPlaceEdit::PreTranslateMessage(MSG* pMsg)
 }
 
 // Auto delete
-void CInPlaceEdit::PostNcDestroy() 
+void Printing::CInPlaceEdit::PostNcDestroy() 
 {
     CEdit::PostNcDestroy();
     
@@ -224,7 +224,7 @@ void CInPlaceEdit::PostNcDestroy()
 ////////////////////////////////////////////////////////////////////////////
 // CInPlaceEdit implementation
 
-void CInPlaceEdit::EndEdit()
+void Printing::CInPlaceEdit::EndEdit()
 {
     CString str;
 

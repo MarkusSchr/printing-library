@@ -41,19 +41,18 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-IMPLEMENT_DYNCREATE(CGridCell, CGridCellBase)
-IMPLEMENT_DYNCREATE(CGridDefaultCell, CGridCell)
+using namespace Printing;
 
 /////////////////////////////////////////////////////////////////////////////
 // GridCell
 
-CGridCell::CGridCell()
+Printing::CGridCell::CGridCell()
 {
     m_plfFont = NULL;
-	CGridCell::Reset();
+	Printing::CGridCell::Reset();
 }
 
-CGridCell::~CGridCell()
+Printing::CGridCell::~CGridCell()
 {
     delete m_plfFont;
 }
@@ -61,12 +60,12 @@ CGridCell::~CGridCell()
 /////////////////////////////////////////////////////////////////////////////
 // GridCell Attributes
 
-void CGridCell::operator=(const CGridCell& cell)
+void Printing::CGridCell::operator=(const Printing::CGridCell& cell)
 {
     if (this != &cell) CGridCellBase::operator=(cell);
 }
 
-void CGridCell::Reset()
+void Printing::CGridCell::Reset()
 {
     CGridCellBase::Reset();
 
@@ -86,7 +85,7 @@ void CGridCell::Reset()
     m_plfFont = NULL;            // Cell font
 }
 
-void CGridCell::SetFont(const LOGFONT* plf)
+void Printing::CGridCell::SetFont(const LOGFONT* plf)
 {
     if (plf == NULL)
     {
@@ -102,7 +101,7 @@ void CGridCell::SetFont(const LOGFONT* plf)
     }
 }
 
-LOGFONT* CGridCell::GetFont() const
+LOGFONT* Printing::CGridCell::GetFont() const
 {
     if (m_plfFont == NULL)
     {
@@ -116,7 +115,7 @@ LOGFONT* CGridCell::GetFont() const
     return m_plfFont; 
 }
 
-CFont* CGridCell::GetFontObject() const
+CFont* Printing::CGridCell::GetFontObject() const
 {
     // If the default font is specified, use the default cell implementation
     if (m_plfFont == NULL)
@@ -136,7 +135,7 @@ CFont* CGridCell::GetFontObject() const
     }
 }
 
-DWORD CGridCell::GetFormat() const
+DWORD Printing::CGridCell::GetFormat() const
 {
     if (m_nFormat == (DWORD)-1)
     {
@@ -150,7 +149,7 @@ DWORD CGridCell::GetFormat() const
     return m_nFormat; 
 }
 
-UINT CGridCell::GetMargin() const           
+UINT Printing::CGridCell::GetMargin() const           
 {
     if (m_nMargin == (UINT)-1)
     {
@@ -167,7 +166,7 @@ UINT CGridCell::GetMargin() const
 /////////////////////////////////////////////////////////////////////////////
 // GridCell Operations
 
-BOOL CGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point */, UINT nID, UINT nChar)
+BOOL Printing::CGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point */, UINT nID, UINT nChar)
 {
     if ( m_bEditing )
 	{      
@@ -191,13 +190,13 @@ BOOL CGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point */, UINT nI
     return TRUE;
 }
 
-void CGridCell::EndEdit()
+void Printing::CGridCell::EndEdit()
 {
     if (m_pEditWnd)
         ((CInPlaceEdit*)m_pEditWnd)->EndEdit();
 }
 
-void CGridCell::OnEndEdit()
+void Printing::CGridCell::OnEndEdit()
 {
     m_bEditing = FALSE;
     m_pEditWnd = NULL;
@@ -206,7 +205,7 @@ void CGridCell::OnEndEdit()
 /////////////////////////////////////////////////////////////////////////////
 // CGridDefaultCell
 
-CGridDefaultCell::CGridDefaultCell() 
+Printing::CGridDefaultCell::CGridDefaultCell() 
 {
 #ifdef _WIN32_WCE
     m_nFormat = DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX;
@@ -230,12 +229,12 @@ CGridDefaultCell::CGridDefaultCell()
 #endif
 }
 
-CGridDefaultCell::~CGridDefaultCell()
+Printing::CGridDefaultCell::~CGridDefaultCell()
 {
     m_Font.DeleteObject(); 
 }
 
-void CGridDefaultCell::SetFont(const LOGFONT* plf)
+void Printing::CGridDefaultCell::SetFont(const LOGFONT* plf)
 {
     ASSERT(plf);
 
@@ -244,7 +243,7 @@ void CGridDefaultCell::SetFont(const LOGFONT* plf)
     m_Font.DeleteObject();
     m_Font.CreateFontIndirect(plf);
 
-    CGridCell::SetFont(plf);
+    Printing::CGridCell::SetFont(plf);
 
     // Get the font size and hence the default cell size
     CDC* pDC = CDC::FromHandle(::GetDC(NULL));
@@ -266,14 +265,17 @@ void CGridDefaultCell::SetFont(const LOGFONT* plf)
     }
 }
 
-LOGFONT* CGridDefaultCell::GetFont() const
+LOGFONT* Printing::CGridDefaultCell::GetFont() const
 {
     ASSERT(m_plfFont);  // This is the default - it CAN'T be NULL!
     return m_plfFont;
 }
 
-CFont* CGridDefaultCell::GetFontObject() const
+CFont* Printing::CGridDefaultCell::GetFontObject() const
 {
     ASSERT(m_Font.GetSafeHandle());
     return (CFont*) &m_Font; 
 }
+
+IMPLEMENT_DYNCREATE(CGridCell, CGridCellBase)
+IMPLEMENT_DYNCREATE(CGridDefaultCell, CGridCell)
