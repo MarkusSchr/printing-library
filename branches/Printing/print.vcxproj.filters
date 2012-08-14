@@ -2,24 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{8f855158-0d77-4d13-bafb-bade5b035b21}</UniqueIdentifier>
+      <UniqueIdentifier>{53e66597-eead-4ecc-9ecb-fcb973e01460}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Source Files\HSE">
-      <UniqueIdentifier>{4594db1a-335b-462f-a94d-44a3f44fc71a}</UniqueIdentifier>
+      <UniqueIdentifier>{1a7dd13b-afad-4636-a93f-d0d6a318d756}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\GridCtrl">
-      <UniqueIdentifier>{b82b58b7-1205-40d2-bcd2-31c5f011ff72}</UniqueIdentifier>
+      <UniqueIdentifier>{fa856bf3-6813-4766-84dd-b7c07be0924b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{a909e837-e946-4632-a40e-d78db5451451}</UniqueIdentifier>
+      <UniqueIdentifier>{b144b124-a83c-4818-9539-545937fe3711}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Header Files\GridCtrl">
-      <UniqueIdentifier>{29cea36a-f05a-4771-9bd0-66fec7009c61}</UniqueIdentifier>
+      <UniqueIdentifier>{46bea576-6ee5-443b-99bb-3e89e61ea997}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{b5c12a91-e9a2-49e7-bab1-788fd7064f26}</UniqueIdentifier>
+      <UniqueIdentifier>{a7d5ae35-17d3-4049-be5f-eea4be89ac8b}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
@@ -30,13 +30,16 @@
     <ClCompile Include="DataTableUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gfx_printjob.cpp">
+    <ClCompile Include="Gfx_printjob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gfx_printunit.cpp">
+    <ClCompile Include="Gfx_printunit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MergableTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiTablesUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="print.cpp">
@@ -69,13 +72,13 @@
     <ClCompile Include="GridCtrl\GridCtrl.cpp">
       <Filter>Source Files\GridCtrl</Filter>
     </ClCompile>
+    <ClCompile Include="GridCtrl\GridDropTarget.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
     <ClCompile Include="GridCtrl\InPlaceEdit.cpp">
       <Filter>Source Files\GridCtrl</Filter>
     </ClCompile>
     <ClCompile Include="GridCtrl\TitleTip.cpp">
-      <Filter>Source Files\GridCtrl</Filter>
-    </ClCompile>
-    <ClCompile Include="GridCtrl\GridDropTarget.cpp">
       <Filter>Source Files\GridCtrl</Filter>
     </ClCompile>
   </ItemGroup>
@@ -97,16 +100,19 @@
     <ClInclude Include="DataTableUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gfx_printjob.h">
+    <ClInclude Include="Gfx_printjob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gfx_printunit.h">
+    <ClInclude Include="Gfx_printunit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MemDC.h">
+    <ClInclude Include="IPrintable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MergableTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiTablesUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="print.h">
@@ -150,6 +156,9 @@
     </ClInclude>
     <ClInclude Include="GridCtrl\TitleTip.h">
       <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="MemDCForPrint.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

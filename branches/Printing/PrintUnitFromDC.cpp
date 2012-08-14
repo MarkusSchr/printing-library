@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "MemDC.h"
+#include "MemDCForPrint.h"
 #include "PrintUnitFromDC.h"
 
 

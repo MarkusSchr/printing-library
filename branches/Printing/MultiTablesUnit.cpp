@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "MultiTablesUnit.h"
-#include "MemDC.h"
+#include "MemDCForPrint.h"
 
 CMultiTablesUnit::CMultiTablesUnit( GPrintJob *pJob /*= NULL*/ )
 	:CPrintUnitStandardTable(pJob)
@@ -63,7 +63,7 @@ int CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
 	//}
 
 	CDC* oldDC = m_pJob->m_pDC;
-	CMyMemDC dc(&JDC);
+	CMemDcNotDraw dc(&JDC);
 
 	if (bGetPageOnly)
 	{
@@ -101,7 +101,7 @@ int CMultiTablesUnit::Paint( int from, int to )
 	int basePage = 1;
 
 	CDC* oldDC = m_pJob->m_pDC;
-	CMyMemDC dc(&JDC);
+	CMemDcNotDraw dc(&JDC);
 
 	for (; page <= to && iTable != m_vecTables.size(); page++)
 	{
