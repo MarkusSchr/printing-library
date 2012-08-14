@@ -6,7 +6,7 @@
 #include "afxres.h"
 #include "gfx_printjob.h"
 
-#include "MemDC.h"
+#include "MemDCForPrint.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -536,7 +536,7 @@ void Printing::GPrintJob::InsertTask( GPrintUnit* task )
 int Printing::GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int to )
 {
 	// need a temperate DC
-	CMyMemDC memDC(pPreviewDC);
+	CMemDcNotDraw memDC(pPreviewDC);
 	
 	SetPreviewPrintDC(&memDC);
 
@@ -596,7 +596,7 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 	}
 
 	// need a temperate DC
-	CMyMemDC memDC(pPreviewDC);
+	CMemDcNotDraw memDC(pPreviewDC);
 
 	SetPreviewPrintDC(&memDC);
 	
