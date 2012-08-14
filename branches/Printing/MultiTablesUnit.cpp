@@ -93,13 +93,30 @@ int CMultiTablesUnit::Paint( int from, int to )
 	m_bPrintThePage = true;
 
 	int movedHeight = 0;
-	int page = from;
+	
 	int iTable = 0;
 	bool bNeedPreview = true;
 
-	int basePage = page;
+	int page = 1;
+	int basePage = 1;
+
+	CDC* oldDC = m_pJob->m_pDC;
+	CMyMemDC dc(&JDC);
+
 	for (; page <= to && iTable != m_vecTables.size(); page++)
 	{
+		// pass the unnecessary pages
+		if (page < from)
+		{
+			oldDC = &JDC;
+			m_pJob->m_pDC = &dc;
+		}
+		else
+		{
+			m_pJob->m_pDC = oldDC;
+		}
+
+		// begin to draw
 		StartPage();
 		// adjust the top margin
 		JRECT.top += m_intervalBetweenFirstTable * m_pum.pumLineOfText;
