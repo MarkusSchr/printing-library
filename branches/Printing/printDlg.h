@@ -46,6 +46,7 @@ private:
 	CEdit m_editRows;
 private:
 	CEdit m_editColumns;
+	afx_msg void OnBnClickedButton1();
 };
 
 //{{AFX_INSERT_LOCATION}}

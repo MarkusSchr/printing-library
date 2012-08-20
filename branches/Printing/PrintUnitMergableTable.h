@@ -58,7 +58,7 @@ namespace Printing
 	public:
 		void SetPrintFont(CFont* font);
 		int BeginPrinting(CDC* pDc, GPrintInfo* info, CRect rect);
-		void Paint(CDC* pDc, int page, CRect rect, PrintEndResult *result = NULL);
+		void Paint(CDC* pDc, int page, CRect rect, PntPrintEndResult *result = NULL);
 		int PrintTitleAndMoveCursor(BOOL bNeedPrintContinue);
 
 	public:
@@ -77,13 +77,13 @@ namespace Printing
 
 	protected:
 		// the grid ctrl instance
-		CGridCtrl* m_pGridCtrl;
+		CPntGridCtrl* m_pGridCtrl;
 
 		// indicate whether we have defined columns
 		bool m_bHasDefinedColumns;
 
 		// store all the merged cell position
-		vector<CCellRange> m_mergeCellPos;
+		vector<CPntCellRange> m_mergeCellPos;
 
 		struct tagCell
 		{

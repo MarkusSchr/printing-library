@@ -57,24 +57,24 @@ using namespace Printing;
 /////////////////////////////////////////////////////////////////////////////
 // GridCellBase
 
-Printing::CGridCellBase::CGridCellBase()
+Printing::CPntGridCellBase::CPntGridCellBase()
 {
     Reset();
 }
 
-Printing::CGridCellBase::~CGridCellBase()
+Printing::CPntGridCellBase::~CPntGridCellBase()
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // GridCellBase Operations
 
-void Printing::CGridCellBase::Reset()
+void Printing::CPntGridCellBase::Reset()
 {
     m_nState  = 0;
 }
 
-void Printing::CGridCellBase::operator=(const CGridCellBase& cell)
+void Printing::CPntGridCellBase::operator=(const CPntGridCellBase& cell)
 {
 	if (this == &cell) return;
 
@@ -95,7 +95,7 @@ void Printing::CGridCellBase::operator=(const CGridCellBase& cell)
 // CGridCellBase Attributes
 
 // Returns a pointer to a cell that holds default values for this particular type of cell
-Printing::CGridCellBase* Printing::CGridCellBase::GetDefaultCell() const
+Printing::CPntGridCellBase* Printing::CPntGridCellBase::GetDefaultCell() const
 {
     if (GetGrid())
         return GetGrid()->GetDefaultCell(IsFixedRow(), IsFixedCol());
@@ -110,12 +110,12 @@ Printing::CGridCellBase* Printing::CGridCellBase::GetDefaultCell() const
 // color schemes.  Also removed printing references as that's now done
 // by PrintCell() and fixed the sort marker so that it doesn't draw out
 // of bounds.
-BOOL Printing::CGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect,  BOOL bEraseBkgnd /*=TRUE*/)
+BOOL Printing::CPntGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect,  BOOL bEraseBkgnd /*=TRUE*/)
 {
     // Note - all through this function we totally brutalise 'rect'. Do not
     // depend on it's value being that which was passed in.
 
-    CGridCtrl* pGrid = GetGrid();
+    CPntGridCtrl* pGrid = GetGrid();
     ASSERT(pGrid);
 
     if (!pGrid || !pDC)
@@ -131,7 +131,7 @@ BOOL Printing::CGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect,  BO
 
     // Get the default cell implementation for this kind of cell. We use it if this cell
     // has anything marked as "default"
-    CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+    CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
     if (!pDefaultCell)
         return FALSE;
 
@@ -236,7 +236,7 @@ BOOL Printing::CGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect,  BO
     // Draw lines only when wanted
     if (IsFixed() && pGrid->GetGridLines() != GVL_NONE)
     {
-        CCellID FocusCell = pGrid->GetFocusCell();
+        CPntCellID FocusCell = pGrid->GetFocusCell();
 
         // As above, always show current location even in list mode so
         // that we know where the cursor is at.
@@ -415,48 +415,48 @@ BOOL Printing::CGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect,  BO
 // CGridCellBase Mouse and Cursor events
 
 // Not yet implemented
-void Printing::CGridCellBase::OnMouseEnter()
+void Printing::CPntGridCellBase::OnMouseEnter()
 {
     TRACE0("Mouse entered cell\n");
 }
 
-void Printing::CGridCellBase::OnMouseOver()
+void Printing::CPntGridCellBase::OnMouseOver()
 {
     //TRACE0("Mouse over cell\n");
 }
 
 // Not Yet Implemented
-void Printing::CGridCellBase::OnMouseLeave()
+void Printing::CPntGridCellBase::OnMouseLeave()
 {
     TRACE0("Mouse left cell\n");
 }
 
-void Printing::CGridCellBase::OnClick( CPoint PointCellRelative)
+void Printing::CPntGridCellBase::OnClick( CPoint PointCellRelative)
 {
     UNUSED_ALWAYS(PointCellRelative);
     TRACE2("Mouse Left btn up in cell at x=%i y=%i\n", PointCellRelative.x, PointCellRelative.y);
 }
 
-void Printing::CGridCellBase::OnClickDown( CPoint PointCellRelative)
+void Printing::CPntGridCellBase::OnClickDown( CPoint PointCellRelative)
 {
     UNUSED_ALWAYS(PointCellRelative);
     TRACE2("Mouse Left btn down in cell at x=%i y=%i\n", PointCellRelative.x, PointCellRelative.y);
 }
 
-void Printing::CGridCellBase::OnRClick( CPoint PointCellRelative)
+void Printing::CPntGridCellBase::OnRClick( CPoint PointCellRelative)
 {
     UNUSED_ALWAYS(PointCellRelative);
     TRACE2("Mouse right-clicked in cell at x=%i y=%i\n", PointCellRelative.x, PointCellRelative.y);
 }
 
-void Printing::CGridCellBase::OnDblClick( CPoint PointCellRelative)
+void Printing::CPntGridCellBase::OnDblClick( CPoint PointCellRelative)
 {
     UNUSED_ALWAYS(PointCellRelative);
     TRACE2("Mouse double-clicked in cell at x=%i y=%i\n", PointCellRelative.x, PointCellRelative.y);
 }
 
 // Return TRUE if you set the cursor
-BOOL Printing::CGridCellBase::OnSetCursor()
+BOOL Printing::CPntGridCellBase::OnSetCursor()
 {
 #ifndef _WIN32_WCE_NO_CURSOR
     SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
@@ -467,12 +467,12 @@ BOOL Printing::CGridCellBase::OnSetCursor()
 /////////////////////////////////////////////////////////////////////////////
 // Printing::CGridCellBase editing
 
-void Printing::CGridCellBase::OnEndEdit() 
+void Printing::CPntGridCellBase::OnEndEdit() 
 {
 	ASSERT( FALSE); 
 }
 
-BOOL Printing::CGridCellBase::ValidateEdit(LPCTSTR str)
+BOOL Printing::CPntGridCellBase::ValidateEdit(LPCTSTR str)
 {
     UNUSED_ALWAYS(str);
 	return TRUE;
@@ -481,13 +481,13 @@ BOOL Printing::CGridCellBase::ValidateEdit(LPCTSTR str)
 /////////////////////////////////////////////////////////////////////////////
 // Printing::CGridCellBase Sizing
 
-BOOL Printing::CGridCellBase::GetTextRect( LPRECT pRect)  // i/o:  i=dims of cell rect; o=dims of text rect
+BOOL Printing::CPntGridCellBase::GetTextRect( LPRECT pRect)  // i/o:  i=dims of cell rect; o=dims of text rect
 {
     if (GetImage() >= 0)
     {
         IMAGEINFO Info;
 
-        CGridCtrl* pGrid = GetGrid();
+        CPntGridCtrl* pGrid = GetGrid();
         CImageList* pImageList = pGrid->GetImageList();
         
         if (pImageList && pImageList->GetImageInfo( GetImage(), &Info))
@@ -501,9 +501,9 @@ BOOL Printing::CGridCellBase::GetTextRect( LPRECT pRect)  // i/o:  i=dims of cel
 }
 
 // By default this uses the selected font (which is a bigger font)
-CSize Printing::CGridCellBase::GetTextExtent(LPCTSTR szText, CDC* pDC /*= NULL*/)
+CSize Printing::CPntGridCellBase::GetTextExtent(LPCTSTR szText, CDC* pDC /*= NULL*/)
 {
-    CGridCtrl* pGrid = GetGrid();
+    CPntGridCtrl* pGrid = GetGrid();
     ASSERT(pGrid);
 
     BOOL bReleaseDC = FALSE;
@@ -513,7 +513,7 @@ CSize Printing::CGridCellBase::GetTextExtent(LPCTSTR szText, CDC* pDC /*= NULL*/
 			pDC = pGrid->GetDC();
         if (pDC == NULL || szText == NULL) 
         {
-            CGridDefaultCell* pDefCell = (CGridDefaultCell*) GetDefaultCell();
+            CPntGridDefaultCell* pDefCell = (CPntGridDefaultCell*) GetDefaultCell();
             ASSERT(pDefCell);
             return CSize(pDefCell->GetWidth(), pDefCell->GetHeight());
         }
@@ -582,7 +582,7 @@ CSize Printing::CGridCellBase::GetTextExtent(LPCTSTR szText, CDC* pDC /*= NULL*/
 }
 
 
-CSize Printing::CGridCellBase::GetCellExtent(CDC* pDC)
+CSize Printing::CPntGridCellBase::GetCellExtent(CDC* pDC)
 {    
     CSize size = GetTextExtent(GetText(), pDC);    
     CSize ImageSize(0,0);    
@@ -590,7 +590,7 @@ CSize Printing::CGridCellBase::GetCellExtent(CDC* pDC)
     int nImage = GetImage();    
     if (nImage >= 0)    
     {        
-        CGridCtrl* pGrid = GetGrid();        
+        CPntGridCtrl* pGrid = GetGrid();        
         ASSERT(pGrid);        
         IMAGEINFO Info;        
         if (pGrid->GetImageList() && pGrid->GetImageList()->GetImageInfo(nImage, &Info))         
@@ -614,15 +614,15 @@ CSize Printing::CGridCellBase::GetCellExtent(CDC* pDC)
 
 // EFW - Added to print cells so that grids that use different colors are
 // printed correctly.
-BOOL Printing::CGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/, CRect rect)
+BOOL Printing::CPntGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/, CRect rect)
 {
 #if defined(_WIN32_WCE_NO_PRINTING) || defined(GRIDCONTROL_NO_PRINTING)
     return FALSE;
 #else
     COLORREF crFG, crBG;
-    GV_ITEM Item;
+    PNT_GV_ITEM Item;
 
-    CGridCtrl* pGrid = GetGrid();
+    CPntGridCtrl* pGrid = GetGrid();
     if (!pGrid || !pDC)
         return FALSE;
 
@@ -638,7 +638,7 @@ BOOL Printing::CGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/, CR
     {
         // Get the default cell implementation for this kind of cell. We use it if this cell
         // has anything marked as "default"
-        CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+        CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
         if (!pDefaultCell)
             return FALSE;
 
@@ -769,9 +769,9 @@ BOOL Printing::CGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/, CR
 /*****************************************************************************
 Callable by derived classes, only
 *****************************************************************************/
-LRESULT Printing::CGridCellBase::SendMessageToParent(int nRow, int nCol, int nMessage)
+LRESULT Printing::CPntGridCellBase::SendMessageToParent(int nRow, int nCol, int nMessage)
 {
-    CGridCtrl* pGrid = GetGrid();
+    CPntGridCtrl* pGrid = GetGrid();
     if( pGrid)
         return pGrid->SendMessageToParent(nRow, nCol, nMessage);
     else
@@ -779,4 +779,4 @@ LRESULT Printing::CGridCellBase::SendMessageToParent(int nRow, int nCol, int nMe
 }
 
 
-IMPLEMENT_DYNAMIC(CGridCellBase, CObject)
+IMPLEMENT_DYNAMIC(CPntGridCellBase, CObject)
