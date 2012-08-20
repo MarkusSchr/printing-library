@@ -620,72 +620,84 @@ void CPrintDlg::OnOK()
 
 void CPrintDlg::OnBnClickedButton1()
 {
+	// test
+	GPrintJob job;
+	CMergableTableUnit mergeUnit;
 
+	std::vector<COLUMNDEFINITIONS> vecColumnDef2;
+	const int columnNum = 9;
+	for (int i = 0; i < columnNum; i++)
+	{
+		Printing::COLUMNDEFINITIONS cd;
+		cd.fPct = (double)((double)1 / (double)columnNum);
+		vecColumnDef2.push_back(cd);
+	}
+	mergeUnit.DefineColumns(vecColumnDef2);
+	const int rowNum = 7; // this does not contain the title line
+	mergeUnit.SetRowNum(rowNum);
+	
+	// set row height
+	for (int i = 0; i < rowNum; i++)
+	{
+		mergeUnit.SetRowHeight(i, 3);
+	}
+	
+	// merge cell
+	for (int i = 0; i < rowNum; i++)
+	{
+		mergeUnit.MergeCell(i, 0, i, 1);
+		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
+	}
 
-	//// test
-	//GPrintJob job;
-	//CMergableTableUnit mergeUnit;
-	//{
+	// 非最后一行
+	mergeUnit.SetCellText(0,0,L"生产厂家：");
+	mergeUnit.SetCellText(0,2,L"你要的生产厂家");
+	mergeUnit.SetCellText(1,0,L"产品标示：");
+	mergeUnit.SetCellText(1,2,L"你要的产品标示");
+	mergeUnit.SetCellText(2,0,L"测试标准：");
+	mergeUnit.SetCellText(2,2,L"你要的测试标准");
+	mergeUnit.SetCellText(3,0,L"测试日期：");
+	mergeUnit.SetCellText(3,2,L"你要的测试日期");
+	mergeUnit.SetCellText(4,0,L"测试结果：");
+	mergeUnit.SetCellText(4,2,L"你要的测试结果");
+	mergeUnit.SetCellText(5,0,L"备注：");
+	mergeUnit.SetCellText(5,2,L"你要的备注");
 
-	//std::vector<COLUMNDEFINITIONS> vecColumnDef2;
-	//columnNum = 9;
-	//for (int i = 0; i < columnNum; i++)
-	//{
-	//	Printing::COLUMNDEFINITIONS cd;
-	//	cd.fPct = (double)(1 / columnNum);
-	//	vecColumnDef2.push_back(cd);
-	//}
-	//mergeUnit.DefineColumns(vecColumnDef2);
-	//mergeUnit.SetRowNum(7);
-	//for (int i = 0; i < 6; i++)
-	//{
-	//	mergeUnit.MergeCell(i, 0, i, 1);
-	//	mergeUnit.MergeCell(i, 2, i, columnNum);
-	//}
+	for (int i = 0; i < 6; i++)
+	{
+		mergeUnit.SetCellFormat(i, 0, DT_LEFT|DT_VCENTER);
+		mergeUnit.SetCellFormat(i, 2, DT_CENTER|DT_VCENTER);
+	}
 
-	//// 非最后一行
-	//mergeUnit.SetCellText(0,0,L"生产厂家：");
-	//mergeUnit.SetCellText(0,2,L"你要的生产厂家");
-	//mergeUnit.SetCellText(1,0,L"产品标示：");
-	//mergeUnit.SetCellText(1,2,L"你要的产品标示");
-	//mergeUnit.SetCellText(2,0,L"测试标准：");
-	//mergeUnit.SetCellText(2,2,L"你要的测试标准");
-	//mergeUnit.SetCellText(3,0,L"测试日期：");
-	//mergeUnit.SetCellText(3,2,L"你要的测试日期");
-	//mergeUnit.SetCellText(4,0,L"测试结果：");
-	//mergeUnit.SetCellText(4,2,L"你要的测试结果");
-	//mergeUnit.SetCellText(5,0,L"备注：");
-	//mergeUnit.SetCellText(5,2,L"你要的备注");
+	// 最后一行
+	mergeUnit.MergeCell(rowNum, 0, rowNum, 1);
+	mergeUnit.SetCellText(rowNum,0,L"测试：__________________");
+	mergeUnit.SetCellFormat(rowNum,0,DT_LEFT|DT_VCENTER);
+	
+	mergeUnit.MergeCell(rowNum, 2, rowNum, 3);
+	mergeUnit.SetCellText(rowNum,2,L"审核：__________________");
+	mergeUnit.SetCellFormat(rowNum,2,DT_LEFT|DT_VCENTER);
 
-	//for (int i = 0; i < 6; i++)
-	//{
-	//	mergeUnit.SetCellFormat(i, 0, DT_LEFT);
-	//	mergeUnit.SetCellFormat(i, 2, DT_CENTER);
-	//}
+	mergeUnit.MergeCell(rowNum, 5, rowNum, 6);
+	mergeUnit.SetCellText(rowNum,5,L"批准：__________________");
+	mergeUnit.SetCellFormat(rowNum,5,DT_LEFT|DT_VCENTER);
 
-	//// 最后一行
-	//mergeUnit.MergeCell(6, 2, 6, 3);
-	//mergeUnit.MergeCell(6, 5, 6, 6);
-	//mergeUnit.MergeCell(6, 8, 6, 9);
-	//mergeUnit.SetCellText(6,0,L"测试：");
-	//mergeUnit.SetCellFormat(6,0,DT_LEFT);
-	//mergeUnit.SetCellText(6,3,L"审核：");
-	//mergeUnit.SetCellFormat(6,3,DT_LEFT);
-	//mergeUnit.SetCellText(6,6,L"批准：");
-	//mergeUnit.SetCellFormat(6,6,DT_LEFT);
+	mergeUnit.MergeCell(rowNum, 8, rowNum, 9);
+	
+	
+	mergeUnit.NeedDrawTableOuterline(false);
 
-	//}
+	job.InsertTask(&mergeUnit);
 
-	//job.InsertTask(&mergeUnit);
-
-	//// 获取print的总数目
-	//CPrintDialog pd(FALSE); 
-	//pd.GetDefaults();
-	//pd.GetDevMode()->dmOrientation=1; 
-	//HDC hdc = pd.CreatePrinterDC(); 
-	//CDC printDC; 
-	//HDC hDC = printDC.GetSafeHdc();
-	//printDC.Attach(hdc);
-	//CMyMemDC dc(&printDC);
-	//job.PreviewAll(&dc);
+	// 获取print的总数目
+	CPrintDialog pd(FALSE); 
+	pd.GetDefaults();
+	pd.GetDevMode()->dmOrientation=1; 
+	HDC hdc = pd.CreatePrinterDC(); 
+	CDC printDC; 
+	HDC hDC = printDC.GetSafeHdc();
+	printDC.Attach(hdc);
+	/*CMemDcNotDraw dc(&printDC);
+	job.PreviewAll(&dc);*/
+	job.PrintFollowingPrintDialog();
 }
