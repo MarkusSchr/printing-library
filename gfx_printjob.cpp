@@ -478,9 +478,6 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 		return 0;
 	}
 
-	SetPreviewPrintDC(pPreviewDC);
-	InitPrintDC();
-	
 	int totalPages = 0;
 	int unitPage = 0;
 	int base = 1;
@@ -584,7 +581,8 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 int Printing::GPrintJob::Preview( CDC * pPreviewDC, CPrintInfo* info, int from /*= 1*/, int to /*= 65535 */ )
 {
 	m_pInfo = info;
-
+	SetPreviewPrintDC(pPreviewDC);
+	InitPrintDC();
 	return PreviewAll(pPreviewDC, from, to);
 }
 
