@@ -69,7 +69,7 @@ int Printing::GPrintJob::PrintFollowingPrintDialog()
 {
 	int nPrintCode = PRINTJOB_READY;
 
-	m_pInfo = new GPrintInfo;
+	m_pInfo = new CPrintInfo;
 	ASSERT(m_pInfo->m_pPD);  // CPrintInfo should have created this
 
 	m_pDialog = CreatePrintDialog();
@@ -479,23 +479,16 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 	}
 
 	SetPreviewPrintDC(pPreviewDC);
-	
-	// allocate a new one in case the former is different
-	GPrintInfo* old = m_pInfo;
-	m_pInfo = new GPrintInfo;
-
 	InitPrintDC();
-	InitPrintInfo();
-
-	// let all the unit to begin with the first page
-	m_pInfo->m_nCurPage = !old ? 1 : old->m_nCurPage;
-
+	
 	int totalPages = 0;
 	int unitPage = 0;
 	int base = 1;
 	for (int i = 0; from <= to && i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
+		int originBeginPage = m_pInfo->m_nCurPage;
 		int unitMaxPage = EvaluateOneUnitPages( pPreviewDC, i);
+		m_pInfo->m_nCurPage = originBeginPage;
 
 		if (from > unitMaxPage + base - 1)
 		{
@@ -512,9 +505,6 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 		}
 		base += unitMaxPage;
 	}
-
-	delete m_pInfo;
-	m_pInfo = old;
 
 	return totalPages;
 }
@@ -559,30 +549,14 @@ int Printing::GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/
 		return 0;
 	}
 
-	// allocate a new one in case the former is different
-	GPrintInfo* old = m_pInfo;
-	m_pInfo = new GPrintInfo;
-	if (old != NULL)
-	{
-		m_pInfo->m_nCurPage = old->m_nCurPage;
-	}
-
 	InitPrintDC();
-	InitPrintInfo();
 	m_vecPrintUnitTasks[unitIndex]->OnBeginPrinting();
 	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(bGetPageOnly, from, to);
 	m_vecPrintUnitTasks[unitIndex]->OnEndPrinting();
 	
-	int currentPage = 1;
 	if (!bGetPageOnly)
 	{
-		currentPage = m_pInfo->m_nCurPage;
-	}
-	delete m_pInfo;
-	m_pInfo = old;
-	if (!bGetPageOnly)
-	{
-		m_pInfo->m_nCurPage = currentPage;
+		m_pInfo->m_nCurPage = m_pInfo->m_nCurPage;
 	}
 
 	return pages;
@@ -599,12 +573,19 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 	CMemDcNotDraw memDC(pPreviewDC);
 
 	SetPreviewPrintDC(&memDC);
-	
+
 	int totalNum = PreviewOneUnit(&memDC, unitIndex, TRUE, from, to);
 
 	SetPreviewPrintDC(pPreviewDC);
 
 	return totalNum;
+}
+
+int Printing::GPrintJob::Preview( CDC * pPreviewDC, CPrintInfo* info, int from /*= 1*/, int to /*= 65535 */ )
+{
+	m_pInfo = info;
+
+	return PreviewAll(pPreviewDC, from, to);
 }
 
 
@@ -634,21 +615,6 @@ Printing::GSelectPrintJobIndexTree::~GSelectPrintJobIndexTree()
 {
 	// restore the old tree
 	m_pJob->m_pActiveTree = m_pOldTree;
-}
-
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////////
-
-Printing::GPrintInfo::GPrintInfo()
-{
-	m_nPhysicalCurPage = 1;
-}
-
-Printing::GPrintInfo::~GPrintInfo()
-{
 }
 
 

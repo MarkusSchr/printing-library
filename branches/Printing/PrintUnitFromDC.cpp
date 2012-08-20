@@ -18,11 +18,11 @@ int CPrintUnitFromDC::Paint( int from, int to )
 {
 	int beginPage = JINFO.m_nCurPage;
 	
-
 	EnvSetBeforePrinting();
 
 	// the following is all controlled by yourself
 	SetPreprocessValue(false);
+	
 	// because this example only print one page, so just test form == 1 && to >= 1
 	if (from == 1 && to >= from)
 	{
@@ -36,6 +36,7 @@ int CPrintUnitFromDC::Paint( int from, int to )
 	{
 		m_pPrinter->Print(&JDC, &JINFO);
 	}
+
 	EndPage();
 	
 	EnvCleanupAfterPrinting();

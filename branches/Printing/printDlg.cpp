@@ -376,35 +376,14 @@ void CPrintDlg::OnOK()
 
 	unitTable1.SetTitle(L"数据1");
 	unitTable1.NeedPrintTitleExcpetFirstPage(true);
-	job.InsertTask(&unitTable1);
+	//job.InsertTask(&unitTable1);
 
 	CDataTableUnit unitTable2;
 	unitTable2.SetTitle(L"数据2");
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
 	unitTable2.SetHeader(footer, 3);
-	job.InsertTask(&unitTable2);
-
-	//////////// test 1 : preview ////////////////////////////
-	// preview
-	CPrintDialog pd(FALSE); 
-	if(!pd.GetDefaults()) 
-	{ 
-		MessageBox( L"请先安装打印机 ", L"系统提示 ",MB_ICONWARNING|MB_OK);  
-		return; 
-	} 
-	pd.GetDevMode()->dmOrientation=1; 
-	HDC hdc = pd.CreatePrinterDC(); 
-	CDC dc; 
-	HDC hDC = dc.GetSafeHdc();
-	dc.Attach(hdc);
-	hDC = dc.GetSafeHdc();
-
-	// use the preview function to get the total pages that will be printed
-	int totalPages = job.PreviewAll(&dc);
-	int unit0Pages = job.PreviewOneUnit(&dc, 0, TRUE);
-	int unit1Pages = job.PreviewOneUnit(&dc, 1, TRUE);
-	ASSERT(unit0Pages + unit1Pages == totalPages);
+	//job.InsertTask(&unitTable2);
 
 	COLUMNDEFINITIONS cd;
 	TCHAR buf[200];
@@ -418,16 +397,6 @@ void CPrintDlg::OnOK()
 	unitTable1.SetRowFormat(DT_LEFT);
 	// need check columns again
 	unitTable1.DefineColumns(vecColumnDef);
-	// only preview the first unit's page 1 to 2
-	totalPages = job.PreviewOneUnit(&dc, 0, TRUE, 1, 2);
-
-
-	//////////// test 3 : self-define page ////////////////////////////
-	CPrintUnitFromDC userDefinedUnit;
-	userDefinedUnit.SetFooter(footer, 3);
-	userDefinedUnit.SetHeader(header, 3);
-	job.InsertTask(&userDefinedUnit);
-
 
 	//////////// test 4 : self-define page ////////////////////////////
 	CBitmapTableUnit unitBitmapTable;
@@ -444,7 +413,7 @@ void CPrintDlg::OnOK()
 	// set data
 	CBitmap bmp;
 	CSize mSize;
-	LoadPictureFile(L"D:\\我的文档\\桌面\\Aicro's work\\printing\\bmp\\001.jpg", &bmp, mSize);
+	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\1.jpg", &bmp, mSize);
 
 	//
 	vector<vector<CBitmap* > > vecBmp;
@@ -466,6 +435,13 @@ void CPrintDlg::OnOK()
 	// row in each page does not affect the result	
 	unitBitmapTable.SetRowsInEachPage(4);
 	job.InsertTask(&unitBitmapTable);
+
+
+	//////////// test 3 : self-define page ////////////////////////////
+	CPrintUnitFromDC userDefinedUnit;
+	userDefinedUnit.SetFooter(footer, 3);
+	userDefinedUnit.SetHeader(header, 3);
+	job.InsertTask(&userDefinedUnit);
 
 	//////////// test 5 : informal table ////////////////////////////
 	CMergableTableUnit mergeUnit;
@@ -687,7 +663,7 @@ void CPrintDlg::OnBnClickedButton1()
 	
 	mergeUnit.NeedDrawTableOuterline(false);
 
-	job.InsertTask(&mergeUnit);
+	//job.InsertTask(&mergeUnit);
 
 	// 获取print的总数目
 	CPrintDialog pd(FALSE); 
@@ -699,5 +675,42 @@ void CPrintDlg::OnBnClickedButton1()
 	printDC.Attach(hdc);
 	/*CMemDcNotDraw dc(&printDC);
 	job.PreviewAll(&dc);*/
+	//job.PrintFollowingPrintDialog();
+
+
+	//////////// test 4 : self-define page ////////////////////////////
+	CBitmapTableUnit unitBitmapTable;
+	unitBitmapTable.SetTitle(L"锟斤拷锟斤拷");
+	// add the margin around the title
+	unitBitmapTable.SetTitleMargin(10);
+	unitBitmapTable.SetTitlePen(140, L"锟斤拷锟斤拷");
+	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
+
+
+	// set data
+	CBitmap bmp;
+	CSize mSize;
+	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\1.jpg", &bmp, mSize);
+
+	//
+	vector<vector<CBitmap* > > vecBmp;
+	int row = 10;
+	int columns = 3;
+	vecBmp.resize(row);
+	for (int i = 0; i < row; i++)
+	{
+		vecBmp[i].resize(columns);
+	}
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < vecBmp[i].size(); j++)
+		{
+			vecBmp[i][j] = &bmp;
+		}
+	}
+	unitBitmapTable.SetPrintData(&vecBmp);
+	// row in each page does not affect the result	
+	unitBitmapTable.SetRowsInEachPage(4);
+	job.InsertTask(&unitBitmapTable);
 	job.PrintFollowingPrintDialog();
 }

@@ -675,7 +675,6 @@ void Printing::GPrintUnit::EndPage()
 		JDC.EndPage();
 
 		JINFO.m_nCurPage++;
-		JINFO.m_nPhysicalCurPage++;
 	}
 }
 
@@ -692,7 +691,6 @@ void Printing::GPrintUnit::AdvancePage(BOOL bIncPageNo)
 	if(bIncPageNo)
 	{
 		JINFO.m_nCurPage++;
-		JINFO.m_nPhysicalCurPage++;
 	}
 }
 

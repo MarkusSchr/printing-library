@@ -87,19 +87,6 @@ namespace Printing
 	} GDEVNAMES, *LPGDEVNAMES;
 
 
-
-	struct GPrintInfo : public CPrintInfo
-	{
-		GPrintInfo();
-		virtual ~GPrintInfo();
-
-		UINT m_nPhysicalCurPage;   
-	};
-
-
-
-
-
 	class GPrintJob : public CObject
 	{
 		DECLARE_DYNAMIC(GPrintJob)
@@ -113,13 +100,7 @@ namespace Printing
 		// these structure values are temporary, and must be stored as 
 		// CStrings if you intend to use them later
 		void GetDeviceNames(LPGDEVNAMES pDevNames);
-		// do the printing job by using the specified CDC 	
-		// return -1 if sth wrong
-		// the function will also get the total pages that will print within this job or some units
-		// if the unitIndex is -1, means to preview all the units
-		// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
-		virtual int PreviewOneUnit(CDC * pPreviewDC, int unitIndex = 0, BOOL bGetPageOnly = FALSE, int from = 1, int to = 65535 );
-		virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535 );
+
 		// insert print unit task into the job
 		void InsertTask( GPrintUnit* task );
 		// evaluate the total pages of the job or the specified unit
@@ -173,13 +154,21 @@ namespace Printing
 		// aren't using the defualt print dialog
 		virtual void UseDefaults();
 
-
+		int Preview(CDC * pPreviewDC, CPrintInfo* info, int from = 1, int to = 65535 );
 
 	protected:
 		// returns TRUE if this job is using the default print dialog
 		BOOL IsUsingDefaultPrintDialog();
 		// return the old CDC
 		void SetPreviewPrintDC(CDC* dc, BOOL needPreprocessing = FALSE);
+		// do the printing job by using the specified CDC 	
+		// return -1 if sth wrong
+		// the function will also get the total pages that will print within this job or some units
+		// if the unitIndex is -1, means to preview all the units
+		// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
+		virtual int PreviewOneUnit(CDC * pPreviewDC, int unitIndex = 0, BOOL bGetPageOnly = FALSE, int from = 1, int to = 65535 );
+		virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535 );
+
 
 	public:
 		// print device context
@@ -187,7 +176,7 @@ namespace Printing
 		// print dialog...may be CPrintDialog or not
 		CDialog *m_pDialog;
 		// print information
-		GPrintInfo *m_pInfo;
+		CPrintInfo *m_pInfo;
 		// print settings information
 		LPPRINTDLG m_pPD;
 		// client area (not including margins, headers, and footers) of print dc rect
