@@ -57,7 +57,7 @@ namespace Printing
 
 	public:
 		void SetPrintFont(CFont* font);
-		int BeginPrinting(CDC* pDc, GPrintInfo* info, CRect rect);
+		int BeginPrinting(CDC* pDc, CPrintInfo* info, CRect rect);
 		void Paint(CDC* pDc, int page, CRect rect, PntPrintEndResult *result = NULL);
 		int PrintTitleAndMoveCursor(BOOL bNeedPrintContinue);
 

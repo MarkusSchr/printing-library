@@ -346,7 +346,7 @@ void Printing::CPrintUnitMergableTable::SetPrintFont( CFont* font )
 	m_pGridCtrl->SetPrintFont(font);
 }
 
-int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, GPrintInfo* info, CRect rect )
+int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, CPrintInfo* info, CRect rect )
 {
 	return m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
 }
