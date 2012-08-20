@@ -48,7 +48,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTitleTip
 
-Printing::CTitleTip::CTitleTip()
+Printing::CPntTitleTip::CPntTitleTip()
 {
 	// Register the window class if it has not already been registered.
 	WNDCLASS wndcls;
@@ -76,12 +76,12 @@ Printing::CTitleTip::CTitleTip()
     m_pParentWnd        = NULL;
 }
 
-Printing::CTitleTip::~CTitleTip()
+Printing::CPntTitleTip::~CPntTitleTip()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(Printing::CTitleTip, CWnd)
+BEGIN_MESSAGE_MAP(Printing::CPntTitleTip, CWnd)
 	//{{AFX_MSG_MAP(CTitleTip)
 	ON_WM_MOUSEMOVE()
 	//}}AFX_MSG_MAP
@@ -91,7 +91,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTitleTip message handlers
 
-BOOL Printing::CTitleTip::Create(CWnd * pParentWnd)
+BOOL Printing::CPntTitleTip::Create(CWnd * pParentWnd)
 {
 	ASSERT_VALID(pParentWnd);
 
@@ -110,7 +110,7 @@ BOOL Printing::CTitleTip::Create(CWnd * pParentWnd)
     return m_bCreated;
 }
 
-BOOL Printing::CTitleTip::DestroyWindow() 
+BOOL Printing::CPntTitleTip::DestroyWindow() 
 {
     m_bCreated = FALSE;
 	
@@ -123,7 +123,7 @@ BOOL Printing::CTitleTip::DestroyWindow()
 // lpszTitleText - The text to be displayed
 // xoffset		 - Number of pixel that the text is offset from
 //				   left border of the cell
-void Printing::CTitleTip::Show(CRect rectTitle, LPCTSTR lpszTitleText, int xoffset /*=0*/,
+void Printing::CPntTitleTip::Show(CRect rectTitle, LPCTSTR lpszTitleText, int xoffset /*=0*/,
                      LPRECT lpHoverRect /*=NULL*/,
                      const LOGFONT* lpLogFont /*=NULL*/,
                      COLORREF crTextClr /* CLR_DEFAULT */,
@@ -220,7 +220,7 @@ void Printing::CTitleTip::Show(CRect rectTitle, LPCTSTR lpszTitleText, int xoffs
     dc.SelectObject( pOldFont );
 }
 
-void Printing::CTitleTip::Hide()
+void Printing::CPntTitleTip::Hide()
 {
   	if (!::IsWindow(GetSafeHwnd()))
         return;
@@ -231,7 +231,7 @@ void Printing::CTitleTip::Hide()
 	ShowWindow( SW_HIDE );
 }
 
-void Printing::CTitleTip::OnMouseMove(UINT nFlags, CPoint point) 
+void Printing::CPntTitleTip::OnMouseMove(UINT nFlags, CPoint point) 
 {
     if (!m_rectHover.PtInRect(point)) 
     {
@@ -254,7 +254,7 @@ void Printing::CTitleTip::OnMouseMove(UINT nFlags, CPoint point)
     }
 }
 
-BOOL Printing::CTitleTip::PreTranslateMessage(MSG* pMsg) 
+BOOL Printing::CPntTitleTip::PreTranslateMessage(MSG* pMsg) 
 {
     // Used to qualify WM_LBUTTONDOWN messages as double-clicks
     DWORD dwTick=0;

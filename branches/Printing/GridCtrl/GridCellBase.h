@@ -55,9 +55,9 @@
                                  GVIF_FORMAT|GVIF_FONT|GVIF_MARGIN)
 namespace Printing
 {
-	class CGridCtrl;
+	class CPntGridCtrl;
 	// Used for Get/SetItem calls.
-	typedef struct _GV_ITEM {
+	typedef struct _PNT_GV_ITEM {
 		int      row,col;     // Row and Column of item
 		UINT     mask;        // Mask for use in getting/setting cell data
 		UINT     nState;      // cell state (focus/hilighted etc)
@@ -69,22 +69,22 @@ namespace Printing
 		LOGFONT  lfFont;      // Cell font
 		UINT     nMargin;     // Internal cell margin
 		CString  strText;     // Text in cell
-	} GV_ITEM;
+	} PNT_GV_ITEM;
 
 
 	// Each cell contains one of these. Fields "row" and "column" are not stored since we
 	// will usually have acces to them in other ways, and they are an extra 8 bytes per
 	// cell that is probably unnecessary.
 
-	class CGridCellBase : public CObject
+	class CPntGridCellBase : public CObject
 	{
-		friend class CGridCtrl;
-		DECLARE_DYNAMIC(CGridCellBase)
+		friend class CPntGridCtrl;
+		DECLARE_DYNAMIC(CPntGridCellBase)
 
 		// Construction/Destruction
 	public:
-		CGridCellBase();
-		virtual ~CGridCellBase();
+		CPntGridCellBase();
+		virtual ~CPntGridCellBase();
 
 		// Attributes
 	public:
@@ -97,7 +97,7 @@ namespace Printing
 		virtual void SetBackClr(COLORREF /* clr */)             = 0 ;
 		virtual void SetFont(const LOGFONT* /* plf */)          = 0 ;
 		virtual void SetMargin( UINT /* nMargin */)             = 0 ;
-		virtual void SetGrid(CGridCtrl* /* pGrid */)            = 0 ;
+		virtual void SetGrid(CPntGridCtrl* /* pGrid */)            = 0 ;
 		virtual void SetCoords( int /* nRow */, int /* nCol */) = 0 ;
 
 		virtual LPCTSTR    GetText()       const                = 0 ;
@@ -110,11 +110,11 @@ namespace Printing
 		virtual COLORREF   GetBackClr()    const                = 0 ;
 		virtual LOGFONT  * GetFont()       const                = 0 ;
 		virtual CFont    * GetFontObject() const                = 0 ;
-		virtual CGridCtrl* GetGrid()       const                = 0 ;
+		virtual CPntGridCtrl* GetGrid()       const                = 0 ;
 		virtual CWnd     * GetEditWnd()    const                = 0 ;
 		virtual UINT       GetMargin()     const                = 0 ;
 
-		virtual CGridCellBase* GetDefaultCell() const;
+		virtual CPntGridCellBase* GetDefaultCell() const;
 
 		virtual BOOL IsDefaultFont()       const                = 0 ;
 		virtual BOOL IsEditing()           const                = 0 ;
@@ -129,7 +129,7 @@ namespace Printing
 
 		// Operators
 	public:
-		virtual void operator=(const CGridCellBase& cell);
+		virtual void operator=(const CPntGridCellBase& cell);
 
 		// Operations
 	public:

@@ -38,25 +38,25 @@
 
 namespace Printing
 {
-	class CGridCtrl;
-	class CGridCell : public Printing::CGridCellBase
+	class CPntGridCtrl;
+	class CPntGridCell : public Printing::CPntGridCellBase
 	{
-		friend class CGridCtrl;
-		DECLARE_DYNCREATE(CGridCell)
+		friend class CPntGridCtrl;
+		DECLARE_DYNCREATE(CPntGridCell)
 
 		// Construction/Destruction
 	public:
-		CGridCell();
-		virtual ~CGridCell();
+		CPntGridCell();
+		virtual ~CPntGridCell();
 
 		// Attributes
 	public:
-		void operator=(const CGridCell& cell);
+		void operator=(const CPntGridCell& cell);
 
 		virtual void  SetText(LPCTSTR szText)        { m_strText = szText;  }                       
 		virtual void  SetImage(int nImage)           { m_nImage = nImage;   }                        
 		virtual void  SetData(LPARAM lParam)         { m_lParam = lParam;   }      
-		virtual void  SetGrid(CGridCtrl* pGrid)      { m_pGrid = pGrid;     }                          
+		virtual void  SetGrid(CPntGridCtrl* pGrid)      { m_pGrid = pGrid;     }                          
 		// virtual void SetState(const DWORD nState);  -  use base class version   
 		virtual void  SetFormat(DWORD nFormat)       { m_nFormat = nFormat; }                      
 		virtual void  SetTextClr(COLORREF clr)       { m_crFgClr = clr;     }                          
@@ -70,7 +70,7 @@ namespace Printing
 		virtual LPCTSTR     GetText() const             { return (m_strText.IsEmpty())? _T("") : LPCTSTR(m_strText); }
 		virtual int         GetImage() const            { return m_nImage;  }
 		virtual LPARAM      GetData() const             { return m_lParam;  }
-		virtual CGridCtrl*  GetGrid() const             { return m_pGrid;   }
+		virtual CPntGridCtrl*  GetGrid() const             { return m_pGrid;   }
 		// virtual DWORD    GetState() const - use base class
 		virtual DWORD       GetFormat() const;
 		virtual COLORREF    GetTextClr() const          { return m_crFgClr; } // TODO: change to use default cell
@@ -102,20 +102,20 @@ namespace Printing
 
 		BOOL       m_bEditing;     // Cell being edited?
 
-		CGridCtrl* m_pGrid;        // Parent grid control
+		CPntGridCtrl* m_pGrid;        // Parent grid control
 		CWnd*      m_pEditWnd;
 	};
 
 	// This class is for storing grid default values. It's a little heavy weight, so
 	// don't use it in bulk 
-	class CGridDefaultCell : public CGridCell
+	class CPntGridDefaultCell : public CPntGridCell
 	{
-		DECLARE_DYNCREATE(CGridDefaultCell)
+		DECLARE_DYNCREATE(CPntGridDefaultCell)
 
 		// Construction/Destruction
 	public:
-		CGridDefaultCell();
-		virtual ~CGridDefaultCell();
+		CPntGridDefaultCell();
+		virtual ~CPntGridDefaultCell();
 
 	public:
 		virtual DWORD GetStyle() const                      { return m_dwStyle;      }
@@ -128,7 +128,7 @@ namespace Printing
 		// Disable these properties
 		virtual void     SetData(LPARAM /*lParam*/)             { ASSERT(FALSE);         }      
 		virtual void     SetState(DWORD /*nState*/)             { ASSERT(FALSE);         }
-		virtual DWORD    GetState() const                       { return CGridCell::GetState()|GVIS_READONLY; }
+		virtual DWORD    GetState() const                       { return CPntGridCell::GetState()|GVIS_READONLY; }
 		virtual void     SetCoords( int /*row*/, int /*col*/)   { ASSERT(FALSE);         }
 		virtual void     SetFont(const LOGFONT* /*plf*/);
 		virtual LOGFONT* GetFont() const;   

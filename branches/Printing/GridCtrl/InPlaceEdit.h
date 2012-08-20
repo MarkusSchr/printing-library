@@ -22,8 +22,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9C72__INCLUDED_)
-#define AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9C72__INCLUDED_
+#if !defined(AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9456__INCLUDED_)
+#define AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -31,11 +31,11 @@
 
 namespace Printing
 {
-	class CInPlaceEdit : public CEdit
+	class CPntInPlaceEdit : public CEdit
 	{
 		// Construction
 	public:
-		CInPlaceEdit(CWnd* pParent, CRect& rect, DWORD dwStyle, UINT nID,
+		CPntInPlaceEdit(CWnd* pParent, CRect& rect, DWORD dwStyle, UINT nID,
 			int nRow, int nColumn, CString sInitText, UINT nFirstChar);
 
 		// Attributes
@@ -56,7 +56,7 @@ namespace Printing
 
 		// Implementation
 	public:
-		virtual ~CInPlaceEdit();
+		virtual ~CPntInPlaceEdit();
 
 		// Generated message map functions
 	protected:
@@ -83,4 +83,4 @@ namespace Printing
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9C72__INCLUDED_)
+#endif // !defined(AFX_INPLACEEDIT_H__ECD42821_16DF_11D1_992F_895E185F9456__INCLUDED_)

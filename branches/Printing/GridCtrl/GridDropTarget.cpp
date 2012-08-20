@@ -40,20 +40,20 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CGridDropTarget
 
-Printing::CGridDropTarget::CGridDropTarget()
+Printing::CPntGridDropTarget::CPntGridDropTarget()
 {
     m_pGridCtrl = NULL;
     m_bRegistered = FALSE;
 }
 
-Printing::CGridDropTarget::~CGridDropTarget()
+Printing::CPntGridDropTarget::~CPntGridDropTarget()
 {
 }
 
 // Overloaded Register() function performs the normal COleDropTarget::Register
 // but also serves to connect this COleDropTarget with the parent grid control,
 // where all drop messages will ultimately be forwarded.
-BOOL Printing::CGridDropTarget::Register(CGridCtrl *pGridCtrl)
+BOOL Printing::CPntGridDropTarget::Register(CPntGridCtrl *pGridCtrl)
 {
     if (m_bRegistered)
         return FALSE;
@@ -64,10 +64,10 @@ BOOL Printing::CGridDropTarget::Register(CGridCtrl *pGridCtrl)
         return FALSE;
     bInProcedure = TRUE;
 
-    ASSERT(pGridCtrl->IsKindOf(RUNTIME_CLASS(CGridCtrl)));
+    ASSERT(pGridCtrl->IsKindOf(RUNTIME_CLASS(CPntGridCtrl)));
     ASSERT(pGridCtrl);
 
-    if (!pGridCtrl || !pGridCtrl->IsKindOf(RUNTIME_CLASS(CGridCtrl)))
+    if (!pGridCtrl || !pGridCtrl->IsKindOf(RUNTIME_CLASS(CPntGridCtrl)))
     {
         bInProcedure = FALSE;
         return FALSE;
@@ -81,13 +81,13 @@ BOOL Printing::CGridDropTarget::Register(CGridCtrl *pGridCtrl)
     return m_bRegistered;
 }
 
-void Printing::CGridDropTarget::Revoke()
+void Printing::CPntGridDropTarget::Revoke()
 {
     m_bRegistered = FALSE;
     COleDropTarget::Revoke();
 }
 
-BEGIN_MESSAGE_MAP(Printing::CGridDropTarget, COleDropTarget)
+BEGIN_MESSAGE_MAP(Printing::CPntGridDropTarget, COleDropTarget)
     //{{AFX_MSG_MAP(CGridDropTarget)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -95,7 +95,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGridDropTarget message handlers
 
-DROPEFFECT Printing::CGridDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint /*point*/)
+DROPEFFECT Printing::CPntGridDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint /*point*/)
 {
 //    TRACE("In CGridDropTarget::OnDragScroll\n");
     if (pWnd->GetSafeHwnd() == m_pGridCtrl->GetSafeHwnd())
@@ -108,7 +108,7 @@ DROPEFFECT Printing::CGridDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState,
         return DROPEFFECT_NONE;
 }
 
-DROPEFFECT Printing::CGridDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, 
+DROPEFFECT Printing::CPntGridDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, 
                                         DWORD dwKeyState, CPoint point)
 {
     TRACE(_T("In CGridDropTarget::OnDragEnter\n"));
@@ -120,7 +120,7 @@ DROPEFFECT Printing::CGridDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pD
         return DROPEFFECT_NONE;
 }
 
-void Printing::CGridDropTarget::OnDragLeave(CWnd* pWnd)
+void Printing::CPntGridDropTarget::OnDragLeave(CWnd* pWnd)
 {
     TRACE(_T("In CGridDropTarget::OnDragLeave\n"));
     ASSERT(m_pGridCtrl);
@@ -129,7 +129,7 @@ void Printing::CGridDropTarget::OnDragLeave(CWnd* pWnd)
         m_pGridCtrl->OnDragLeave();
 }
 
-DROPEFFECT Printing::CGridDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, 
+DROPEFFECT Printing::CPntGridDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, 
                                        DWORD dwKeyState, CPoint point)
 {
 //    TRACE("In CGridDropTarget::OnDragOver\n");
@@ -141,7 +141,7 @@ DROPEFFECT Printing::CGridDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pDa
         return DROPEFFECT_NONE;
 }
 
-BOOL Printing::CGridDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pDataObject,
+BOOL Printing::CPntGridDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pDataObject,
                              DROPEFFECT dropEffect, CPoint point)
 {
     TRACE(_T("In CGridDropTarget::OnDrop\n"));

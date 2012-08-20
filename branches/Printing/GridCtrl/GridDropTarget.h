@@ -32,26 +32,26 @@
 
 #include <afxole.h>
 
-class Printing::CGridCtrl;
+class Printing::CPntGridCtrl;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGridDropTarget command target
 namespace Printing
 {
-	class CGridDropTarget : public COleDropTarget
+	class CPntGridDropTarget : public COleDropTarget
 	{
 	public:
-		CGridDropTarget();
-		virtual ~CGridDropTarget();
+		CPntGridDropTarget();
+		virtual ~CPntGridDropTarget();
 
 		// Attributes
 	public:
-		CGridCtrl* m_pGridCtrl;
+		CPntGridCtrl* m_pGridCtrl;
 		BOOL       m_bRegistered;
 
 		// Operations
 	public:
-		BOOL Register(CGridCtrl *pGridCtrl);
+		BOOL Register(CPntGridCtrl *pGridCtrl);
 		virtual void Revoke();
 
 		BOOL        OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
