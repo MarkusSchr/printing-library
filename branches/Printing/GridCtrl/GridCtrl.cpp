@@ -7172,7 +7172,6 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
                     pDC->LineTo(rect.left, rect.bottom);
                 }
             }
-
         }
         m_nCurrPrintRow++;
 		printedRow++;
@@ -7235,9 +7234,9 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 					rect.top -= Overlap;
 					CBrush brush(RGB(255,255,255));
 					CBrush* oldBrush = pDC->SelectObject(&brush);
-					//CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
+					CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
 					pDC->Rectangle(&rect);
-					//pDC->SelectObject(pOldPen);
+					pDC->SelectObject(pOldPen);
 					pDC->SelectObject(oldBrush);
 
 					// next repaint the line
