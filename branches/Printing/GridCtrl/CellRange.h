@@ -22,8 +22,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1382__INCLUDED_)
-#define AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1382__INCLUDED_
+#if !defined(AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1456__INCLUDED_)
+#define AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -147,4 +147,4 @@ namespace Printing
 			min(m_nMaxRow,rhs.m_nMaxRow), min(m_nMaxCol,rhs.m_nMaxCol));
 	}
 }
-#endif // !defined(AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1382__INCLUDED_)
+#endif // !defined(AFX_CELLRANGE_H__F86EF761_725A_11D1_ABBA_00A0243D1456__INCLUDED_)

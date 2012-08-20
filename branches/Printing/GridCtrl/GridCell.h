@@ -22,8 +22,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_)
-#define AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_
+#if !defined(AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_)
+#define AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -144,4 +144,4 @@ namespace Printing
 	// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 }
 
-#endif // !defined(AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_)
+#endif // !defined(AFX_GRIDCELL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_)
