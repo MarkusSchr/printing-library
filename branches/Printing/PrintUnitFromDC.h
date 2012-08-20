@@ -7,6 +7,8 @@
 #include "HSECPrintPageConfig.h"
 #include "HSEPrinter.h"
 
+#include "MemDC.h"
+
 using namespace Printing;
 class CPrintUnitFromDC : public Printing::GPrintUnit
 {
@@ -24,5 +26,7 @@ private:
 	virtual void OnEndPrinting();
 
 private:
-	CHSEPrinter* m_pPrinter;		
+	CHSEPrinter* m_pPrinter;
+
+	CMemDCUsedForPrinter* dc;
 };
