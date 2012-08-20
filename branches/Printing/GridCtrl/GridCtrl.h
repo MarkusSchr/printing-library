@@ -32,8 +32,8 @@
 // 2. The InplaceEditCtrl is not multiline even if a cell can contain Multiline Text..
 // 3. If a cell is too small, the InplaceEditCtrl is almost invisible..
 
-#if !defined(AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_)
-#define AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_
+#if !defined(AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_)
+#define AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -125,13 +125,13 @@ namespace Printing
 		NMHDR      hdr;
 		CCellRange range;
 	} GV_CACHEHINT;
+
+	// storage typedef for each row in the grid
+	typedef CTypedPtrArray<CObArray, Printing::CGridCellBase*> GRID_ROW;
+
+	// For virtual mode callback
+	typedef BOOL (CALLBACK* GRIDCALLBACK)(Printing::GV_DISPINFO *, LPARAM);
 }
-
-// storage typedef for each row in the grid
-typedef CTypedPtrArray<CObArray, Printing::CGridCellBase*> GRID_ROW;
-
-// For virtual mode callback
-typedef BOOL (CALLBACK* GRIDCALLBACK)(Printing::GV_DISPINFO *, LPARAM);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Defines
@@ -1058,4 +1058,4 @@ namespace Printing
 	// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 }
 
-#endif // !defined(AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1382__INCLUDED_)
+#endif // !defined(AFX_GRIDCTRL_H__519FA702_722C_11D1_ABBA_00A0243D1456__INCLUDED_)

@@ -22,8 +22,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1382__INCLUDED_)
-#define AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1382__INCLUDED_
+#if !defined(AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1456__INCLUDED_)
+#define AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -81,4 +81,4 @@ namespace Printing
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1382__INCLUDED_)
+#endif // !defined(AFX_GRIDDROPTARGET_H__5C610981_BD36_11D1_97CD_00A0243D1456__INCLUDED_)
