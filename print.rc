@@ -90,13 +90,14 @@ EXSTYLE WS_EX_APPWINDOW
 CAPTION "print"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Print Test Report",IDOK,81,124,73,14
+    DEFPUSHBUTTON   "Print Test Report",IDOK,25,124,73,14
     LTEXT           "Clicking 'Print Report' below will print a test report that includes a header page, an index, and three different types of reports.",IDC_STATIC,7,7,207,29
     PUSHBUTTON      "Cancel",IDCANCEL,164,124,50,14
     LTEXT           "Rows",IDC_STATIC,7,43,17,8
     LTEXT           "Columns",IDC_STATIC,7,74,29,8
     EDITTEXT        IDC_EDIT_ROWS,46,39,40,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_EDIT_COLUMNS,45,70,40,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Test",IDC_BUTTON1,109,124,50,14
 END
 
 

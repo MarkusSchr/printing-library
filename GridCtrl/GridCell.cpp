@@ -46,13 +46,13 @@ using namespace Printing;
 /////////////////////////////////////////////////////////////////////////////
 // GridCell
 
-Printing::CGridCell::CGridCell()
+Printing::CPntGridCell::CPntGridCell()
 {
     m_plfFont = NULL;
-	Printing::CGridCell::Reset();
+	Printing::CPntGridCell::Reset();
 }
 
-Printing::CGridCell::~CGridCell()
+Printing::CPntGridCell::~CPntGridCell()
 {
     delete m_plfFont;
 }
@@ -60,14 +60,14 @@ Printing::CGridCell::~CGridCell()
 /////////////////////////////////////////////////////////////////////////////
 // GridCell Attributes
 
-void Printing::CGridCell::operator=(const Printing::CGridCell& cell)
+void Printing::CPntGridCell::operator=(const Printing::CPntGridCell& cell)
 {
-    if (this != &cell) CGridCellBase::operator=(cell);
+    if (this != &cell) CPntGridCellBase::operator=(cell);
 }
 
-void Printing::CGridCell::Reset()
+void Printing::CPntGridCell::Reset()
 {
-    CGridCellBase::Reset();
+    CPntGridCellBase::Reset();
 
     m_strText.Empty();
     m_nImage   = -1;
@@ -85,7 +85,7 @@ void Printing::CGridCell::Reset()
     m_plfFont = NULL;            // Cell font
 }
 
-void Printing::CGridCell::SetFont(const LOGFONT* plf)
+void Printing::CPntGridCell::SetFont(const LOGFONT* plf)
 {
     if (plf == NULL)
     {
@@ -101,11 +101,11 @@ void Printing::CGridCell::SetFont(const LOGFONT* plf)
     }
 }
 
-LOGFONT* Printing::CGridCell::GetFont() const
+LOGFONT* Printing::CPntGridCell::GetFont() const
 {
     if (m_plfFont == NULL)
     {
-        CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+        CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
         if (!pDefaultCell)
             return NULL;
 
@@ -115,12 +115,12 @@ LOGFONT* Printing::CGridCell::GetFont() const
     return m_plfFont; 
 }
 
-CFont* Printing::CGridCell::GetFontObject() const
+CFont* Printing::CPntGridCell::GetFontObject() const
 {
     // If the default font is specified, use the default cell implementation
     if (m_plfFont == NULL)
     {
-        CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+        CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
         if (!pDefaultCell)
             return NULL;
 
@@ -135,11 +135,11 @@ CFont* Printing::CGridCell::GetFontObject() const
     }
 }
 
-DWORD Printing::CGridCell::GetFormat() const
+DWORD Printing::CPntGridCell::GetFormat() const
 {
     if (m_nFormat == (DWORD)-1)
     {
-        CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+        CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
         if (!pDefaultCell)
             return 0;
 
@@ -149,11 +149,11 @@ DWORD Printing::CGridCell::GetFormat() const
     return m_nFormat; 
 }
 
-UINT Printing::CGridCell::GetMargin() const           
+UINT Printing::CPntGridCell::GetMargin() const           
 {
     if (m_nMargin == (UINT)-1)
     {
-        CGridDefaultCell *pDefaultCell = (CGridDefaultCell*) GetDefaultCell();
+        CPntGridDefaultCell *pDefaultCell = (CPntGridDefaultCell*) GetDefaultCell();
         if (!pDefaultCell)
             return 0;
 
@@ -166,7 +166,7 @@ UINT Printing::CGridCell::GetMargin() const
 /////////////////////////////////////////////////////////////////////////////
 // GridCell Operations
 
-BOOL Printing::CGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point */, UINT nID, UINT nChar)
+BOOL Printing::CPntGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point */, UINT nID, UINT nChar)
 {
     if ( m_bEditing )
 	{      
@@ -184,19 +184,19 @@ BOOL Printing::CGridCell::Edit(int nRow, int nCol, CRect rect, CPoint /* point *
 		m_bEditing = TRUE;
 		
 		// InPlaceEdit auto-deletes itself
-		CGridCtrl* pGrid = GetGrid();
-		m_pEditWnd = new CInPlaceEdit(pGrid, rect, dwStyle, nID, nRow, nCol, GetText(), nChar);
+		CPntGridCtrl* pGrid = GetGrid();
+		m_pEditWnd = new CPntInPlaceEdit(pGrid, rect, dwStyle, nID, nRow, nCol, GetText(), nChar);
     }
     return TRUE;
 }
 
-void Printing::CGridCell::EndEdit()
+void Printing::CPntGridCell::EndEdit()
 {
     if (m_pEditWnd)
-        ((CInPlaceEdit*)m_pEditWnd)->EndEdit();
+        ((CPntInPlaceEdit*)m_pEditWnd)->EndEdit();
 }
 
-void Printing::CGridCell::OnEndEdit()
+void Printing::CPntGridCell::OnEndEdit()
 {
     m_bEditing = FALSE;
     m_pEditWnd = NULL;
@@ -205,7 +205,7 @@ void Printing::CGridCell::OnEndEdit()
 /////////////////////////////////////////////////////////////////////////////
 // CGridDefaultCell
 
-Printing::CGridDefaultCell::CGridDefaultCell() 
+Printing::CPntGridDefaultCell::CPntGridDefaultCell() 
 {
 #ifdef _WIN32_WCE
     m_nFormat = DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX;
@@ -229,12 +229,12 @@ Printing::CGridDefaultCell::CGridDefaultCell()
 #endif
 }
 
-Printing::CGridDefaultCell::~CGridDefaultCell()
+Printing::CPntGridDefaultCell::~CPntGridDefaultCell()
 {
     m_Font.DeleteObject(); 
 }
 
-void Printing::CGridDefaultCell::SetFont(const LOGFONT* plf)
+void Printing::CPntGridDefaultCell::SetFont(const LOGFONT* plf)
 {
     ASSERT(plf);
 
@@ -243,7 +243,7 @@ void Printing::CGridDefaultCell::SetFont(const LOGFONT* plf)
     m_Font.DeleteObject();
     m_Font.CreateFontIndirect(plf);
 
-    Printing::CGridCell::SetFont(plf);
+    Printing::CPntGridCell::SetFont(plf);
 
     // Get the font size and hence the default cell size
     CDC* pDC = CDC::FromHandle(::GetDC(NULL));
@@ -265,17 +265,17 @@ void Printing::CGridDefaultCell::SetFont(const LOGFONT* plf)
     }
 }
 
-LOGFONT* Printing::CGridDefaultCell::GetFont() const
+LOGFONT* Printing::CPntGridDefaultCell::GetFont() const
 {
     ASSERT(m_plfFont);  // This is the default - it CAN'T be NULL!
     return m_plfFont;
 }
 
-CFont* Printing::CGridDefaultCell::GetFontObject() const
+CFont* Printing::CPntGridDefaultCell::GetFontObject() const
 {
     ASSERT(m_Font.GetSafeHandle());
     return (CFont*) &m_Font; 
 }
 
-IMPLEMENT_DYNCREATE(CGridCell, CGridCellBase)
-IMPLEMENT_DYNCREATE(CGridDefaultCell, CGridCell)
+IMPLEMENT_DYNCREATE(CPntGridCell, CPntGridCellBase)
+IMPLEMENT_DYNCREATE(CPntGridDefaultCell, CPntGridCell)

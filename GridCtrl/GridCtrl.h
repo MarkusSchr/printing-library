@@ -108,29 +108,29 @@
 namespace Printing
 {
 	// This structure sent to Grid's parent in a WM_NOTIFY message
-	typedef struct tagNM_GRIDVIEW {
+	typedef struct tagPNT_NM_GRIDVIEW {
 		NMHDR hdr;
 		int   iRow;
 		int   iColumn;
-	} NM_GRIDVIEW;
+	} PNT_NM_GRIDVIEW;
 
 	// This is sent to the Grid from child in-place edit controls
-	typedef struct tagGV_DISPINFO {
+	typedef struct tagPNT_GV_DISPINFO {
 		NMHDR   hdr;
-		GV_ITEM item;
-	} GV_DISPINFO;
+		PNT_GV_ITEM item;
+	} PNT_GV_DISPINFO;
 
 	// This is sent to the Grid from child in-place edit controls
-	typedef struct tagGV_CACHEHINT {
+	typedef struct tagPNT_GV_CACHEHINT {
 		NMHDR      hdr;
-		CCellRange range;
-	} GV_CACHEHINT;
+		CPntCellRange range;
+	} PNT_GV_CACHEHINT;
 
 	// storage typedef for each row in the grid
-	typedef CTypedPtrArray<CObArray, Printing::CGridCellBase*> GRID_ROW;
+	typedef CTypedPtrArray<CObArray, Printing::CPntGridCellBase*> PNT_GRID_ROW;
 
 	// For virtual mode callback
-	typedef BOOL (CALLBACK* GRIDCALLBACK)(Printing::GV_DISPINFO *, LPARAM);
+	typedef BOOL (CALLBACK* GRIDCALLBACK)(Printing::PNT_GV_DISPINFO *, LPARAM);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ namespace Printing
 #define GVN_GETDISPINFO         LVN_GETDISPINFO 
 #define GVN_ODCACHEHINT         LVN_ODCACHEHINT 
 
-class Printing::CGridCtrl;
+class Printing::CPntGridCtrl;
 
 /////////////////////////////////////////////////////////////////////////////
 // CGridCtrl window
@@ -200,13 +200,13 @@ typedef bool (*PVIRTUALCOMPARE)(int, int);
 namespace Printing
 {
 	// struct that indicates how the printing is ended
-	struct PrintEndResult
+	struct PntPrintEndResult
 	{
 		bool bEndOfPage; // print this page end for reach the bottom of the page
 		bool bEndOfTable;// print this page end for reach the last row of the table
 		int pixelOfBottom; // the pixel of the bottom at the end of this round's printing 
 
-		PrintEndResult()
+		PntPrintEndResult()
 		{
 			bEndOfPage = false;
 			bEndOfTable = false;
@@ -214,15 +214,15 @@ namespace Printing
 		}
 	};
 
-	class CGridCtrl : public CWnd
+	class CPntGridCtrl : public CWnd
 	{
-		DECLARE_DYNCREATE(CGridCtrl)
-		friend class CGridCell;
-		friend class CGridCellBase;
+		DECLARE_DYNCREATE(CPntGridCtrl)
+		friend class CPntGridCell;
+		friend class CPntGridCellBase;
 
 		// Construction
 	public:
-		CGridCtrl(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0);
+		CPntGridCtrl(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0);
 
 		BOOL Create(const RECT& rect, CWnd* parent, UINT nID,
 			DWORD dwStyle = WS_CHILD | WS_BORDER | WS_TABSTOP | WS_VISIBLE);
@@ -236,22 +236,22 @@ namespace Printing
 
 		//// LUC : MergeCell////////
 
-		INT_PTR MergeCells(CCellRange& mergedCellRange);
+		INT_PTR MergeCells(CPntCellRange& mergedCellRange);
 		void SplitCells(INT_PTR nMergeID);
 
-		BOOL IsMergedCell(int row, int col, CCellRange& mergedCellRange);
+		BOOL IsMergedCell(int row, int col, CPntCellRange& mergedCellRange);
 		BOOL GetMergedCellRect(int row, int col, CRect& rect);
-		BOOL GetMergedCellRect(CCellRange& mergedCell, CRect& rect);
+		BOOL GetMergedCellRect(CPntCellRange& mergedCell, CRect& rect);
 		BOOL GetTopLeftMergedCell(int& row, int& col, CRect& mergeRect);
 		BOOL GetBottomRightMergedCell(int& row, int& col, CRect& mergeRect);
-		virtual BOOL IsFocused(CGridCellBase& cell, int nRow, int nCol);
-		virtual BOOL IsSelected(CGridCellBase& cell, int nRow, int nCol);
+		virtual BOOL IsFocused(CPntGridCellBase& cell, int nRow, int nCol);
+		virtual BOOL IsSelected(CPntGridCellBase& cell, int nRow, int nCol);
 
 		BOOL	m_bDrawingMergedCell;
 		INT_PTR	m_nCurrentMergeID;
 
 		static CRect rectNull;		
-		static CCellID cellNull;
+		static CPntCellID cellNull;
 
 		// LUC : Freeze Rows	
 
@@ -350,16 +350,16 @@ namespace Printing
 		BOOL SetColumnWidth(int col, int width);
 
 		BOOL GetCellOrigin(int nRow, int nCol, LPPOINT p);
-		BOOL GetCellOrigin(const CCellID& cell, LPPOINT p);
+		BOOL GetCellOrigin(const CPntCellID& cell, LPPOINT p);
 		BOOL GetCellRect(int nRow, int nCol, LPRECT pRect);
-		BOOL GetCellRect(const CCellID& cell, LPRECT pRect);
+		BOOL GetCellRect(const CPntCellID& cell, LPRECT pRect);
 
-		BOOL GetTextRect(const CCellID& cell, LPRECT pRect);
+		BOOL GetTextRect(const CPntCellID& cell, LPRECT pRect);
 		BOOL GetTextRect(int nRow, int nCol, LPRECT pRect);
 
 		// LUC
 		// Change for MergeCell
-		CCellID GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck = TRUE, CCellID& cellOriginal = cellNull);
+		CPntCellID GetCellFromPt(CPoint point, BOOL bAllowFixedCellCheck = TRUE, CPntCellID& cellOriginal = cellNull);
 
 		// LUC
 		//int  GetFixedRowHeight() const;
@@ -424,9 +424,9 @@ namespace Printing
 
 		int GetSelectedCount() const                  { return (int)m_SelectedCellMap.GetCount(); }
 
-		CCellID SetFocusCell(CCellID cell);
-		CCellID SetFocusCell(int nRow, int nCol);
-		CCellID GetFocusCell() const                  { return m_idCurrentCell;           }
+		CPntCellID SetFocusCell(CPntCellID cell);
+		CPntCellID SetFocusCell(int nRow, int nCol);
+		CPntCellID GetFocusCell() const                  { return m_idCurrentCell;           }
 
 
 		void SetVirtualMode(BOOL bVirtual);
@@ -494,20 +494,20 @@ namespace Printing
 		// default Grid cells. Use these for setting default values such as colors and fonts
 		///////////////////////////////////////////////////////////////////////////////////
 	public:
-		CGridCellBase* GetDefaultCell(BOOL bFixedRow, BOOL bFixedCol) const;
+		CPntGridCellBase* GetDefaultCell(BOOL bFixedRow, BOOL bFixedCol) const;
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// Grid cell Attributes
 		///////////////////////////////////////////////////////////////////////////////////
 	public:
-		CGridCellBase* GetCell(int nRow, int nCol) const;   // Get the actual cell!
+		CPntGridCellBase* GetCell(int nRow, int nCol) const;   // Get the actual cell!
 
 		void SetModified(BOOL bModified = TRUE, int nRow = -1, int nCol = -1);
 		BOOL GetModified(int nRow = -1, int nCol = -1);
 		BOOL IsCellFixed(int nRow, int nCol);
 
-		BOOL   SetItem(const GV_ITEM* pItem);
-		BOOL   GetItem(GV_ITEM* pItem);
+		BOOL   SetItem(const PNT_GV_ITEM* pItem);
+		BOOL   GetItem(PNT_GV_ITEM* pItem);
 		BOOL   SetItemText(int nRow, int nCol, LPCTSTR str);
 		// The following was virtual. If you want to override, use 
 		//  CGridCellBase-derived class's GetText() to accomplish same thing
@@ -552,7 +552,7 @@ namespace Printing
 		BOOL DeleteNonFixedRows();
 		BOOL DeleteAllItems();
 
-		void ClearCells(CCellRange Selection);
+		void ClearCells(CPntCellRange Selection);
 
 		BOOL AutoSizeRow(int nRow, BOOL bResetScroll = TRUE);
 		BOOL AutoSizeColumn(int nCol, UINT nAutoSizeStyle = GVS_DEFAULT, BOOL bResetScroll = TRUE);
@@ -567,20 +567,20 @@ namespace Printing
 		void Refresh();
 		void AutoFill();   // Fill grid with blank cells
 
-		void EnsureVisible(CCellID &cell)       { EnsureVisible(cell.row, cell.col); }
+		void EnsureVisible(CPntCellID &cell)       { EnsureVisible(cell.row, cell.col); }
 		void EnsureVisible(int nRow, int nCol);
 		BOOL IsCellVisible(int nRow, int nCol);
-		BOOL IsCellVisible(CCellID cell);
+		BOOL IsCellVisible(CPntCellID cell);
 		BOOL IsCellEditable(int nRow, int nCol) const;
-		BOOL IsCellEditable(CCellID &cell) const;
+		BOOL IsCellEditable(CPntCellID &cell) const;
 		BOOL IsCellSelected(int nRow, int nCol) const;
-		BOOL IsCellSelected(CCellID &cell) const;
+		BOOL IsCellSelected(CPntCellID &cell) const;
 
 		// SetRedraw stops/starts redraws on things like changing the # rows/columns
 		// and autosizing, but not for user-intervention such as resizes
 		void SetRedraw(BOOL bAllowDraw, BOOL bResetScrollBars = FALSE);
 		BOOL RedrawCell(int nRow, int nCol, CDC* pDC = NULL);
-		BOOL RedrawCell(const CCellID& cell, CDC* pDC = NULL);
+		BOOL RedrawCell(const CPntCellID& cell, CDC* pDC = NULL);
 		BOOL RedrawRow(int row);
 		BOOL RedrawColumn(int col);
 
@@ -593,14 +593,14 @@ namespace Printing
 		// Cell Ranges
 		///////////////////////////////////////////////////////////////////////////////////
 	public:
-		CCellRange GetCellRange() const;
-		CCellRange GetSelectedCellRange() const;
-		void SetSelectedRange(const CCellRange& Range, BOOL bForceRepaint = FALSE, BOOL bSelectCells = TRUE);
+		CPntCellRange GetCellRange() const;
+		CPntCellRange GetSelectedCellRange() const;
+		void SetSelectedRange(const CPntCellRange& Range, BOOL bForceRepaint = FALSE, BOOL bSelectCells = TRUE);
 		void SetSelectedRange(int nMinRow, int nMinCol, int nMaxRow, int nMaxCol,
 			BOOL bForceRepaint = FALSE, BOOL bSelectCells = TRUE);
 		BOOL IsValid(int nRow, int nCol) const;
-		BOOL IsValid(const CCellID& cell) const;
-		BOOL IsValid(const CCellRange& range) const;
+		BOOL IsValid(const CPntCellID& cell) const;
+		BOOL IsValid(const CPntCellRange& range) const;
 
 		///////////////////////////////////////////////////////////////////////////////////
 		// Clipboard, drag and drop, and cut n' paste operations
@@ -608,7 +608,7 @@ namespace Printing
 #ifndef GRIDCONTROL_NO_CLIPBOARD
 		virtual void CutSelectedText();
 		virtual COleDataSource* CopyTextFromGrid();
-		virtual BOOL PasteTextToGrid(CCellID cell, COleDataObject* pDataObject, BOOL bSelectPastedCells=TRUE);
+		virtual BOOL PasteTextToGrid(CPntCellID cell, COleDataObject* pDataObject, BOOL bSelectPastedCells=TRUE);
 #endif
 
 #ifndef GRIDCONTROL_NO_DRAGDROP
@@ -631,7 +631,7 @@ namespace Printing
 		// Misc.
 		///////////////////////////////////////////////////////////////////////////////////
 	public:
-		CCellID GetNextItem(CCellID& cell, int nFlags) const;
+		CPntCellID GetNextItem(CPntCellID& cell, int nFlags) const;
 
 		BOOL SortItems(int nCol, BOOL bAscending, LPARAM data = 0);
 		BOOL SortTextItems(int nCol, BOOL bAscending, LPARAM data = 0);
@@ -669,14 +669,14 @@ namespace Printing
 		///////////////////////////////////////////////////////////////////////////////////
 	public:
 		virtual int OnBeginPrinting(CDC *pDC, CPrintInfo *pInfo, CRect clientRect);
-		virtual void OnPrint(CDC *pDC, int currentPageNum, CRect clientRect, PrintEndResult* printedEndReslt = NULL);
+		virtual void OnPrint(CDC *pDC, int currentPageNum, CRect clientRect, PntPrintEndResult* printedEndReslt = NULL);
 		virtual void OnEndPrinting(CDC *pDC, CPrintInfo *pInfo);
 
 #endif // #if !defined(_WIN32_WCE_NO_PRINTING) && !defined(GRIDCONTROL_NO_PRINTING)
 
 		// Implementation
 	public:
-		virtual ~CGridCtrl();
+		virtual ~CPntGridCtrl();
 
 	protected:
 		BOOL RegisterWindowClass();
@@ -684,17 +684,17 @@ namespace Printing
 		void SetupDefaultCells();
 
 		LRESULT SendMessageToParent(int nRow, int nCol, int nMessage) const;
-		LRESULT SendDisplayRequestToParent(GV_DISPINFO* pDisplayInfo) const;
-		LRESULT SendCacheHintToParent(const CCellRange& range) const;
+		LRESULT SendDisplayRequestToParent(PNT_GV_DISPINFO* pDisplayInfo) const;
+		LRESULT SendCacheHintToParent(const CPntCellRange& range) const;
 
 		BOOL InvalidateCellRect(const int row, const int col);
-		BOOL InvalidateCellRect(const CCellID& cell);
-		BOOL InvalidateCellRect(const CCellRange& cellRange);
+		BOOL InvalidateCellRect(const CPntCellID& cell);
+		BOOL InvalidateCellRect(const CPntCellRange& cellRange);
 		void EraseBkgnd(CDC* pDC);
 
-		BOOL GetCellRangeRect(const CCellRange& cellRange, LPRECT lpRect);
+		BOOL GetCellRangeRect(const CPntCellRange& cellRange, LPRECT lpRect);
 
-		BOOL SetCell(int nRow, int nCol, CGridCellBase* pCell);
+		BOOL SetCell(int nRow, int nCol, CPntGridCellBase* pCell);
 
 		int  SetMouseMode(int nMode) { int nOldMode = m_MouseMode; m_MouseMode = nMode; return nOldMode; }
 		int  GetMouseMode() const    { return m_MouseMode; }
@@ -702,11 +702,11 @@ namespace Printing
 		BOOL MouseOverRowResizeArea(CPoint& point);
 		BOOL MouseOverColumnResizeArea(CPoint& point);
 
-		CCellID GetTopleftNonFixedCell(BOOL bForceRecalculation = FALSE);
-		CCellRange GetUnobstructedNonFixedCellRange(BOOL bForceRecalculation = FALSE);
+		CPntCellID GetTopleftNonFixedCell(BOOL bForceRecalculation = FALSE);
+		CPntCellRange GetUnobstructedNonFixedCellRange(BOOL bForceRecalculation = FALSE);
 		// LUC
-		CCellRange GetVisibleNonFixedCellRange(LPRECT pRect = NULL, BOOL bForceRecalculation = FALSE);
-		CCellRange GetVisibleFixedCellRange(LPRECT pRect = NULL, BOOL bForceRecalculation = FALSE);
+		CPntCellRange GetVisibleNonFixedCellRange(LPRECT pRect = NULL, BOOL bForceRecalculation = FALSE);
+		CPntCellRange GetVisibleFixedCellRange(LPRECT pRect = NULL, BOOL bForceRecalculation = FALSE);
 
 		BOOL IsVisibleVScroll() { return ( (m_nBarState & GVL_VERT) > 0); } 
 		BOOL IsVisibleHScroll() { return ( (m_nBarState & GVL_HORZ) > 0); }
@@ -748,8 +748,8 @@ namespace Printing
 #endif
 
 		// Mouse Clicks
-		virtual void  OnFixedColumnClick(CCellID& cell);
-		virtual void  OnFixedRowClick(CCellID& cell);
+		virtual void  OnFixedColumnClick(CPntCellID& cell);
+		virtual void  OnFixedRowClick(CPntCellID& cell);
 
 		// Editing
 		virtual void  OnEditCell(int nRow, int nCol, CPoint point, UINT nChar);
@@ -761,7 +761,7 @@ namespace Printing
 		virtual void  OnDraw(CDC* pDC);
 
 		// CGridCellBase Creation and Cleanup
-		virtual CGridCellBase* CreateCell(int nRow, int nCol);
+		virtual CPntGridCellBase* CreateCell(int nRow, int nCol);
 		virtual void DestroyCell(int nRow, int nCol);
 
 		// Attributes
@@ -808,7 +808,7 @@ namespace Printing
 		BOOL m_bExcludeFreezedColsFromSelection;
 
 		// LUC
-		CArray<CCellRange, CCellRange&> m_arMergedCells;
+		CArray<CPntCellRange, CPntCellRange&> m_arMergedCells;
 		// LUC
 		BOOL m_bShowHorzNonGridArea;
 
@@ -817,35 +817,35 @@ namespace Printing
 
 		// Fonts and images
 		CRuntimeClass*   m_pRtcDefault; // determines kind of Grid Cell created by default
-		CGridDefaultCell m_cellDefault;  // "default" cell. Contains default colours, font etc.
-		CGridDefaultCell m_cellFixedColDef, m_cellFixedRowDef, m_cellFixedRowColDef;
+		CPntGridDefaultCell m_cellDefault;  // "default" cell. Contains default colours, font etc.
+		CPntGridDefaultCell m_cellFixedColDef, m_cellFixedRowDef, m_cellFixedRowColDef;
 		CFont*       m_pPrinterFont;  // for the printer
 		CImageList* m_pImageList;
 
 		// Cell data
-		CTypedPtrArray<CObArray, GRID_ROW*> m_RowData;
+		CTypedPtrArray<CObArray, PNT_GRID_ROW*> m_RowData;
 
 		// Mouse operations such as cell selection
 		int         m_MouseMode;
 		BOOL        m_bLMouseButtonDown, m_bRMouseButtonDown;
 		CPoint      m_LeftClickDownPoint, m_LastMousePoint;
-		CCellID     m_LeftClickDownCell, m_SelectionStartCell;
-		CCellID     m_idCurrentCell, m_idTopLeftCell;
+		CPntCellID     m_LeftClickDownCell, m_SelectionStartCell;
+		CPntCellID     m_idCurrentCell, m_idTopLeftCell;
 		INT_PTR     m_nTimerID;
 		int         m_nTimerInterval;
 		int         m_nResizeCaptureRange;
 		BOOL        m_bAllowRowResize, m_bAllowColumnResize;
 		int         m_nRowsPerWheelNotch;
-		CMap<DWORD,DWORD, CCellID, CCellID&> m_SelectedCellMap, m_PrevSelectedCellMap;
+		CMap<DWORD,DWORD, CPntCellID, CPntCellID&> m_SelectedCellMap, m_PrevSelectedCellMap;
 
 #ifndef GRIDCONTROL_NO_TITLETIPS
-		CTitleTip   m_TitleTip;             // Title tips for cells
+		CPntTitleTip   m_TitleTip;             // Title tips for cells
 #endif
 
 		// Drag and drop
-		CCellID     m_LastDragOverCell;
+		CPntCellID     m_LastDragOverCell;
 #ifndef GRIDCONTROL_NO_DRAGDROP
-		CGridDropTarget m_DropTarget;       // OLE Drop target for the grid
+		CPntGridDropTarget m_DropTarget;       // OLE Drop target for the grid
 #endif
 
 		// Printing information
@@ -876,10 +876,10 @@ namespace Printing
 
 	protected:
 		void SelectAllCells();
-		void SelectColumns(CCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
-		void SelectRows(CCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
-		void SelectCells(CCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
-		void OnSelecting(const CCellID& currentCell);
+		void SelectColumns(CPntCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
+		void SelectRows(CPntCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
+		void SelectCells(CPntCellID currentCell, BOOL bForceRedraw=FALSE, BOOL bSelectCells=TRUE);
+		void OnSelecting(const CPntCellID& currentCell);
 
 		// Generated message map functions
 		//{{AFX_MSG(CGridCtrl)
@@ -951,7 +951,7 @@ namespace Printing
 		void AllowSelectRowInFixedCol(bool b=true) { m_AllowSelectRowInFixedCol = b;} // 
 		//    allow acces?
 		intlist m_arRowOrder, m_arColOrder;
-		static CGridCtrl* m_This;
+		static CPntGridCtrl* m_This;
 	protected:
 		virtual void AddSubVirtualRow(int Num, int Nb);
 		bool m_bDragRowMode;
@@ -968,23 +968,23 @@ namespace Printing
 	};
 
 	// Returns the default cell implementation for the given grid region
-	inline CGridCellBase* CGridCtrl::GetDefaultCell(BOOL bFixedRow, BOOL bFixedCol) const
+	inline CPntGridCellBase* CPntGridCtrl::GetDefaultCell(BOOL bFixedRow, BOOL bFixedCol) const
 	{ 
-		if (bFixedRow && bFixedCol) return (CGridCellBase*) &m_cellFixedRowColDef;
-		if (bFixedRow)              return (CGridCellBase*) &m_cellFixedRowDef;
-		if (bFixedCol)              return (CGridCellBase*) &m_cellFixedColDef;
-		return (CGridCellBase*) &m_cellDefault;
+		if (bFixedRow && bFixedCol) return (CPntGridCellBase*) &m_cellFixedRowColDef;
+		if (bFixedRow)              return (CPntGridCellBase*) &m_cellFixedRowDef;
+		if (bFixedCol)              return (CPntGridCellBase*) &m_cellFixedColDef;
+		return (CPntGridCellBase*) &m_cellDefault;
 	}
 
-	inline CGridCellBase* CGridCtrl::GetCell(int nRow, int nCol) const
+	inline CPntGridCellBase* CPntGridCtrl::GetCell(int nRow, int nCol) const
 	{
 		if (nRow < 0 || nRow >= m_nRows || nCol < 0 || nCol >= m_nCols) 
 			return NULL;
 
 		if (GetVirtualMode())
 		{
-			CGridCellBase* pCell = GetDefaultCell(nRow < m_nFixedRows, nCol < m_nFixedCols);
-			static GV_DISPINFO gvdi;
+			CPntGridCellBase* pCell = GetDefaultCell(nRow < m_nFixedRows, nCol < m_nFixedCols);
+			static PNT_GV_DISPINFO gvdi;
 			gvdi.item.row     = nRow;
 			gvdi.item.col     = nCol;
 			gvdi.item.mask    = 0xFFFFFFFF;
@@ -1002,7 +1002,7 @@ namespace Printing
 			if (IsCellSelected(nRow, nCol))   gvdi.item.nState |= GVIS_SELECTED;
 			if (nRow < GetFixedRowCount())    gvdi.item.nState |= (GVIS_FIXED | GVIS_FIXEDROW);
 			if (nCol < GetFixedColumnCount()) gvdi.item.nState |= (GVIS_FIXED | GVIS_FIXEDCOL);
-			if (GetFocusCell() == CCellID(nRow, nCol)) gvdi.item.nState |= GVIS_FOCUSED;
+			if (GetFocusCell() == CPntCellID(nRow, nCol)) gvdi.item.nState |= GVIS_FOCUSED;
 			if(!m_InDestructor)
 			{
 				gvdi.item.row = m_arRowOrder[nRow];
@@ -1015,7 +1015,7 @@ namespace Printing
 				gvdi.item.row = nRow;        
 				gvdi.item.col = nCol;
 			}
-			static CGridCell cell;
+			static CPntGridCell cell;
 			cell.SetState(gvdi.item.nState);
 			cell.SetFormat(gvdi.item.nFormat);
 			cell.SetImage(gvdi.item.iImage);
@@ -1025,17 +1025,17 @@ namespace Printing
 			cell.SetFont(&(gvdi.item.lfFont));
 			cell.SetMargin(gvdi.item.nMargin);
 			cell.SetText(gvdi.item.strText);
-			cell.SetGrid((CGridCtrl*)this);
+			cell.SetGrid((CPntGridCtrl*)this);
 
-			return (CGridCellBase*) &cell;
+			return (CPntGridCellBase*) &cell;
 		}
 
-		GRID_ROW* pRow = m_RowData[nRow];
+		PNT_GRID_ROW* pRow = m_RowData[nRow];
 		if (!pRow) return NULL;
 		return pRow->GetAt(m_arColOrder[nCol]);
 	}
 
-	inline BOOL CGridCtrl::SetCell(int nRow, int nCol, CGridCellBase* pCell)
+	inline BOOL CPntGridCtrl::SetCell(int nRow, int nCol, CPntGridCellBase* pCell)
 	{
 		if (GetVirtualMode())
 			return FALSE;
@@ -1043,7 +1043,7 @@ namespace Printing
 		if (nRow < 0 || nRow >= m_nRows || nCol < 0 || nCol >= m_nCols) 
 			return FALSE;
 
-		GRID_ROW* pRow = m_RowData[nRow];
+		PNT_GRID_ROW* pRow = m_RowData[nRow];
 		if (!pRow) return FALSE;
 
 		pCell->SetCoords( nRow, nCol); 

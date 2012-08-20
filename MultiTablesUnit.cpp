@@ -110,7 +110,7 @@ int Printing::CMultiTablesUnit::Paint( int from, int to )
 				bNeedPreview = false;
 			}
 
-			PrintEndResult printEndResult;
+			PntPrintEndResult printEndResult;
 			m_vecTables[iTable]->Paint(&JDC, page - basePage + 1, JRECT, &printEndResult); 
 
 			if (printEndResult.bEndOfTable)

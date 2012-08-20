@@ -22,8 +22,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9C72__INCLUDED_)
-#define AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9C72__INCLUDED_
+#if !defined(AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9456__INCLUDED_)
+#define AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9456__INCLUDED_
 
 #if _MSC_VER >= 1000
 #pragma once
@@ -35,12 +35,12 @@
 // CTitleTip window
 namespace Printing
 {
-	class CTitleTip : public CWnd
+	class CPntTitleTip : public CWnd
 	{
 		// Construction
 	public:
-		CTitleTip();
-		virtual ~CTitleTip();
+		CPntTitleTip();
+		virtual ~CPntTitleTip();
 		virtual BOOL Create( CWnd *pParentWnd);
 
 		// Attributes
@@ -86,4 +86,4 @@ namespace Printing
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Developer Studio will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9C72__INCLUDED_)
+#endif // !defined(AFX_TITLETIP_H__C7165DA1_187F_11D1_992F_895E185F9456__INCLUDED_)

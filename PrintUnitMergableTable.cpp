@@ -53,7 +53,7 @@ BOOL Printing::CPrintUnitMergableTable::MergeCell( int minRow, int minColumn, in
 {
 	ASSERT(m_nRows != 0 && m_nColumns != 0);
 
-	CCellRange range(minRow,minColumn,maxRow,maxColumn);
+	CPntCellRange range(minRow,minColumn,maxRow,maxColumn);
 	bool bLegal = (range.GetMinRow() >= 0 && range.GetMinCol() >= 0 &&
 		range.GetMaxRow() >= 0 && range.GetMaxCol() >= 0 &&
 		range.GetMaxRow() < m_nRows && range.GetMaxCol() < m_nColumns &&
@@ -200,7 +200,7 @@ void Printing::CPrintUnitMergableTable::CreateGridCtrl()
 	DELETE_IF_NOT_NULL(m_pGridCtrl);
 
 	// create the grid ctrl
-	m_pGridCtrl = new CGridCtrl;
+	m_pGridCtrl = new CPntGridCtrl;
 
 	m_pGridCtrl->Create(JINFO.m_rectDraw, AfxGetMainWnd(), 100);
 	// fill it up with stuff
@@ -228,7 +228,7 @@ void Printing::CPrintUnitMergableTable::DefineRowsAndColumns()
 	m_pGridCtrl->SetColumnCount(nSize);
 	for (int col = 0; col < nSize; col++)
 	{
-		GV_ITEM Item;
+		PNT_GV_ITEM Item;
 		Item.mask = GVIF_TEXT|GVIF_FORMAT;
 		Item.row = 0;
 		Item.col = col;
@@ -351,7 +351,7 @@ int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, GPrintInfo* info
 	return m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
 }
 
-void Printing::CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PrintEndResult *result )
+void CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PntPrintEndResult *result )
 {
 	m_pGridCtrl->OnPrint(pDc, page, rect, result);   
 }
