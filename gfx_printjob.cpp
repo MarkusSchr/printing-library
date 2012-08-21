@@ -539,7 +539,7 @@ int Printing::GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int t
 	return totalNum;
 }
 
-int Printing::GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/, BOOL bGetPageOnly /*= FALSE*/, int from /*= 1*/, int to /*= 65535 */ )
+int Printing::GPrintJob::PreviewOneUnit( CDC * pOriginDC, int unitIndex /*= 0*/, BOOL bGetPageOnly /*= FALSE*/, int from /*= 1*/, int to /*= 65535 */ )
 {
 	if (unitIndex < 0 || unitIndex > (int)m_vecPrintUnitTasks.size() - 1)
 	{
@@ -548,7 +548,7 @@ int Printing::GPrintJob::PreviewOneUnit( CDC * pPreviewDC, int unitIndex /*= 0*/
 
 	InitPrintDC();
 	m_vecPrintUnitTasks[unitIndex]->OnBeginPrinting();
-	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(bGetPageOnly, from, to);
+	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(pOriginDC, bGetPageOnly, from, to);
 	m_vecPrintUnitTasks[unitIndex]->OnEndPrinting();
 	
 	if (!bGetPageOnly)

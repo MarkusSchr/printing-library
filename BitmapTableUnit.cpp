@@ -19,7 +19,7 @@ Printing::CBitmapTableUnit::~CBitmapTableUnit(void)
 {
 }
 
-int Printing::CBitmapTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CBitmapTableUnit::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, int from, int to )
 {
 	return Paint(from, to);
 }

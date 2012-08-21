@@ -166,7 +166,7 @@ namespace Printing
 		// the function will also get the total pages that will print within this job or some units
 		// if the unitIndex is -1, means to preview all the units
 		// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
-		virtual int PreviewOneUnit(CDC * pPreviewDC, int unitIndex = 0, BOOL bGetPageOnly = FALSE, int from = 1, int to = 65535 );
+		virtual int PreviewOneUnit(CDC * pOriginDC, int unitIndex = 0, BOOL bGetPageOnly = FALSE, int from = 1, int to = 65535 );
 		virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535 );
 
 

@@ -14,7 +14,7 @@ namespace Printing
 		virtual ~CPrintUnitMergableTable();
 
 	private:
-		virtual int PreviewUnit(BOOL bGetPageOnly, int from, int to) {return -1;}
+		virtual int PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from, int to) {return -1;}
 		virtual int Paint(int from, int to) {return -1;}
 
 	public:

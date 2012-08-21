@@ -11,8 +11,13 @@ CMergableTableUnit::~CMergableTableUnit(void)
 {
 }
 
-int CMergableTableUnit::PreviewUnit(BOOL bGetPageOnly, int from, int to )
+int CMergableTableUnit::PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from, int to )
 {
+	// we will use calculation rather than virtual draw to calc the pages, 
+	// so set back the dc
+	CDC* old = &JDC;
+	m_pJob->m_pDC = pOriginDC;
+
 	int printedPages = m_printPagesTotal;
 	
 	EnvSetBeforePrinting();
@@ -44,15 +49,14 @@ int CMergableTableUnit::PreviewUnit(BOOL bGetPageOnly, int from, int to )
 	}
 	EnvCleanupAfterPrinting();
 
+	m_pJob->m_pDC = old;
+
 	return printedPages;
 }
 
 int CMergableTableUnit::Paint( int from, int to )
 {
-	if (m_printPagesTotal == 0)
-	{
-		m_printPagesTotal = PreviewUnit(TRUE, 1, 65535);
-	}
+	ASSERT(m_printPagesTotal != 0);
 
 	bool bContinuePrinting = true;
 
