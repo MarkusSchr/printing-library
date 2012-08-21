@@ -7232,7 +7232,7 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 					rect.left -= Overlap;
 					Overlap = (minRow == 0)? 0:1;
 					rect.top -= Overlap;
-					CBrush brush(RGB(255,255,255));
+					CBrush brush(pDC->GetBkColor());
 					CBrush* oldBrush = pDC->SelectObject(&brush);
 					CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
 					pDC->Rectangle(&rect);

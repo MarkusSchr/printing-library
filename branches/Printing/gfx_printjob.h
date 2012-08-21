@@ -86,6 +86,27 @@ namespace Printing
 
 	} GDEVNAMES, *LPGDEVNAMES;
 
+	typedef struct tagStatusReport
+	{
+		wstring portName;
+		wstring printerName;
+		wstring currentComponentName;
+		int remainedComponentNum;
+		int remainPages;
+		int printedPages;
+		bool starting;
+
+		void Clear()
+		{
+			portName.clear();
+			printerName.clear();
+			currentComponentName.clear();
+			remainedComponentNum = 0;
+			remainPages = 0;
+			printedPages = 0;
+			starting = false;
+		}
+	}STATUS_REPORT, *P_STATUS_REPORT;
 
 	class GPrintJob : public CObject
 	{
@@ -101,11 +122,10 @@ namespace Printing
 		// CStrings if you intend to use them later
 		void GetDeviceNames(LPGDEVNAMES pDevNames);
 
+		// remove tasks
+		void RemoveTasks() {m_vecPrintUnitTasks.clear(); }
 		// insert print unit task into the job
 		void InsertTask( GPrintUnit* task );
-		// evaluate the total pages of the job or the specified unit
-		int EvaluateAllUnitPages(CDC* pPreviewDC, int from = 1, int to = 65535);
-		int EvaluateOneUnitPages(CDC* pPreviewDC, int unitIndex, int from = 1, int to = 65535);
 
 	public:    
 		// return a pointer to the dialog specific to this print job...if you don't override
@@ -155,6 +175,9 @@ namespace Printing
 		virtual void UseDefaults();
 
 		int Preview(CDC * pPreviewDC, CPrintInfo* info, int from = 1, int to = 65535 );
+		int EvaluatePages( CDC * pPreviewDC, CPrintInfo* info, int from = 1, int to = 65535 );
+
+		void SetupInfo( CPrintInfo* info );
 
 	protected:
 		// returns TRUE if this job is using the default print dialog
@@ -167,8 +190,10 @@ namespace Printing
 		// if the unitIndex is -1, means to preview all the units
 		// e.g. Preview(pDC, 0, 2,3) means using pDC to print unit 0's page 2 to page 3
 		virtual int PreviewOneUnit(CDC * pOriginDC, int unitIndex = 0, BOOL bGetPageOnly = FALSE, int from = 1, int to = 65535 );
-		virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535 );
-
+		virtual int PreviewAll(CDC * pPreviewDC, int from = 1, int to = 65535);
+		// evaluate the total pages of the job or the specified unit
+		int EvaluateAllUnitPages(CDC* pPreviewDC, int from = 1, int to = 65535);
+		int EvaluateOneUnitPages(CDC* pPreviewDC, int unitIndex, int from = 1, int to = 65535);
 
 	public:
 		// print device context
@@ -176,6 +201,7 @@ namespace Printing
 		// print dialog...may be CPrintDialog or not
 		CDialog *m_pDialog;
 		// print information
+		CPrintInfo m_info;
 		CPrintInfo *m_pInfo;
 		// print settings information
 		LPPRINTDLG m_pPD;
@@ -207,6 +233,7 @@ namespace Printing
 		vector<GPrintUnit*> m_vecPrintUnitTasks;
 		// the vector contains need pages of each print unit 
 		vector<int> m_vecUnitPages;
+		int m_totalPages;
 
 	public:
 		virtual ~GPrintJob();

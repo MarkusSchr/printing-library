@@ -7,6 +7,7 @@
 #include "gfx_printjob.h"
 
 #include "MemDCForPrint.h"
+#include <sstream>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -15,12 +16,18 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 using namespace Printing;
+using namespace std;
+
+
+// status to report to the caller while printing
+STATUS_REPORT g_printing_status;
+
 
 Printing::GPrintJob::GPrintJob()
 {
 	m_pDC = NULL;
 	m_pDialog = NULL;
-	m_pInfo = NULL;
+	m_pInfo = &m_info;
 	m_pPD = NULL;
 	m_dwFlags = 0;
 
@@ -29,6 +36,8 @@ Printing::GPrintJob::GPrintJob()
 	m_rectDevice = CRect(0,0,0,0);
 
 	m_pActiveTree = NULL;
+
+	m_totalPages = 0;
 }
 
 
@@ -51,14 +60,11 @@ Printing::GPrintJob::~GPrintJob()
 
 	if(!IsUsingDefaultPrintDialog())
 	{
-		delete m_pDialog;
-		m_pDialog = NULL;
-	}
-	
-	if (m_pInfo != NULL)
-	{
-		delete m_pInfo;
-		m_pInfo = NULL;
+		if (!m_pDialog)
+		{
+			delete m_pDialog;
+			m_pDialog = NULL;
+		}
 	}
 }
 
@@ -67,6 +73,9 @@ Printing::GPrintJob::~GPrintJob()
 
 int Printing::GPrintJob::PrintFollowingPrintDialog()
 {
+	// clear the status
+	g_printing_status.Clear();
+
 	int nPrintCode = PRINTJOB_READY;
 
 	m_pInfo = new CPrintInfo;
@@ -114,6 +123,11 @@ int Printing::GPrintJob::PrintFollowingPrintDialog()
 				return PRINTJOB_DIALOGNOINIT;
 			}
 
+			// record the status
+			// Convert a TCHAR string to a LPCSTR
+			g_printing_status.printerName = m_pInfo->m_pPD->GetDeviceName();
+			g_printing_status.portName = m_pInfo->m_pPD->GetPortName();
+
 			// print
 			PreviewAll(m_pDC, m_pPD->nFromPage, m_pPD->nToPage);
 
@@ -125,6 +139,11 @@ int Printing::GPrintJob::PrintFollowingPrintDialog()
 			nPrintCode = PRINTJOB_NOPRINTTOFILE;
 		}
 	}
+
+	m_pDialog = NULL;
+
+	delete m_pInfo;
+	m_pInfo = &m_info;
 
 	return nPrintCode;
 }
@@ -478,6 +497,13 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 		return 0;
 	}
 
+	// record the status		
+	std::stringstream out;
+	g_printing_status.remainedComponentNum = (int)m_vecPrintUnitTasks.size();
+	g_printing_status.remainPages = m_totalPages == 0? EvaluatePages(m_pDC, m_pInfo, from, to) : m_totalPages;
+	g_printing_status.printedPages = 0;
+	g_printing_status.starting = false;
+
 	int totalPages = 0;
 	int unitPage = 0;
 	int base = 1;
@@ -487,21 +513,32 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 		int unitMaxPage = EvaluateOneUnitPages( pPreviewDC, i);
 		m_pInfo->m_nCurPage = originBeginPage;
 
+		g_printing_status.remainedComponentNum--;
+
 		if (from > unitMaxPage + base - 1)
 		{
 			// empty
 		}
 		else
 		{
+			g_printing_status.starting = true;
+			string unitName = m_vecPrintUnitTasks[i]->GetUnitName();
+			g_printing_status.currentComponentName.assign(unitName.begin(), unitName.end() );
+			
 			// this unit needs to be drawn
 			int newfrom = from - base + 1;
 			int newto = to -base + 1;
 			int acturalPrintedPage = PreviewOneUnit(pPreviewDC, i, FALSE, newfrom, newto);
+			
+			g_printing_status.printedPages += acturalPrintedPage;
+
 			from += acturalPrintedPage;
 			totalPages += acturalPrintedPage;
 		}
 		base += unitMaxPage;
 	}
+
+	g_printing_status.starting = false;
 
 	return totalPages;
 }
@@ -530,11 +567,16 @@ int Printing::GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int t
 	int totalNum = 0;
 	for (int i = 0; i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
-		m_vecUnitPages[i] = PreviewOneUnit(pPreviewDC, i, TRUE);
+		int originBeginPage = m_pInfo->m_nCurPage;
+		m_vecUnitPages[i] = EvaluateOneUnitPages( pPreviewDC, i);
+		m_pInfo->m_nCurPage = originBeginPage;
+
 		totalNum += m_vecUnitPages[i];
 	}
 	
 	SetPreviewPrintDC(pPreviewDC);
+
+	m_totalPages = totalNum;
 
 	return totalNum;
 }
@@ -546,7 +588,7 @@ int Printing::GPrintJob::PreviewOneUnit( CDC * pOriginDC, int unitIndex /*= 0*/,
 		return 0;
 	}
 
-	InitPrintDC();
+
 	m_vecPrintUnitTasks[unitIndex]->OnBeginPrinting();
 	int pages = m_vecPrintUnitTasks[unitIndex]->PreviewUnit(pOriginDC, bGetPageOnly, from, to);
 	m_vecPrintUnitTasks[unitIndex]->OnEndPrinting();
@@ -580,10 +622,29 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 
 int Printing::GPrintJob::Preview( CDC * pPreviewDC, CPrintInfo* info, int from /*= 1*/, int to /*= 65535 */ )
 {
-	m_pInfo = info;
+	SetupInfo(info);
+
 	SetPreviewPrintDC(pPreviewDC);
 	InitPrintDC();
 	return PreviewAll(pPreviewDC, from, to);
+}
+
+int Printing::GPrintJob::EvaluatePages( CDC * pPreviewDC, CPrintInfo* info, int from /*= 1*/, int to /*= 65535 */ )
+{
+	m_totalPages = 0;
+
+	SetupInfo(info);
+	SetPreviewPrintDC(pPreviewDC);
+	InitPrintDC();
+	return EvaluateAllUnitPages(pPreviewDC, from, to);
+}
+
+void Printing::GPrintJob::SetupInfo( CPrintInfo* info )
+{
+	m_pInfo = info;
+	m_rectDevice = m_pInfo->m_rectDraw;
+	m_rectPage = m_pInfo->m_rectDraw;
+	m_rectClient = m_pInfo->m_rectDraw;
 }
 
 

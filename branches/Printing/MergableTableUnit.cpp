@@ -15,7 +15,7 @@ int CMergableTableUnit::PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from,
 {
 	// we will use calculation rather than virtual draw to calc the pages, 
 	// so set back the dc
-	CDC* old = &JDC;
+	CDC* old = m_pJob->m_pDC;
 	m_pJob->m_pDC = pOriginDC;
 
 	int printedPages = m_printPagesTotal;
