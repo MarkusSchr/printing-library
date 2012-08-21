@@ -25,7 +25,7 @@ void Printing::CMultiTablesUnit::ClearTables()
 	m_vecTables.clear();
 }
 
-int Printing::CMultiTablesUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CMultiTablesUnit::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, int from, int to )
 {
 	int printedPages = 1;
 

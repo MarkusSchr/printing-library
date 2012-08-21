@@ -10,7 +10,7 @@ Printing::CDataTableUnit::~CDataTableUnit(void)
 {
 }
 
-int Printing::CDataTableUnit::PreviewUnit( BOOL bGetPageOnly, int from, int to )
+int Printing::CDataTableUnit::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, int from, int to )
 {
 	// it is the user's responsible to check whether the column can match the data
 	if (m_pData == NULL || m_vecColumnDef.size() == 0 || from > to)

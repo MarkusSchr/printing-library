@@ -376,14 +376,14 @@ void CPrintDlg::OnOK()
 
 	unitTable1.SetTitle(L"数据1");
 	unitTable1.NeedPrintTitleExcpetFirstPage(true);
-	//job.InsertTask(&unitTable1);
+	job.InsertTask(&unitTable1);
 
 	CDataTableUnit unitTable2;
 	unitTable2.SetTitle(L"数据2");
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
 	unitTable2.SetHeader(footer, 3);
-	//job.InsertTask(&unitTable2);
+	job.InsertTask(&unitTable2);
 
 	COLUMNDEFINITIONS cd;
 	TCHAR buf[200];
