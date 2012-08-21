@@ -66,3 +66,8 @@ int CPrintUnitFromDC::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, int from, 
 {
 	return Paint(from, to);
 }
+
+int CPrintUnitFromDC::EveluateUnitPages( CDC* pOriginDC, int from, int to )
+{
+	return 1;
+}

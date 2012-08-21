@@ -174,6 +174,7 @@ namespace Printing
 
 		return TRUE;
 	}
+	
 
 	template<class T>
 	BOOL CPrintUnitStandardTable<T>::CheckCurrentDCCompatibleWithPrevious()

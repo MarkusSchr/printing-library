@@ -608,12 +608,18 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 		return 0;
 	}
 
+	// check whether we have calculate the pages before
+	if (m_vecUnitPages[unitIndex] != 0)
+	{
+		return m_vecUnitPages[unitIndex];
+	}
+
 	// need a temperate DC
 	CMemDcNotDraw memDC(pPreviewDC);
 
 	SetPreviewPrintDC(&memDC);
 
-	int totalNum = PreviewOneUnit(pPreviewDC, unitIndex, TRUE, from, to);
+	int totalNum = m_vecPrintUnitTasks[unitIndex]->EveluateUnitPages(pPreviewDC, from, to);
 
 	SetPreviewPrintDC(pPreviewDC);
 

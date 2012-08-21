@@ -439,6 +439,9 @@ namespace Printing
 		void SetUnitName(string name) {m_unitName = name; }
 		string GetUnitName() {return m_unitName; }
 
+		void SetAllRowsHeightInTextLine(int rowHeightInTextLine) {m_restrictedRowHeightInTextLine = rowHeightInTextLine; }
+		void SetHeaderHeightInTextLine(int headerHeightInTextLine) {m_headingHeightInTextLine = headerHeightInTextLine; }
+
 	public:
 		GPrintUnit(GPrintJob *pJob=NULL);
 		virtual ~GPrintUnit();
@@ -589,7 +592,9 @@ namespace Printing
 		bool m_bNeedPrintTitleExcpetFirstPage;
 		////////////////////////////////////////////////////////////////////////////////////////
 		string m_unitName;
-
+		// signal indicating whether we have restrict the height of the row
+		int m_restrictedRowHeightInTextLine;
+		int m_headingHeightInTextLine;
 
 	private:
 		// call to set the print job that owns this unit
@@ -630,7 +635,7 @@ namespace Printing
 		// pointer to owner print job
 		GPrintJob *m_pJob;
 
-	private:
+	protected:
 		// all the followings are for drawing the table
 		// to contain the columns, the index means which page this column is in
 		// i.e. m_vecColumnPage[0][1] indicates the second column in page 1

@@ -45,6 +45,9 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_bNeedPrintTitleExcpetFirstPage = FALSE;
 
 	SetNeedPreprocessSign(true);
+
+	m_restrictedRowHeightInTextLine = 0;
+	m_headingHeightInTextLine = 1;
 }
 
 
@@ -271,17 +274,17 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 	int nRows = contents.size();
 	// the row num ahead the first row to be printed before changing page
 	int oneAheadFirstRowBeforeChangePage = -1;
-	
-	// do the actual job
-	bool bNewPage = StartPage();
-
-	// print the title
-	PrintTitleAndMoveCursor(FALSE);
 
 	// now check whether this page should be printed
 	int currentPage = 1;
 	m_bPrintThePage = currentPage >= from ? true : false;
 	int printedPages = 0;
+
+	// do the actual job
+	bool bNewPage = StartPage();
+
+	// print the title
+	PrintTitleAndMoveCursor(FALSE);
 
 	// indicate whether any of the columns of the row has exceeded the page
 	vector<bool> vecNeedChangePage(nRows, false);
@@ -510,7 +513,8 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 int Printing::GPrintUnit::PrintTableContents( vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
 	// if we have precalculate before, just skip
-	if (GetNeedPreprocessSign() == true)
+	if (GetNeedPreprocessSign() == true 
+		&& m_restrictedRowHeightInTextLine == 0 /*indicate we have calculate the height in advance*/)
 	{
 		// all the preprocess stage will not increase the pages
 		PreCalculateRowStartPosition(*pContents, nRowFormat, from , to, bPrintHeadingWhenChangePage);
@@ -963,7 +967,7 @@ void Printing::GPrintUnit::PrintColHeadings( vector<int>& headings, UINT nEffect
 				if(lpDef)
 				{
 					CRect r;
-					GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_pum.pumHeadingHeight);
+					GMAKERECT(r, lpDef->nStart, JCUR.y, lpDef->nWidth, m_headingHeightInTextLine * m_pum.pumHeadingHeight);
 					int nLen = lpDef->strName.GetLength();
 
 					if(lpDef->dwFlags & PCF_RIGHTMARGIN)
