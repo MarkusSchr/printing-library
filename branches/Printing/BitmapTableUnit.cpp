@@ -43,16 +43,6 @@ int Printing::CBitmapTableUnit::Paint( int from, int to )
 
 int Printing::CBitmapTableUnit::PrintContents( int from, int to, BOOL bPrintHeadingWhenChangePage /*= TRUE*/ )
 {
-	// if we have precalculate before, just skip
-	if (GetNeedPreprocessSign() == true)
-	{
-		// all the preprocess stage will not increase the pages
-		PreCalColumnWidth(from , to, bPrintHeadingWhenChangePage);
-		PreCalRowHeight(from , to, bPrintHeadingWhenChangePage);
-		
-		SetNeedPreprocessSign(false);
-	}
-
 	// here it will actually print, and increase the pages
 	// set preprocessing mode in order not to print pages that are before 'from'
 	SetPreprocessValue(false);
@@ -218,4 +208,14 @@ BOOL Printing::CBitmapTableUnit::SetPrintData( vector<vector<CBitmap*>> *data )
 {
 	SetColumnsInEachPage((*data)[0].size());
 	return CPrintUnitStandardTable::SetPrintData(data);
+}
+
+int Printing::CBitmapTableUnit::EveluateUnitPages( CDC* pOriginDC, int from, int to )
+{
+	// all the preprocess stage will not increase the pages
+	PreCalColumnWidth(from , to, m_bNeedPrintTitleExcpetFirstPage);
+	PreCalRowHeight(from , to, m_bNeedPrintTitleExcpetFirstPage);
+
+	int nRows = m_pData->size();
+	return (nRows % m_nRowInEachPage) ? nRows / m_nRowInEachPage + 1 : nRows / m_nRowInEachPage;
 }

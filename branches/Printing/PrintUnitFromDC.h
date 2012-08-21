@@ -20,6 +20,7 @@ private:
 	// printing
 	virtual int PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from, int to);
 	virtual int Paint(int from, int to);
+	virtual int EveluateUnitPages(CDC* pOriginDC, int from, int to);
 
 	// called when the print job is ready to begin
 	virtual void OnBeginPrinting();

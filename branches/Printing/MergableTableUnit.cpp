@@ -100,3 +100,8 @@ int CMergableTableUnit::Paint( int from, int to )
 }
 
 
+
+int Printing::CMergableTableUnit::EveluateUnitPages( CDC* pOriginDC, int from, int to )
+{
+	return PreviewUnit(pOriginDC, TRUE, from, to );	
+}
