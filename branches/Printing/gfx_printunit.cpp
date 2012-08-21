@@ -1480,7 +1480,7 @@ void Printing::GPrintUnit::GetContentOnType( int type, CString context, CString&
 		{
 			CString date, time;
 			GetCurrentTimeAndDate(date, time);
-			str = str + context + date + " " + time;
+			str = str + context + date + TEXT(" ") + time;
 		}
 		break;
 	case TYPE_DATA:  // user-defined data, it will use "content"
