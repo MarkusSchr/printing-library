@@ -523,15 +523,15 @@ END_MESSAGE_MAP()
 
 void Printing::CPntGridCtrl::OnPaint()
 {
-    CPaintDC dc(this);      // device context for painting
+    //CPaintDC dc(this);      // device context for painting
 
-    if (m_bDoubleBuffer)    // Use a memory DC to remove flicker
-    {
-        CMemDCUsedForPrinter MemDC(&dc);
-        OnDraw(&MemDC);
-    }
-    else                    // Draw raw - this helps in debugging vis problems.
-        OnDraw(&dc);
+    //if (m_bDoubleBuffer)    // Use a memory DC to remove flicker
+    //{
+    //    CMemDCUsedForPrinter MemDC(&dc);
+    //    OnDraw(&MemDC);
+    //}
+    //else                    // Draw raw - this helps in debugging vis problems.
+    //    OnDraw(&dc);
 }
 
 BOOL Printing::CPntGridCtrl::OnEraseBkgnd(CDC* /*pDC*/)
