@@ -436,6 +436,9 @@ namespace Printing
 		// set -1 to use default
 		void SetMetrics(PRINTUNITMETRICS pum);
 
+		void SetUnitName(string name) {m_unitName = name; }
+		string GetUnitName() {return m_unitName; }
+
 	public:
 		GPrintUnit(GPrintJob *pJob=NULL);
 		virtual ~GPrintUnit();
@@ -585,6 +588,8 @@ namespace Printing
 		int m_titleMargin;
 		bool m_bNeedPrintTitleExcpetFirstPage;
 		////////////////////////////////////////////////////////////////////////////////////////
+		string m_unitName;
+
 
 	private:
 		// call to set the print job that owns this unit
