@@ -530,7 +530,7 @@ int Printing::GPrintJob::EvaluateAllUnitPages( CDC* pPreviewDC, int from , int t
 	int totalNum = 0;
 	for (int i = 0; i < (int)m_vecPrintUnitTasks.size(); i++)
 	{
-		m_vecUnitPages[i] = PreviewOneUnit(memDC, i, TRUE);
+		m_vecUnitPages[i] = PreviewOneUnit(pPreviewDC, i, TRUE);
 		totalNum += m_vecUnitPages[i];
 	}
 	
@@ -571,7 +571,7 @@ int Printing::GPrintJob::EvaluateOneUnitPages( CDC* pPreviewDC, int unitIndex, i
 
 	SetPreviewPrintDC(&memDC);
 
-	int totalNum = PreviewOneUnit(&memDC, unitIndex, TRUE, from, to);
+	int totalNum = PreviewOneUnit(pPreviewDC, unitIndex, TRUE, from, to);
 
 	SetPreviewPrintDC(pPreviewDC);
 
