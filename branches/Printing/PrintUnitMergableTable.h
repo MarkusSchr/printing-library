@@ -16,6 +16,7 @@ namespace Printing
 	private:
 		virtual int PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from, int to) {return -1;}
 		virtual int Paint(int from, int to) {return -1;}
+		virtual int EveluateUnitPages(CDC* pOriginDC, int from, int to) {return -1;}
 
 	public:
 		// call this method before any merge methods

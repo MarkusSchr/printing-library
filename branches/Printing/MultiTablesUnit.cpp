@@ -214,3 +214,11 @@ void Printing::CMultiTablesUnit::CompleteAllColHeadingsDefinition()
 		m_vecTables[i]->CompleteAllColHeadingsDefinition();
 	}
 }
+
+int Printing::CMultiTablesUnit::EveluateUnitPages( CDC* pOriginDC, int from, int to )
+{
+	EnvSetBeforePrinting();
+	m_printPagesTotal = this->Paint(from, to);
+	EnvCleanupAfterPrinting();
+	return m_printPagesTotal;
+}

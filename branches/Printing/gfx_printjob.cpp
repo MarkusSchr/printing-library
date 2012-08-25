@@ -7,7 +7,6 @@
 #include "gfx_printjob.h"
 
 #include "MemDCForPrint.h"
-#include <sstream>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -498,7 +497,6 @@ int Printing::GPrintJob::PreviewAll(CDC * pPreviewDC, int from, int to)
 	}
 
 	// record the status		
-	std::stringstream out;
 	g_printing_status.remainedComponentNum = (int)m_vecPrintUnitTasks.size();
 	g_printing_status.remainPages = m_totalPages == 0? EvaluatePages(m_pDC, m_pInfo, from, to) : m_totalPages;
 	g_printing_status.printedPages = 0;
