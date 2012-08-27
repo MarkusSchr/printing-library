@@ -123,7 +123,7 @@ namespace Printing
 		void GetDeviceNames(LPGDEVNAMES pDevNames);
 
 		// remove tasks
-		void RemoveTasks() {m_vecPrintUnitTasks.clear(); }
+		void RemoveTasks() {m_vecPrintUnitTasks.clear(); m_vecUnitPages.clear();}
 		// insert print unit task into the job
 		void InsertTask( GPrintUnit* task );
 

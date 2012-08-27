@@ -60,11 +60,11 @@ void Printing::CBitmapTableUnit::PreCalRowHeight( int from, int to, BOOL bPrintH
 		Printing::CMemDcNotDraw dc(&JDC);
 		CDC* oldDC = m_pJob->m_pDC;
 		m_pJob->m_pDC = &dc;
-		textHeight = PrintTitle(FALSE);
+		textHeight = PrintTitleAndMoveCursor(FALSE);
 		m_pJob->m_pDC = oldDC;
 	}
 
-	m_rowHeight = (int)((double)(totalHeight - textHeight - 2 * m_titleMargin)/(double)(m_nRowInEachPage));
+	m_rowHeight = (int)((double)(totalHeight - textHeight - 2 * m_titleMarginInTextLineHeight * m_pum.pumLineOfText)/(double)(m_nRowInEachPage));
 }
 
 void Printing::CBitmapTableUnit::PreCalColumnWidth( int from, int to, BOOL bPrintHeadingWhenChangePage )
@@ -212,9 +212,13 @@ BOOL Printing::CBitmapTableUnit::SetPrintData( vector<vector<CBitmap*>> *data )
 
 int Printing::CBitmapTableUnit::EveluateUnitPages( CDC* pOriginDC, int from, int to )
 {
+	EnvSetBeforePrinting();
+
 	// all the preprocess stage will not increase the pages
 	PreCalColumnWidth(from , to, m_bNeedPrintTitleExcpetFirstPage);
 	PreCalRowHeight(from , to, m_bNeedPrintTitleExcpetFirstPage);
+
+	EnvCleanupAfterPrinting();
 
 	int nRows = m_pData->size();
 	return (nRows % m_nRowInEachPage) ? nRows / m_nRowInEachPage + 1 : nRows / m_nRowInEachPage;

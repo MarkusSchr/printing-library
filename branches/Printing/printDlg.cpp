@@ -380,7 +380,7 @@ void CPrintDlg::OnOK()
 
 	unitTable1.SetTitle(L"数据1");
 	unitTable1.NeedPrintTitleExcpetFirstPage(true);
-	job.InsertTask(&unitTable1);
+	
 
 	CDataTableUnit unitTable2;
 	unitTable2.SetTitle(L"数据2");
@@ -388,7 +388,7 @@ void CPrintDlg::OnOK()
 	unitTable2.SetPrintData(&vecParts);
 	unitTable2.SetHeader(footer, 3);
 	unitTable2.SetAllRowsHeightInTextLine(1);
-	job.InsertTask(&unitTable2);
+	
 
 	COLUMNDEFINITIONS cd;
 	TCHAR buf[200];
@@ -403,7 +403,7 @@ void CPrintDlg::OnOK()
 	CBitmapTableUnit unitBitmapTable;
 	unitBitmapTable.SetTitle(L"测试");
 	// add the margin around the title
-	unitBitmapTable.SetTitleMargin(10);
+	unitBitmapTable.SetTitleMargin(2);
 	unitBitmapTable.SetTitlePen(140, L"楷体");
 	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
 
@@ -435,14 +435,14 @@ void CPrintDlg::OnOK()
 	unitBitmapTable.SetPrintData(&vecBmp);
 	// row in each page does not affect the result	
 	unitBitmapTable.SetRowsInEachPage(4);
-	job.InsertTask(&unitBitmapTable);
+	
 
 
 	//////////// test 3 : self-define page ////////////////////////////
 	CPrintUnitFromDC userDefinedUnit;
 	userDefinedUnit.SetFooter(footer, 3);
 	userDefinedUnit.SetHeader(header, 3);
-	job.InsertTask(&userDefinedUnit);
+	
 
 	//////////// test 5 : informal table ////////////////////////////
 	CMergableTableUnit mergeUnit;
@@ -481,7 +481,7 @@ void CPrintDlg::OnOK()
 	mergeUnit.SetHeader(header, 3);
 	mergeUnit.SetFooter(footer, 3);
 	// set the margin between header and main context by 4 * heightOfLineText
-	mergeUnit.SetTopMarginInLineOfText(4);
+	mergeUnit.SetTopMarginInLineOfText(2);
 	
 	// to set the row format as "DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE"
 	// which is also the default value, just to show we can do it.
@@ -494,8 +494,7 @@ void CPrintDlg::OnOK()
 
 	// set title
 	mergeUnit.SetTitle(L"男人总是不关心女人的感受");
-
-	job.InsertTask(&mergeUnit);
+	
 
 	//////////// test 4 : print multi-tables in one printing unit ////////////////////////////
 	// table 1
@@ -523,7 +522,6 @@ void CPrintDlg::OnOK()
 	t1.SetTitle(L"桂林山水甲天下");
 	t1.NeedDrawTableOuterline(true);
 	
-
 	// table 2
 	CPrintUnitMergableTable t2;
 	double fPrt3 = (double)((double)1 / (double)vecColumnDef.size());
@@ -554,7 +552,6 @@ void CPrintDlg::OnOK()
 		}
 	}
 	
-
 	// table 3
 	CPrintUnitMergableTable t3;
 	t3.SetTitle(L"广东");
@@ -590,89 +587,142 @@ void CPrintDlg::OnOK()
 	multiTableUnit.InsertTables(t2);
 	multiTableUnit.InsertTables(t3);
 	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
-	multiTableUnit.SetTableIntervalInLineOfText(5);
+	multiTableUnit.SetTableIntervalInLineOfText(2);
 	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
 	multiTableUnit.SetHeader(header, 3);
 
-	job.InsertTask(&multiTableUnit);
-
+	
 	//////////// test 5 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
+	job.InsertTask(&unitTable1);
+	job.InsertTask(&unitTable2);
+	job.InsertTask(&unitBitmapTable);
+	job.InsertTask(&userDefinedUnit);
+	job.InsertTask(&mergeUnit);
+	job.InsertTask(&multiTableUnit);
+
+	
 	job.PrintFollowingPrintDialog();
 }
 
 
 void CPrintDlg::OnBnClickedButton1()
 {
+	// prepare the column
+	vector<COLUMNDEFINITIONS> vecColumnDef;
+	// define my four columns...
+	for (int i = 0; i < 5; i++)
+	{
+		COLUMNDEFINITIONS cd;
+		TCHAR buf[200];
+		_itow_s(i, buf, 10);
+		wstring str = buf;
+		str.append(TEXT("个列"));
+		cd.strName = str.c_str();
+
+		vecColumnDef.push_back(cd);
+	}
+
 	// test
 	GPrintJob job;
-	CMergableTableUnit mergeUnit;
 
-	std::vector<COLUMNDEFINITIONS> vecColumnDef2;
-	const int columnNum = 9;
-	for (int i = 0; i < columnNum; i++)
+		//////////// test 4 : print multi-tables in one printing unit ////////////////////////////
+	// table 1
+	CPrintUnitMergableTable t1;
+	double fPrt2 = (double)((double)1 / (double)vecColumnDef.size());
+	for (int i = 0; i < vecColumnDef.size(); i++)
 	{
-		Printing::COLUMNDEFINITIONS cd;
-		cd.fPct = (double)((double)1 / (double)columnNum);
-		vecColumnDef2.push_back(cd);
-	}
-	mergeUnit.DefineColumns(vecColumnDef2);
-	const int rowNum = 7; // this does not contain the title line
-	mergeUnit.SetRowNum(rowNum);
-	
-	// set row height
-	for (int i = 0; i < 2; i++)
-	{
-		mergeUnit.SetRowHeight(i, 3);
-	}
-	
-	// merge cell
-	for (int i = 0; i < 2; i++)
-	{
-		mergeUnit.MergeCell(i, 0, i, 1);
-		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
+		vecColumnDef[i].fPct = fPrt2;
 	}
 
-	// 非最后一行
-	mergeUnit.SetCellText(0,0,L"生产厂家：");
-	mergeUnit.SetCellText(0,2,L"你要的生产厂家");
-	mergeUnit.SetCellText(1,0,L"产品标示：");
-	mergeUnit.SetCellText(1,2,L"你要的产品标示");
-	mergeUnit.SetCellText(2,0,L"测试标准：");
-	mergeUnit.SetCellText(2,2,L"你要的测试标准");
-	mergeUnit.SetCellText(3,0,L"测试日期：");
-	mergeUnit.SetCellText(3,2,L"你要的测试日期");
-	mergeUnit.SetCellText(4,0,L"测试结果：");
-	mergeUnit.SetCellText(4,2,L"你要的测试结果");
-	mergeUnit.SetCellText(5,0,L"备注：");
-	mergeUnit.SetCellText(5,2,L"你要的备注");
-
-	for (int i = 0; i < 6; i++)
+	t1.DefineColumns(vecColumnDef);
+	int rowNum2 = 10;
+	t1.SetRowNum(rowNum2);
+	for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
 	{
-		mergeUnit.SetCellFormat(i, 0, DT_LEFT|DT_VCENTER);
-		mergeUnit.SetCellFormat(i, 2, DT_CENTER|DT_VCENTER);
+		t1.SetRowHeight(i, 3);
 	}
-
-	// 最后一行
-	mergeUnit.MergeCell(rowNum, 0, rowNum, 1);
-	mergeUnit.SetCellText(rowNum,0,L"测试：__________________");
-	mergeUnit.SetCellFormat(rowNum,0,DT_LEFT|DT_VCENTER);
+	t1.MergeCell(1,0,2,2);
+	t1.SetCellText(1,0, L"桂林");
+	t1.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
+	t1.SetAllRowsFont(100, L"宋体");
+	t1.SetRowFont(3, 100, L"黑体");
+	t1.SetHeadingFont(100, L"楷体");
+	t1.SetCellFont(1, 0, 100, L"黑体");
+	t1.SetTitle(L"桂林山水甲天下");
+	t1.SetTitlePen(100, L"宋体");
+	t1.NeedDrawTableOuterline(true);
 	
-	mergeUnit.MergeCell(rowNum, 2, rowNum, 3);
-	mergeUnit.SetCellText(rowNum,2,L"审核：__________________");
-	mergeUnit.SetCellFormat(rowNum,2,DT_LEFT|DT_VCENTER);
+	//// table 2
+	//CPrintUnitMergableTable t2;
+	//double fPrt3 = (double)((double)1 / (double)vecColumnDef.size());
+	//for (int i = 0; i < vecColumnDef.size(); i++)
+	//{
+	//	vecColumnDef[i].fPct = fPrt3;
+	//}
 
-	mergeUnit.MergeCell(rowNum, 5, rowNum, 6);
-	mergeUnit.SetCellText(rowNum,5,L"批准：__________________");
-	mergeUnit.SetCellFormat(rowNum,5,DT_LEFT|DT_VCENTER);
+	//t2.DefineColumns(vecColumnDef);
+	//rowNum2 = 20;
+	//t2.SetRowNum(rowNum2);
+	//for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
+	//{
+	//	t2.SetRowHeight(i, 3);
+	//}
+	//t2.SetTitle(L"广西壮族自治区");
+	//for (int i = 0; i < rowNum2 + 1; i++)
+	//{
+	//	for (int j = 0; j < vecColumnDef.size(); j++)
+	//	{
+	//		wstring str = L"广西-";
+	//		WCHAR t[256];
+	//		wsprintf(t, L"%d-", i);
+	//		str.append(t);
+	//		wsprintf(t, L"%d", j);
+	//		str.append(t);
+	//		t2.SetCellText(i,j, str.c_str());
+	//	}
+	//}
+	//
+	//// table 3
+	//CPrintUnitMergableTable t3;
+	//t3.SetTitle(L"广东");
+	//double fPrt4 = (double)((double)1 / (double)vecColumnDef.size());
+	//for (int i = 0; i < vecColumnDef.size(); i++)
+	//{
+	//	vecColumnDef[i].fPct = fPrt4;
+	//}
 
-	mergeUnit.MergeCell(rowNum, 8, rowNum, 9);
-	
-	
-//	mergeUnit.NeedDrawTableOuterline(false);
+	//t3.DefineColumns(vecColumnDef);
+	//rowNum2 = 20;
+	//t3.SetRowNum(rowNum2);
+	//for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
+	//{
+	//	t3.SetRowHeight(i, 3);
+	//}
+	//for (int i = 0; i < rowNum2 + 1; i++)
+	//{
+	//	for (int j = 0; j < vecColumnDef.size(); j++)
+	//	{
+	//		wstring str = L"世界-";
+	//		WCHAR t[256];
+	//		wsprintf(t, L"%d-", i);
+	//		str.append(t);
+	//		wsprintf(t, L"%d", j);
+	//		str.append(t);
+	//		t3.SetCellText(i,j, str.c_str());
+	//	}
+	//}
 
-	job.InsertTask(&mergeUnit);
+	CMultiTablesUnit multiTableUnit;
+	multiTableUnit.InsertTables(t1);
+	//multiTableUnit.InsertTables(t2);
+	//multiTableUnit.InsertTables(t3);
+	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
+	multiTableUnit.SetTableIntervalInLineOfText(2);
+	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
+
+	job.InsertTask(&multiTableUnit);
 
 	job.PrintFollowingPrintDialog();
 }

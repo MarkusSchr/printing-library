@@ -20,7 +20,6 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_pJob = pJob;
 
 	m_sizeCurrentRow = CSize(0,0);
-	GMakeStructFillZero(m_pum);
 
 	m_lpActiveColDefs = NULL;
 	m_pActiveFontPair = NULL;
@@ -40,7 +39,7 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	// title related variables
 	m_nTitleFormat = DT_CENTER;
-	m_titleMargin = 10;
+	m_titleMarginInTextLineHeight = 1;
 	m_pFontTileSrt = new srtFont(120, L"ËÎÌו");
 	m_bNeedPrintTitleExcpetFirstPage = FALSE;
 
@@ -148,6 +147,8 @@ void Printing::GPrintUnit::CreateUserDefinedFont( CFont& fontDes, srtFont *fontS
 	fontDes.CreatePointFont(fontSource->nPointSize, fontSource->name.c_str(), &JDC);
 }
 
+#define SETMETRICELEMENT(destination, source) if ( (destination) == -1) { (destination) = (source); }
+
 void Printing::GPrintUnit::InitPrintMetrics()
 {
 	TEXTMETRIC tm;
@@ -156,42 +157,44 @@ void Printing::GPrintUnit::InitPrintMetrics()
 		GSELECT_OBJECT(&JDC, &m_fontHeader);
 		JDC.GetTextMetrics(&tm);
 
-		m_pum.pumHeaderHeight = tm.tmHeight * 2;
-		m_pum.pumHeaderLineHeight = tm.tmHeight;
+		SETMETRICELEMENT(m_pum.pumHeaderHeight, tm.tmHeight * 2)
+		SETMETRICELEMENT(m_pum.pumHeaderLineHeight, tm.tmHeight / 10)
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &m_fontFooter);
 		JDC.GetTextMetrics(&tm);
 
-		m_pum.pumFooterHeight = tm.tmHeight * 2;
-		m_pum.pumFooterLineHeight = tm.tmHeight;
+		SETMETRICELEMENT(m_pum.pumFooterHeight, tm.tmHeight * 2)
+		SETMETRICELEMENT(m_pum.pumFooterLineHeight, tm.tmHeight / 10)
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
 		JDC.GetTextMetrics(&tm);
-		m_pum.pumLineOfText = tm.tmHeight;
+
+		SETMETRICELEMENT(m_pum.pumLineOfText, tm.tmHeight)
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &(m_fontHeading));
 		JDC.GetTextMetrics(&tm);
-		m_pum.pumHeadingHeight = tm.tmHeight;
-		m_pum.pumFooterHeight = tm.tmHeight;
+		
+		SETMETRICELEMENT(m_pum.pumHeadingHeight, tm.tmHeight)
+		SETMETRICELEMENT(m_pum.pumFooterHeight, tm.tmHeight)
 	}
 
 	// left and right margin
 	// both the margin is 1/20 of the page
 	{
-		m_pum.pumLeftMarginWidth = (JRECTDEV.right - JRECTDEV.left)/20;
-		m_pum.pumRightMarginWidth = m_pum.pumLeftMarginWidth;
+		SETMETRICELEMENT(m_pum.pumLeftMarginWidth, (JRECTDEV.right - JRECTDEV.left)/20)
+		SETMETRICELEMENT(m_pum.pumRightMarginWidth, m_pum.pumLeftMarginWidth)
 	}
 
 	// top/header and bottom/footer margin
 	{
-		m_pum.pumHeaderMargin = 10;
-		m_pum.pumFooterMargin = 10;
+		SETMETRICELEMENT(m_pum.pumHeaderMargin, 0)
+		SETMETRICELEMENT(m_pum.pumFooterMargin, 0)
 	}
 
 	RealizeMetrics();
@@ -1076,8 +1079,8 @@ void Printing::GPrintUnit::RealizeMetrics()
 {
 	JRECT = JINFO.m_rectDraw;
 
-	JRECT.top += (m_pum.pumHeaderHeight + m_pum.pumHeaderMargin + 2 * m_pum.pumHeaderLineHeight);
-	JRECT.bottom -= (m_pum.pumFooterHeight + m_pum.pumFooterMargin + 2 * m_pum.pumFooterLineHeight);
+	JRECT.top += (m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + 2 * m_pum.pumHeaderLineHeight);
+	JRECT.bottom -= (m_pum.pumFooterMargin + m_pum.pumFooterHeight + 2 * m_pum.pumFooterLineHeight);
 	JRECT.left += m_pum.pumLeftMarginWidth;
 	JRECT.right -= m_pum.pumRightMarginWidth;
 
@@ -1542,8 +1545,11 @@ void Printing::GPrintUnit::DrawSeparetLine( BOOL bHeader )
 		linePosY = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight - m_separateLineInterval;
 	}
 
-	JDC.MoveTo(JCUR.x, linePosY);
-	JDC.LineTo(JCUR.x + JRECT.Width(), linePosY);
+	int beginX = JCUR.x;
+	int endX = JCUR.x + JRECT.Width();
+
+	JDC.MoveTo(beginX, linePosY);
+	JDC.LineTo(endX, linePosY);
 }
 
 /////////////////////////////
@@ -1963,27 +1969,32 @@ int Printing::GPrintUnit::PrintTitleAndMoveCursor( BOOL bShowContinued )
 	int originY = JCUR.y;
 
 	// traverse the height of the interval
-	JCUR.y += m_titleMargin;
+	JCUR.y += m_titleMarginInTextLineHeight * m_pum.pumLineOfText;
 
 	// print title first
 	// attention that heading is a kind of row
 	if (!m_title.empty())
 	{
-		JCUR.y += PrintTitle(bShowContinued);
+		/*JCUR.y += */PrintTitle(bShowContinued);
 	}
 
 	// traverse the height of the interval
-	JCUR.y += m_titleMargin;
+	JCUR.y += m_titleMarginInTextLineHeight * m_pum.pumLineOfText;
 
 	return JCUR.y - originY;
 }
 
 int Printing::GPrintUnit::SetTitleMargin( int titleMarginInLineOfText )
 {
-	int old = m_titleMargin;
-	m_titleMargin = titleMarginInLineOfText * m_pum.pumLineOfText;
+	if (titleMarginInLineOfText <= 0)
+	{
+		return -1;
+	}
 
-	if (old != m_titleMargin)
+	int old = m_titleMarginInTextLineHeight;
+	m_titleMarginInTextLineHeight = titleMarginInLineOfText;
+
+	if (old != m_titleMarginInTextLineHeight)
 	{
 		SetNeedPreprocessSign(true);
 	}

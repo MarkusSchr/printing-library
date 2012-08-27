@@ -60,11 +60,14 @@ void CPrintUnitFromDC::OnEndPrinting()
 	{
 		m_pPrinter->EndPrinting(&JDC, &JINFO);
 	}
+
+	JDC.SetMapMode(MM_TEXT);
 }
 
 int CPrintUnitFromDC::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, int from, int to )
 {
-	return Paint(from, to);
+	int printedPages = Paint(from, to);
+	return printedPages;
 }
 
 int CPrintUnitFromDC::EveluateUnitPages( CDC* pOriginDC, int from, int to )
