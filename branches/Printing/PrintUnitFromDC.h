@@ -30,4 +30,5 @@ private:
 	CHSEPrinter* m_pPrinter;
 
 	CMemDCUsedForPrinter* dc;
+	CDC * pOld;
 };

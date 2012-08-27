@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MergableTableUnit.h"
+#include "MemDCForPrint.h"
 
 CMergableTableUnit::CMergableTableUnit(GPrintJob *pJob)
 	:CPrintUnitMergableTable(pJob)
@@ -44,7 +45,7 @@ int CMergableTableUnit::PreviewUnit(CDC* pOriginDC, BOOL bGetPageOnly, int from,
 		}
 	}
 	else 
-	{
+	{	
 		printedPages = Paint(from, to);
 	}
 	EnvCleanupAfterPrinting();
@@ -79,8 +80,14 @@ int CMergableTableUnit::Paint( int from, int to )
 			JRECT.top += movedHeight;
 		}
 
-		CPrintUnitMergableTable::Paint(&JDC, page, JRECT);
-
+		{
+			CMemDCUsedForPrinter dc(&JDC, JRECT);
+			CDC* pOld = &JDC;
+			m_pJob->m_pDC = &dc;
+			CPrintUnitMergableTable::Paint(&dc, page, JRECT);
+			m_pJob->m_pDC = pOld;
+		}
+		
 		// we need to change the JCUR back
 		if (movedHeight != 0)
 		{

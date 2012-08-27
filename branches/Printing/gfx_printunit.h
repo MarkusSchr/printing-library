@@ -137,16 +137,16 @@ namespace Printing
 
 		tagPrintUnitMetrics()
 		{
-			pumHeadingHeight = 0;
-			pumFooterHeight = 0;
-			pumHeaderHeight = 0;
-			pumRightMarginWidth = 0;
-			pumLeftMarginWidth = 0;
-			pumFooterLineHeight = 0;
-			pumHeaderLineHeight = 0;
-			pumLineOfText = 0;
-			pumHeaderMargin = 0;
-			pumFooterMargin = 0;
+			pumHeadingHeight = -1;
+			pumFooterHeight = -1;
+			pumHeaderHeight = -1;
+			pumRightMarginWidth = -1;
+			pumLeftMarginWidth = -1;
+			pumFooterLineHeight = -1;
+			pumHeaderLineHeight = -1;
+			pumLineOfText = -1;
+			pumHeaderMargin = -1;
+			pumFooterMargin = -1;
 		}
 
 		tagPrintUnitMetrics& operator=(tagPrintUnitMetrics& pum)
@@ -588,7 +588,7 @@ namespace Printing
 		UINT m_nTitleFormat;
 		CFont m_FontTitle;
 		srtFont * m_pFontTileSrt;
-		int m_titleMargin;
+		int m_titleMarginInTextLineHeight;
 		bool m_bNeedPrintTitleExcpetFirstPage;
 		////////////////////////////////////////////////////////////////////////////////////////
 		string m_unitName;

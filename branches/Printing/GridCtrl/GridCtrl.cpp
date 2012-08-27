@@ -7225,6 +7225,18 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 				if (pCell 
 					&& minRow >= beginPrintRow && minRow < m_nCurrPrintRow)
 				{
+					if (minCol == 0)
+					{
+						rcMergeRect.left++;
+					}
+					if (minRow == beginPrintRow)
+					{
+						rcMergeRect.top++;
+					}
+					rcMergeRect.right--;
+					rcMergeRect.bottom--;
+					pCell->Draw(pDC, minRow, minCol, rcMergeRect, TRUE);
+
 					// next repaint the line
 					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_HORZ)
 					{
@@ -7254,18 +7266,6 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 							pDC->LineTo(rcMergeRect.left, rcMergeRect.bottom);
 						}
 					}
-
-					if (minCol == 0)
-					{
-						rcMergeRect.left++;
-					}
-					if (minRow == beginPrintRow)
-					{
-						rcMergeRect.top++;
-					}
-					rcMergeRect.right--;
-					rcMergeRect.bottom--;
-					pCell->Draw(pDC, minRow, minCol, rcMergeRect, TRUE);
 				}
 			}
 		}
