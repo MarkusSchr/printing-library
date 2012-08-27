@@ -7225,20 +7225,6 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 				if (pCell 
 					&& minRow >= beginPrintRow && minRow < m_nCurrPrintRow)
 				{
-					// first erase the background
-					CRect rect = rcMergeRect;
-				
-					int Overlap = (minCol == 0)? 0:1;
-					rect.left -= Overlap;
-					Overlap = (minRow == 0)? 0:1;
-					rect.top -= Overlap;
-					CBrush brush(pDC->GetBkColor());
-					CBrush* oldBrush = pDC->SelectObject(&brush);
-					CPen* pOldPen = (CPen*)(pDC->SelectStockObject(NULL_PEN));
-					pDC->Rectangle(&rect);
-					pDC->SelectObject(pOldPen);
-					pDC->SelectObject(oldBrush);
-
 					// next repaint the line
 					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_HORZ)
 					{
@@ -7289,7 +7275,6 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 
     // SetWindowOrg back for next page
     pDC->SetWindowOrg(0,0);
-
     pDC->SelectObject(pOldFont);
 }
 
