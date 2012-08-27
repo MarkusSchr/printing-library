@@ -460,10 +460,18 @@ void CPrintDlg::OnOK()
 		mergeUnit.SetRowHeight(i, 3);
 	}
 	
-	mergeUnit.MergeCell(1,0,2,2);
 	mergeUnit.MergeCell(3,3,4,4);
 	mergeUnit.MergeCell(7,3,7,4);
 	mergeUnit.MergeCell(24,3,70,4);
+
+
+	// merge cell
+	for (int i = 0; i < 2/*rowNum*/; i++)
+	{
+		mergeUnit.MergeCell(i, 0, i, 1);
+		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
+	}
+
 	mergeUnit.SetCellText(1,0, L"你好");
 	mergeUnit.SetCellText(3,3, L"世界");
 	mergeUnit.SetCellText(2,3, L"中文简体，蒋介石");
@@ -614,13 +622,13 @@ void CPrintDlg::OnBnClickedButton1()
 	mergeUnit.SetRowNum(rowNum);
 	
 	// set row height
-	for (int i = 0; i < rowNum; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		mergeUnit.SetRowHeight(i, 3);
 	}
 	
 	// merge cell
-	for (int i = 0; i < rowNum; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		mergeUnit.MergeCell(i, 0, i, 1);
 		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
@@ -662,56 +670,9 @@ void CPrintDlg::OnBnClickedButton1()
 	mergeUnit.MergeCell(rowNum, 8, rowNum, 9);
 	
 	
-	mergeUnit.NeedDrawTableOuterline(false);
+//	mergeUnit.NeedDrawTableOuterline(false);
 
-	//job.InsertTask(&mergeUnit);
+	job.InsertTask(&mergeUnit);
 
-	// 获取print的总数目
-	CPrintDialog pd(FALSE); 
-	pd.GetDefaults();
-	pd.GetDevMode()->dmOrientation=1; 
-	HDC hdc = pd.CreatePrinterDC(); 
-	CDC printDC; 
-	HDC hDC = printDC.GetSafeHdc();
-	printDC.Attach(hdc);
-	/*CMemDcNotDraw dc(&printDC);
-	job.PreviewAll(&dc);*/
-	//job.PrintFollowingPrintDialog();
-
-
-	//////////// test 4 : self-define page ////////////////////////////
-	CBitmapTableUnit unitBitmapTable;
-	unitBitmapTable.SetTitle(L"锟斤拷锟斤拷");
-	// add the margin around the title
-	unitBitmapTable.SetTitleMargin(10);
-	unitBitmapTable.SetTitlePen(140, L"锟斤拷锟斤拷");
-	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
-
-
-	// set data
-	CBitmap bmp;
-	CSize mSize;
-	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\1.jpg", &bmp, mSize);
-
-	//
-	vector<vector<CBitmap* > > vecBmp;
-	int row = 10;
-	int columns = 3;
-	vecBmp.resize(row);
-	for (int i = 0; i < row; i++)
-	{
-		vecBmp[i].resize(columns);
-	}
-	for (int i = 0; i < row; i++)
-	{
-		for (int j = 0; j < vecBmp[i].size(); j++)
-		{
-			vecBmp[i][j] = &bmp;
-		}
-	}
-	unitBitmapTable.SetPrintData(&vecBmp);
-	// row in each page does not affect the result	
-	unitBitmapTable.SetRowsInEachPage(4);
-	job.InsertTask(&unitBitmapTable);
 	job.PrintFollowingPrintDialog();
 }
