@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PrintUnitMergableTable.h"
 #include <algorithm>
+#include "MemDCForPrint.h"
 
 Printing::CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
 	:CPrintUnitStandardTable(pJob)
@@ -348,12 +349,15 @@ void Printing::CPrintUnitMergableTable::SetPrintFont( CFont* font )
 
 int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, CPrintInfo* info, CRect rect )
 {
-	return m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
+	int index = pDc->SaveDC();
+	int printedPages = m_pGridCtrl->OnBeginPrinting(pDc, info, rect);
+	pDc->RestoreDC(index);
+	return printedPages;
 }
 
 void CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PntPrintEndResult *result )
 {
-	m_pGridCtrl->OnPrint(pDc, page, rect, result);   
+	m_pGridCtrl->OnPrint(pDc, page, rect, result);
 }
 
 int Printing::CPrintUnitMergableTable::PrintTitleAndMoveCursor( BOOL bNeedPrintContinue )
