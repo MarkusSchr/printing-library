@@ -515,8 +515,6 @@ namespace Printing
 		// return how many pages have been drawn
 		// fill the table with data
 		int PrintTableContents(vector<vector<LPCTSTR> >* pContents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage = TRUE);
-		virtual void PreCalculateRowHeight(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
-		virtual void PreCalculateRowStartPosition(vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage);
 
 	protected:
 		virtual void PrintColForOverflow(int row, int nCol, UINT height, UINT nFormat);	

@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <algorithm>
 
+#include "MemDCForPrint.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -181,7 +183,6 @@ void Printing::GPrintUnit::InitPrintMetrics()
 		JDC.GetTextMetrics(&tm);
 		
 		SETMETRICELEMENT(m_pum.pumHeadingHeight, tm.tmHeight)
-		SETMETRICELEMENT(m_pum.pumFooterHeight, tm.tmHeight)
 	}
 
 	// left and right margin
@@ -286,6 +287,11 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 	// do the actual job
 	bool bNewPage = StartPage();
 
+	CRect rect(JRECT.left, JCUR.y, JRECT.right, JRECT.bottom);
+	CMemDCUsedForPrinter * pDc = new CMemDCUsedForPrinter(&JDC, rect);
+	CDC* pOld = &JDC;
+	m_pJob->m_pDC = pDc;
+	
 	// print the title
 	PrintTitleAndMoveCursor(FALSE);
 
@@ -348,6 +354,9 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 
 			if (true == bNewPage)
 			{
+				DELETE_IF_NOT_NULL(pDc);
+				m_pJob->m_pDC = pOld;
+
 				// the page is full or we have reached the bottom
 				EndPage();
 				++currentPage;
@@ -366,6 +375,10 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 				{
 					// not finished yet, continue...
 					StartPage();
+
+					CRect rect(JRECT.left, JCUR.y, JRECT.right, JRECT.bottom);
+					pDc = new CMemDCUsedForPrinter(&JDC, rect);
+					m_pJob->m_pDC = pDc;
 
 					if (m_bNeedPrintTitleExcpetFirstPage)
 					{
@@ -1507,30 +1520,6 @@ void Printing::GPrintUnit::PrintColForOverflow( int row, int nCol, UINT height, 
 		}
 		PrintColumnContent(nCol, strTemp, DT_EDITCONTROL | nFormat, top, height);
 	}
-}
-
-void Printing::GPrintUnit::PreCalculateRowHeight( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
-{
-	SetPreprocessValue(true);
-	m_bCheckPosition = false;
-	m_preprocessRowHeight.clear();
-	m_preprocessRowHeight.resize(contents.size());
-	DrawTableContents(contents, nRowFormat, from, to, bPrintHeadingWhenChangePage);
-	SetPreprocessValue(false);
-}
-
-void Printing::GPrintUnit::PreCalculateRowStartPosition( vector<vector<LPCTSTR> >& contents, UINT nRowFormat, int from, int to, BOOL bPrintHeadingWhenChangePage )
-{
-	SetPreprocessValue(true);
-	m_bCheckPosition = true;
-	// prepare the pre-process data
-	m_preprocessRowStartPosY.clear();
-	m_preprocessRowStartPosY.resize(contents.size());
-	m_preprocessRowHeight.clear();
-	m_preprocessRowHeight.resize(contents.size());
-	DrawTableContents(contents, nRowFormat, from, to, bPrintHeadingWhenChangePage);
-	m_bCheckPosition = false;
-	SetPreprocessValue(false);
 }
 
 void Printing::GPrintUnit::SetBodyPrinterFont( int nPointSize, LPCTSTR lpszFaceName )

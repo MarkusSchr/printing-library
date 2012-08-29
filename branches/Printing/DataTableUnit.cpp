@@ -21,8 +21,10 @@ int Printing::CDataTableUnit::PreviewUnit( CDC* pOriginDC, BOOL bGetPageOnly, in
 
 	// it is necessary to call this function if we want to use the column-cross-page table
 	SetNeedPreprocessSign(!CheckCurrentDCCompatibleWithPrevious());
-
-	return Paint(from, to);
+	
+	int printedPages = 0;
+	printedPages = Paint(from, to);
+	return printedPages;
 }
 
 int Printing::CDataTableUnit::Paint( int from, int to )
@@ -43,6 +45,19 @@ int Printing::CDataTableUnit::Paint( int from, int to )
 
 int Printing::CDataTableUnit::EveluateUnitPages( CDC* pOriginDC, int from, int to )
 {
+	//int printedPages = 0;
+	//CDC* pOld = &JDC;
+	//{
+	//	CMemDcNotDraw dc(&JDC);
+
+	//	// TODO: why will preview be bolder? if you delete the following statement, it will disappear
+	//	m_pJob->m_pDC = &dc;
+	//	printedPages = Paint(from, to);
+	//}
+	//m_pJob->m_pDC = pOld;
+	//return printedPages;	
+
+	/////////////////////////////////////////////
 	int pages = 1;
 
 	// prepare work
