@@ -442,6 +442,7 @@ namespace Printing
 		void SetAllRowsHeightInTextLine(int rowHeightInTextLine) {m_restrictedRowHeightInTextLine = rowHeightInTextLine; }
 		void SetHeaderHeightInTextLine(int headerHeightInTextLine) {m_headingHeightInTextLine = headerHeightInTextLine; }
 
+		void SetEnglishVersion(bool bEnglish) {m_bEnglish = bEnglish; }
 	public:
 		GPrintUnit(GPrintJob *pJob=NULL);
 		virtual ~GPrintUnit();
@@ -593,6 +594,9 @@ namespace Printing
 		// signal indicating whether we have restrict the height of the row
 		int m_restrictedRowHeightInTextLine;
 		int m_headingHeightInTextLine;
+
+		// language
+		bool m_bEnglish;
 
 	private:
 		// call to set the print job that owns this unit
