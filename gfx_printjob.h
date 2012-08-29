@@ -108,6 +108,8 @@ namespace Printing
 		}
 	}STATUS_REPORT, *P_STATUS_REPORT;
 
+	typedef void (*PRINTING_UNITS_SET_FUN)(void* param, CPrintInfo *& pInfo);
+
 	class GPrintJob : public CObject
 	{
 		DECLARE_DYNAMIC(GPrintJob)
@@ -116,7 +118,7 @@ namespace Printing
 		GPrintJob();
 
 		// call to print this job..returns one of the "PRINTJOB_..." codes
-		int PrintFollowingPrintDialog();
+		int PrintFollowingPrintDialog(PRINTING_UNITS_SET_FUN fun = NULL, void* param = NULL);
 		// will initialize a structure with pointers to all device names
 		// these structure values are temporary, and must be stored as 
 		// CStrings if you intend to use them later
