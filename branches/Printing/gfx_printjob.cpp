@@ -70,7 +70,7 @@ Printing::GPrintJob::~GPrintJob()
 
 
 
-int Printing::GPrintJob::PrintFollowingPrintDialog()
+int Printing::GPrintJob::PrintFollowingPrintDialog( PRINTING_UNITS_SET_FUN fun /*= NULL*/, void* param /*= NULL*/ )
 {
 	// clear the status
 	g_printing_status.Clear();
@@ -126,6 +126,12 @@ int Printing::GPrintJob::PrintFollowingPrintDialog()
 			// Convert a TCHAR string to a LPCSTR
 			g_printing_status.printerName = m_pInfo->m_pPD->GetDeviceName();
 			g_printing_status.portName = m_pInfo->m_pPD->GetPortName();
+
+			// give user the last chance to revise printing units
+			if (fun)
+			{
+				fun(param, m_pInfo);
+			}
 
 			// print
 			PreviewAll(m_pDC, m_pPD->nFromPage, m_pPD->nToPage);
