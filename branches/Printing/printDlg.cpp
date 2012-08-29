@@ -379,6 +379,7 @@ void CPrintDlg::OnOK()
 	unitTable1.SetSeparateLineWidth(3);
 
 	unitTable1.SetTitle(L"Êý¾Ý1");
+	unitTable1.SetEnglishVersion(true);
 	unitTable1.NeedPrintTitleExcpetFirstPage(true);
 	
 
