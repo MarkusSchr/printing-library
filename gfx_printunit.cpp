@@ -49,6 +49,8 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	m_restrictedRowHeightInTextLine = 1;
 	m_headingHeightInTextLine = 1;
+
+	m_bEnglish = false;
 }
 
 
@@ -188,14 +190,14 @@ void Printing::GPrintUnit::InitPrintMetrics()
 	// left and right margin
 	// both the margin is 1/20 of the page
 	{
-		SETMETRICELEMENT(m_pum.pumLeftMarginWidth, (JRECTDEV.right - JRECTDEV.left)/20)
+		SETMETRICELEMENT(m_pum.pumLeftMarginWidth, (JRECTDEV.right - JRECTDEV.left)/50)
 		SETMETRICELEMENT(m_pum.pumRightMarginWidth, m_pum.pumLeftMarginWidth)
 	}
 
 	// top/header and bottom/footer margin
 	{
-		SETMETRICELEMENT(m_pum.pumHeaderMargin, 0)
-		SETMETRICELEMENT(m_pum.pumFooterMargin, 0)
+		SETMETRICELEMENT(m_pum.pumHeaderMargin, (JRECTDEV.bottom - JRECTDEV.top)/50)
+		SETMETRICELEMENT(m_pum.pumFooterMargin, m_pum.pumHeaderMargin)
 	}
 
 	RealizeMetrics();
@@ -287,7 +289,12 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 	// do the actual job
 	bool bNewPage = StartPage();
 
-	CRect rect(JRECT.left, JCUR.y, JRECT.right, JRECT.bottom);
+	CRect rect(
+		JRECT.left - 5, 
+		JCUR.y + m_titleMarginInTextLineHeight * m_pum.pumLineOfText / 2, 
+		JRECT.right + 5, 
+		JRECT.bottom);
+
 	CMemDCUsedForPrinter * pDc = new CMemDCUsedForPrinter(&JDC, rect);
 	CDC* pOld = &JDC;
 	m_pJob->m_pDC = pDc;
@@ -376,7 +383,16 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 					// not finished yet, continue...
 					StartPage();
 
-					CRect rect(JRECT.left, JCUR.y, JRECT.right, JRECT.bottom);
+					int offset = 0;
+					if (m_bNeedPrintTitleExcpetFirstPage)
+					{
+						offset = m_titleMarginInTextLineHeight * m_pum.pumLineOfText / 2;
+					}
+					CRect rect(
+						JRECT.left - 5, 
+						JCUR.y + offset, 
+						JRECT.right + 5, 
+						JRECT.bottom);
 					pDc = new CMemDCUsedForPrinter(&JDC, rect);
 					m_pJob->m_pDC = pDc;
 
@@ -1734,8 +1750,16 @@ int Printing::GPrintUnit::PrintTitle( BOOL bShowContinued )
 		wstring temp = m_title;
 		if (bShowContinued)
 		{
-			// attach the "续”
-			temp.append(L"(续)");
+			if (!m_bEnglish)
+			{
+				// attach the "续”
+				temp.append(L"(续)");
+			}
+			else
+			{
+				// attach the "续”
+				temp.append(L"(Con.)");
+			}
 		}
 
 		GSELECT_OBJECT(&JDC, &m_FontTitle);

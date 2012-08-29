@@ -81,7 +81,12 @@ int CMergableTableUnit::Paint( int from, int to )
 		}
 
 		{
-			CMemDCUsedForPrinter dc(&JDC, JRECT);
+			CRect rect(
+				JRECT.left - 5, 
+				JRECT.top, 
+				JRECT.right + 5, 
+				JRECT.bottom);
+			CMemDCUsedForPrinter dc(&JDC, rect);
 			CDC* pOld = &JDC;
 			m_pJob->m_pDC = &dc;
 			CPrintUnitMergableTable::Paint(&dc, page, JRECT);

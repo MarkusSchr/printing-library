@@ -119,6 +119,5 @@ int Printing::CDataTableUnit::EveluateUnitPages( CDC* pOriginDC, int from, int t
 	EnvCleanupAfterPrinting();
 	JCUR = oldCur;
 
-
 	return pages;
 }
