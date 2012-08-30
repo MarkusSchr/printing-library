@@ -725,5 +725,9 @@ void CPrintDlg::OnBnClickedButton1()
 
 	job.InsertTask(&multiTableUnit);
 
+
+	CPrintUnitFromDC userDefinedUnit;
+	job.InsertTask(&userDefinedUnit);
+
 	job.PrintFollowingPrintDialog();
 }
