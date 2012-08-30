@@ -7275,6 +7275,7 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 
     // SetWindowOrg back for next page
     pDC->SetWindowOrg(0,0);
+
     pDC->SelectObject(pOldFont);
 }
 

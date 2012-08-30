@@ -46,6 +46,16 @@ int CPrintUnitFromDC::Paint( int from, int to )
 
 void CPrintUnitFromDC::OnBeginPrinting()
 {
+	// transfer the printing mapping mode, from MM_TEXT to MM_LOMETRIC
+	CRect rect = JINFO.m_rectDraw;
+
+	CRect rect2(0,0,1977,-2868);
+	JDC.SetMapMode(MM_LOMETRIC);
+	// JDC.LPtoDP(rect);
+	JDC.DPtoLP(rect);
+	JINFO.m_rectDraw = rect;
+
+
 	if(m_pPrinter)
 	{
 		m_pPrinter->PrepareDC(&JDC, &JINFO);
@@ -60,6 +70,9 @@ void CPrintUnitFromDC::OnEndPrinting()
 	{
 		m_pPrinter->EndPrinting(&JDC, &JINFO);
 	}
+
+	// JDC.LPtoDP(rect);
+	JDC.LPtoDP(JINFO.m_rectDraw);
 
 	JDC.SetMapMode(MM_TEXT);
 }
