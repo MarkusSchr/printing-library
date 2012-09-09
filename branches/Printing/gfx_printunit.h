@@ -119,8 +119,15 @@ namespace Printing
 
 namespace Printing
 {
+
 	typedef struct tagPrintUnitMetrics
 	{
+		static const int INVALID_VALUE_FOR_METRICS = -65535;
+		
+		// if any of the followings is negative, it means that the 
+		// value should be the multiply of the text line height
+		// using that item's font
+		
 		int pumHeadingHeight;
 		int pumFooterHeight;
 		// the height of header
@@ -137,61 +144,38 @@ namespace Printing
 
 		tagPrintUnitMetrics()
 		{
-			pumHeadingHeight = -1;
-			pumFooterHeight = -1;
-			pumHeaderHeight = -1;
-			pumRightMarginWidth = -1;
-			pumLeftMarginWidth = -1;
-			pumFooterLineHeight = -1;
-			pumHeaderLineHeight = -1;
-			pumLineOfText = -1;
-			pumHeaderMargin = -1;
-			pumFooterMargin = -1;
+			pumHeadingHeight = INVALID_VALUE_FOR_METRICS;
+			pumFooterHeight = INVALID_VALUE_FOR_METRICS;
+			pumHeaderHeight = INVALID_VALUE_FOR_METRICS;
+			pumRightMarginWidth = INVALID_VALUE_FOR_METRICS;
+			pumLeftMarginWidth = INVALID_VALUE_FOR_METRICS;
+			pumFooterLineHeight = INVALID_VALUE_FOR_METRICS;
+			pumHeaderLineHeight = INVALID_VALUE_FOR_METRICS;
+			pumLineOfText = INVALID_VALUE_FOR_METRICS;
+			pumHeaderMargin = INVALID_VALUE_FOR_METRICS;
+			pumFooterMargin = INVALID_VALUE_FOR_METRICS;
+		}
+
+		inline void SetMetricsElementValue(int source, int& des, int textLineHeight)
+		{
+			if (source != INVALID_VALUE_FOR_METRICS)
+			{
+				des = source;
+			}
 		}
 
 		tagPrintUnitMetrics& operator=(tagPrintUnitMetrics& pum)
 		{
-			if (pum.pumHeadingHeight > -1)
-			{
-				pumHeadingHeight = pum.pumHeaderHeight; 
-			}
-
-			if (pum.pumFooterHeight > -1)
-			{
-				pumFooterHeight = pum.pumFooterHeight; 
-			}
-			if (pum.pumHeaderHeight > -1)
-			{
-				pumHeaderHeight = pum.pumHeaderHeight; 
-			}
-			if (pum.pumRightMarginWidth > -1)
-			{
-				pumRightMarginWidth = pum.pumRightMarginWidth; 
-			}
-			if (pum.pumLeftMarginWidth > -1)
-			{
-				pumLeftMarginWidth = pum.pumLeftMarginWidth; 
-			}
-			if (pum.pumFooterLineHeight > -1)
-			{
-				pumFooterLineHeight = pum.pumFooterLineHeight; 
-			}
-			if (pum.pumHeaderLineHeight > -1)
-			{
-				pumHeaderLineHeight = pum.pumHeaderLineHeight; 
-			}
-			if (pum.pumLineOfText > -1)
-			{
-				pumLineOfText = pum.pumLineOfText; 
-			}
-			if (pum.pumHeaderMargin > -1)
-			{
-				pumHeaderMargin = pum.pumHeaderMargin; 
-			}
-			if (pum.pumFooterMargin > -1)
-			{
-				pumFooterMargin = pum.pumFooterMargin; 
-			}
+			SetMetricsElementValue(pum.pumHeadingHeight, pumHeadingHeight, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumFooterHeight, pumFooterHeight, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumHeaderHeight, pumHeaderHeight, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumRightMarginWidth, pumRightMarginWidth, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumLeftMarginWidth, pumLeftMarginWidth, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumFooterLineHeight, pumFooterLineHeight, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumHeaderLineHeight, pumHeaderLineHeight, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumLineOfText, pumLineOfText, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumHeaderMargin, pumHeaderMargin, pum.pumLineOfText);
+			SetMetricsElementValue(pum.pumFooterMargin, pumFooterMargin, pum.pumLineOfText);
 
 			return *this;
 		}
@@ -364,64 +348,41 @@ namespace Printing
 	} JOBUNITDIM, *LPJOBUNITDIM;
 }
 
-///////////////////////////////////////////////////
-// heading and footer enum and structure
-#define MAX_HEADER_COUNT 3
-#define MAX_FOOTER_COUNT MAX_HEADER_COUNT
-
 namespace Printing
 {
-	enum HEADERFOOTERTYPE
-	{
-		TYPE_EMPTY,
+	class CHeaderFooterTable;
 
-		TYPE_PAGE, // print current page, using "content" as prefix.
-		TYPE_DATE, // the current date, using "content" as prefix.
-		TYPE_TIME, // the current time, using "content" as prefix.
-		TYPE_DATETIME, // the current time, using "content" as prefix.
-
-		TYPE_DATA  // user-defined data, it will use "content"
-	};
-
-	typedef struct tagHeaderDefinitions
-	{
-		HEADERFOOTERTYPE type;	
-		std::wstring content;
-
-		tagHeaderDefinitions()
-		{
-			type = TYPE_EMPTY;
-		}
-	}HEADERDEFINITIONS, *LPHEADERDEFINITIONS;
-
-	typedef HEADERDEFINITIONS FOOTERDEFINITIONS;
-	typedef LPHEADERDEFINITIONS LPFOOTERDEFINITIONS;
-	///////////////////////////////////////////////////
-}
-
-namespace Printing
-{
 	class GPrintUnit : public CObject, IPrintable
 	{
 		friend GSelectActivePair;
 
 		DECLARE_DYNAMIC(GPrintUnit)
 
+	public:
+		struct srtFont
+		{
+			int nPointSize;
+			wstring name;
+
+			srtFont(int size, wstring name)
+			{
+				this->nPointSize = size;
+				this->name = name;
+			}
+		};
 
 	public:
 		// header and footer related methods
 		// the sequence in the array is important, which means the "left", "center" and "right" in sequence
 		// if not necessary, just leave the corresponding item with "type = EMPTY;"
-		void SetHeader(HEADERDEFINITIONS *header, int size);
-		void SetFooter(FOOTERDEFINITIONS *footer, int size);
+		void SetHeader(CHeaderFooterTable *header);
+		void SetFooter(CHeaderFooterTable *footer);
 		// return the old value
 		bool NeedHeaderLine(bool bNeedHeaderLine = true);
 		bool NeedFooterLine(bool bNeedFooterLine = true);
 		// set the interval between the header and the table
 		UINT  SetSeparateLineInterval(UINT interval);
 		UINT  SetSeparateLineWidth(UINT width);	
-		// header and footer helpers
-		void GetContentOnType( int type, CString context, CString& strHeader );
 		// if bHeader is TRUE, means drawing header's line, or drawing footer's line
 		void DrawSeparetLine(BOOL bHeader);
 
@@ -429,7 +390,9 @@ namespace Printing
 		void SetBodyPrinterFont(int nPointSize, LPCTSTR lpszFaceName);
 		void SetBodyScreenFont(int nPointSize, LPCTSTR lpszFaceName);
 		void SetHeaderFont(int nPointSize, LPCTSTR lpszFaceName);
+		void SetHeaderFont(srtFont* headerFont);
 		void SetFooterFont(int nPointSize, LPCTSTR lpszFaceName);
+		void SetFooterFont(srtFont* footerFont);
 
 		// print metrics methods
 		PRINTUNITMETRICS GetMetrics();
@@ -466,19 +429,7 @@ namespace Printing
 		virtual void InitPrintMetrics();
 
 	protected:
-		struct srtFont
-		{
-			int nPointSize;
-			wstring name;
-
-			srtFont(int size, wstring name)
-			{
-				this->nPointSize = size;
-				this->name = name;
-			}
-		};
 		virtual void CreateUserDefinedFont(CFont& fontDes, srtFont *fontSource);
-
 
 		// the nHeading in the following functions means the number of the column set.
 		// there can be many column set, within which there are many columns
@@ -536,7 +487,7 @@ namespace Printing
 		void SetActiveHeading(int nHeading);
 
 		void PrintFooterText(LPCTSTR lpszText);
-		void PrintHeaderText(LPCTSTR lpszText);
+		void PrintHeaderText();
 		// return the height of the text
 		int PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0, bool bDrawOuterline = false);
 		int PrintTextLine(LPPRINTTEXTLINE lpTextLine, bool bDrawOterLine = false);
@@ -672,9 +623,9 @@ namespace Printing
 
 	protected:
 		// header contents
-		HEADERDEFINITIONS m_header[MAX_HEADER_COUNT];
+		CHeaderFooterTable* m_header;
 		// footer contents
-		HEADERDEFINITIONS m_footer[MAX_FOOTER_COUNT];
+		CHeaderFooterTable* m_footer;
 
 		bool m_bNeedHeaderSeparateLine;
 		bool m_bNeedFooterSeperateLine;

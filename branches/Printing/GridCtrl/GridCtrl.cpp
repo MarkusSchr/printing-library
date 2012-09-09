@@ -209,6 +209,8 @@ Printing::CPntGridCtrl::CPntGridCtrl(int nRows, int nCols, int nFixedRows, int n
 	m_bShowHorzNonGridArea = FALSE;
 
 	m_pPrinterFont = NULL;
+
+	m_bNeedDrawHeading = true;
 }
 
 Printing::CPntGridCtrl::~CPntGridCtrl()
@@ -3976,7 +3978,8 @@ BOOL Printing::CPntGridCtrl::SetRowCount(int nRows)
                 int startRow = nRows - addedRows;
                 for (int row = startRow; row < nRows; row++)
                 {
-                    m_arRowHeights[row] = m_cellDefault.GetHeight();
+					int rowHeight = m_cellDefault.GetHeight();
+                    m_arRowHeights[row] = rowHeight;
 
                     m_RowData[row] = new PNT_GRID_ROW;
                     m_RowData[row]->SetSize(m_nCols);
@@ -4170,7 +4173,7 @@ int Printing::CPntGridCtrl::InsertColumn(LPCTSTR strHeading,
     // Initialise column data
     SetItemText(0, nColumn, strHeading);
     for (int row = 0; row < m_nRows; row++) 
-        SetItemFormat(row, nColumn, nFormat);
+        SetCellFormat(row, nColumn, nFormat);
     
     // initialized column width
     m_arColWidths[nColumn] = GetTextExtent(0, nColumn, strHeading).cx;
@@ -5030,7 +5033,7 @@ UINT Printing::CPntGridCtrl::GetItemState(int nRow, int nCol) const
     return pCell->GetState();
 }
 
-BOOL Printing::CPntGridCtrl::SetItemFormat(int nRow, int nCol, UINT nFormat)
+BOOL Printing::CPntGridCtrl::SetCellFormat(int nRow, int nCol, UINT nFormat)
 {
     if (GetVirtualMode())
         return FALSE;
@@ -6945,12 +6948,18 @@ int Printing::CPntGridCtrl::OnBeginPrinting( CDC *pDC, CPrintInfo *pInfo, CRect 
     // Get the number of pages. Assumes no row is bigger than the page size.
     int nTotalRowHeight = 0;
     m_nNumPages = 1;
-    for (int row = GetFixedRowCount(); row < GetRowCount(); row++)
+	int rowCount = GetRowCount();
+	if (m_bNeedDrawHeading == false)
+	{
+		rowCount--;
+	}
+    for (int row = GetFixedRowCount(); row < rowCount; row++)
     {
-        nTotalRowHeight += GetRowHeight(row);
+		int rowHeight = GetRowHeight(row);
+        nTotalRowHeight += rowHeight;
         if (nTotalRowHeight > m_nPageHeight) {
             m_nNumPages++;
-            nTotalRowHeight = GetRowHeight(row);
+            nTotalRowHeight = rowHeight;
         }
     }
 
@@ -7077,7 +7086,9 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 
         m_nPageWidth += iColumnOffset;
         m_nPrintColumn = 0;
-        PrintColumnHeadings(pDC, NULL);
+	
+		PrintColumnHeadings(pDC, NULL);
+		
         m_nPageWidth -= iColumnOffset;
         m_nPrintColumn = GetFixedColumnCount();
 
@@ -7090,9 +7101,8 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 
         m_nPageWidth += iColumnOffset;
 
-        // print from column 0 ... last column that fits on the current page
-        PrintColumnHeadings(pDC, NULL);
-        
+		PrintColumnHeadings(pDC, NULL);
+
         m_nPageWidth -= iColumnOffset;
  
         pDC->OffsetWindowOrg( -iColumnOffset, -GetFixedRowHeight());
@@ -7112,6 +7122,15 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 	int printedRow = 0;
 	// the row number that this page begins to print
 	int beginPrintRow = m_nCurrPrintRow;
+
+	// TODO: check whether the modification is right or not
+	// skip the heading
+	if (m_bNeedDrawHeading == false)
+	{
+		beginPrintRow++;
+		m_nCurrPrintRow++;
+	}
+
     while (m_nCurrPrintRow < GetRowCount())
     {
         rect.top = rect.bottom+1;
@@ -7215,7 +7234,7 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 			CPntCellRange tempRang(
 				minRow - beginPrintRow, 
 				minCol, 
-				maxRow, 
+				maxRow - beginPrintRow,
 				m_arMergedCells[i].GetMaxCol());
 
 			if(GetMergedCellRect(tempRang, rcMergeRect))
@@ -7235,7 +7254,10 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 					}
 					rcMergeRect.right--;
 					rcMergeRect.bottom--;
-					pCell->Draw(pDC, minRow, minCol, rcMergeRect, TRUE);
+					if (pCell)
+					{
+						pCell->Draw(pDC, minRow, minCol, rcMergeRect, TRUE);
+					}
 
 					// next repaint the line
 					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_HORZ)

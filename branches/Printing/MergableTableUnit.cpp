@@ -82,9 +82,9 @@ int CMergableTableUnit::Paint( int from, int to )
 
 		{
 			CRect rect(
-				JRECT.left - 5, 
+				JINFO.m_rectDraw.left, 
 				JRECT.top, 
-				JRECT.right + 5, 
+				JINFO.m_rectDraw.right,
 				JRECT.bottom);
 			CMemDCUsedForPrinter dc(&JDC, rect);
 			CDC* pOld = &JDC;

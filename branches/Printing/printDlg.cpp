@@ -12,6 +12,8 @@
 #include "BitmapTableUnit.h"
 #include "MergableTableUnit.h"
 #include "MultiTablesUnit.h"
+
+#include "HeaderFooterTable.h"
 ////////////////////////////////////
 #include "PrintUnitFromDC.h"
 ////////////////////////////////////
@@ -264,10 +266,18 @@ void CPrintDlg::OnOK()
 	CString   strRow; 
 	m_editRows.GetWindowText(strRow); 
 	int rowNum = _ttoi(strRow);
+	if (rowNum == 0)
+	{
+		rowNum = 50;
+	}
 
 	CString   strColumns; 
 	m_editColumns.GetWindowText(strColumns); 
 	int columnNum = _ttoi(strColumns);
+	if (columnNum == 0)
+	{
+		columnNum = 5;
+	}
 
 	ASSERT(rowNum != 0 && columnNum != 0);
 
@@ -337,6 +347,34 @@ void CPrintDlg::OnOK()
 	/////////////////////////////////////////////////////////////////////////////////
 	GPrintJob job;
 	
+	CHeaderFooterTable header(&job);
+	header.SetRowColumnNum(3, 5);
+
+	for (int i = 0; i < 3; i++)
+	{
+		header.MergeRows(i,0,i,1);
+		header.MergeRows(i,2,i,4);
+
+		header.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+		header.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+	}
+	header.SetRowUnitText(0,0,L"abc第一行:");
+	header.SetRowUnitText(0,2,L"Hello world 你好世界！123 :");
+	header.SetRowUnitText(1,0,L"No 2 :");
+	header.SetRowUnitText(1,2,L"123 :");
+	header.SetRowUnitText(2,0,L"No 3 :");
+	header.SetRowUnitText(2,2,L"Hello world 123 :");
+
+	header.SetRowUnitFont(0,0,60,L"黑体");
+	header.SetRowUnitFont(0,2,20,L"楷体");
+	header.SetRowUnitFont(1,0,100,L"楷体");
+	header.SetRowUnitFont(1,2,100,L"楷体");
+
+	//header.NeedOuterLine(false);
+
+	// TODO : To add footer
+	CHeaderFooterTable footer(&job);
+	
 	CDataTableUnit unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
 	unitTable1.SetPrintData(&vecParts);
@@ -349,31 +387,15 @@ void CPrintDlg::OnOK()
 	unitTable1.SetAllRowsHeightInTextLine(1);
 
 	// create a font that is 90“宋体”for heading
-	unitTable1.SetHeaderFont(90, L"宋体");
+	unitTable1.SetHeaderFont(100, L"宋体");
 	unitTable1.SetFooterFont(70, L"黑体");
 	unitTable1.SetBodyPrinterFont(90, L"楷体");
 
 	// draw header
-	HEADERDEFINITIONS header[3];
-	header[0].type = TYPE_DATETIME;
-	header[0].content = L"现在时间 ";
-	header[1].type = TYPE_DATA;
-	header[1].content = L"赛克力电缆";
-	header[2].type = TYPE_PAGE;
-	header[2].content = L"页号 ：";
-	// the SetHeader will deal at most 3 items currently
-	unitTable1.SetHeader(header, 3);
+	unitTable1.SetHeader(&header);
 
 	// draw footer
-	// please ensure you have assign for "3" HEADERDEFINITIONS
-	FOOTERDEFINITIONS footer[3];
-	footer[0].type = TYPE_TIME;
-	footer[1].type = TYPE_DATA;
-	footer[1].content = L"我是三得利";
-	footer[2].type = TYPE_DATE;
-	footer[2].content = L"日期 ：";
-	// the SetFooter will deal at most 3 items currently
-	unitTable1.SetFooter(footer, 3);
+	//unitTable1.SetFooter(&footer);
 
 	unitTable1.SetSeparateLineInterval(10);
 	unitTable1.SetSeparateLineWidth(3);
@@ -387,7 +409,7 @@ void CPrintDlg::OnOK()
 	unitTable2.SetTitle(L"数据2");
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
-	unitTable2.SetHeader(footer, 3);
+	//unitTable2.SetHeader(footer, 3);
 	unitTable2.SetAllRowsHeightInTextLine(1);
 	
 
@@ -409,8 +431,8 @@ void CPrintDlg::OnOK()
 	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
 
 	// ability inherited from the base class
-	unitBitmapTable.SetHeader(header, 3);
-	unitBitmapTable.SetFooter(footer, 3);
+	//unitBitmapTable.SetHeader(&header);
+	//unitBitmapTable.SetFooter(footer, 3);
 
 	// set data
 	CBitmap bmp;
@@ -441,11 +463,12 @@ void CPrintDlg::OnOK()
 
 	//////////// test 3 : self-define page ////////////////////////////
 	CPrintUnitFromDC userDefinedUnit;
-	userDefinedUnit.SetFooter(footer, 3);
-	userDefinedUnit.SetHeader(header, 3);
+//	userDefinedUnit.SetFooter(footer, 3);
+//	userDefinedUnit.SetHeader(&header);
 	
 
 	//////////// test 5 : informal table ////////////////////////////
+	
 	CMergableTableUnit mergeUnit;
 	double fPrt = (double)((double)1 / (double)vecColumnDef.size());
 	for (int i = 0; i < vecColumnDef.size(); i++)
@@ -456,18 +479,16 @@ void CPrintDlg::OnOK()
 	mergeUnit.DefineColumns(vecColumnDef);
 	rowNum = 15;
 	mergeUnit.SetRowNum(rowNum);
-	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
+	for (int i = 0; i < rowNum + 1; i++)
 	{
-		mergeUnit.SetRowHeight(i, 3);
+		mergeUnit.SetCellHeight(i, 2);
 	}
 	
 	mergeUnit.MergeCell(3,3,4,4);
 	mergeUnit.MergeCell(7,3,7,4);
-	mergeUnit.MergeCell(24,3,70,4);
 
-
-	// merge cell
-	for (int i = 0; i < 2/*rowNum*/; i++)
+	// merge the heading
+	for (int i = 0; i < 1; i++)
 	{
 		mergeUnit.MergeCell(i, 0, i, 1);
 		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
@@ -479,23 +500,25 @@ void CPrintDlg::OnOK()
 	mergeUnit.SetCellText(6,8, L"abcde!!!");
 	mergeUnit.SetCellText(rowNum - 1, 3, L"asdffdsa");
 	mergeUnit.SetCellText(24, 3, L"画皮2");
-	mergeUnit.SetHeader(header, 3);
-	mergeUnit.SetFooter(footer, 3);
+//	mergeUnit.SetHeader(&header);
+//	mergeUnit.SetFooter(footer, 3);
 	// set the margin between header and main context by 4 * heightOfLineText
 	mergeUnit.SetTopMarginInLineOfText(2);
 	
 	// to set the row format as "DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE"
 	// which is also the default value, just to show we can do it.
-	mergeUnit.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
-	mergeUnit.SetAllRowsFont(120, L"宋体");
-	mergeUnit.SetRowFont(3, 30, L"黑体");
+	mergeUnit.SetAllRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
+	mergeUnit.SetAllRowsFont(40, L"宋体");
+	mergeUnit.SetRowFont(0, 10, L"黑体");
+	mergeUnit.SetRowFont(2, 20, L"黑体");
 	mergeUnit.SetHeadingFont(90, L"楷体");
-	mergeUnit.SetCellFont(1, 0, 150, L"黑体");
+//	mergeUnit.SetCellFont(1, 0, 10, L"黑体");
 	mergeUnit.NeedDrawTableOuterline(true);
 
 	// set title
 	mergeUnit.SetTitle(L"男人总是不关心女人的感受");
-	
+	// do not to show the column
+	mergeUnit.SetNeedDrawHeadings(true);
 
 	//////////// test 4 : print multi-tables in one printing unit ////////////////////////////
 	// table 1
@@ -511,7 +534,7 @@ void CPrintDlg::OnOK()
 	t1.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{
-		t1.SetRowHeight(i, 3);
+		t1.SetCellHeight(i, 3);
 	}
 	t1.MergeCell(1,0,2,2);
 	t1.SetCellText(1,0, L"桂林");
@@ -529,6 +552,7 @@ void CPrintDlg::OnOK()
 	for (int i = 0; i < vecColumnDef.size(); i++)
 	{
 		vecColumnDef[i].fPct = fPrt3;
+		vecColumnDef[i].strName = L"广西";
 	}
 
 	t2.DefineColumns(vecColumnDef);
@@ -536,10 +560,10 @@ void CPrintDlg::OnOK()
 	t2.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{
-		t2.SetRowHeight(i, 3);
+		t2.SetCellHeight(i, 3);
 	}
 	t2.SetTitle(L"广西壮族自治区");
-	for (int i = 0; i < rowNum + 1; i++)
+	for (int i = 1; i < rowNum + 1; i++)
 	{
 		for (int j = 0; j < vecColumnDef.size(); j++)
 		{
@@ -560,6 +584,7 @@ void CPrintDlg::OnOK()
 	for (int i = 0; i < vecColumnDef.size(); i++)
 	{
 		vecColumnDef[i].fPct = fPrt4;
+		vecColumnDef[i].strName = L"广东";
 	}
 
 	t3.DefineColumns(vecColumnDef);
@@ -567,9 +592,9 @@ void CPrintDlg::OnOK()
 	t3.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{
-		t3.SetRowHeight(i, 3);
+		t3.SetCellHeight(i, 3);
 	}
-	for (int i = 0; i < rowNum + 1; i++)
+	for (int i = 1; i < rowNum + 1; i++)
 	{
 		for (int j = 0; j < vecColumnDef.size(); j++)
 		{
@@ -583,6 +608,35 @@ void CPrintDlg::OnOK()
 		}
 	}
 
+
+	// header for multitableunit
+	CHeaderFooterTable header2(&job);
+	header2.SetRowColumnNum(3, 5);
+
+	for (int i = 0; i < 3; i++)
+	{
+		header2.MergeRows(i,0,i,1);
+		header2.MergeRows(i,2,i,4);
+
+		header2.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+		header2.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+	}
+	header2.SetRowUnitText(0,0,L"222第一行:");
+	header2.SetRowUnitText(0,2,L"222Hello world 你好世界！123 :");
+	header2.SetRowUnitText(1,0,L"222No 2 :");
+	header2.SetRowUnitText(1,2,L"222123 :");
+	header2.SetRowUnitText(2,0,L"222No 3 :");
+	header2.SetRowUnitText(2,2,L"222Hello world 123 :");
+	/*header2.SetRowUnitText(3,0,L"222No 4 :");
+	header2.SetRowUnitText(4,0,L"222No 5 :");*/
+
+	header2.SetRowUnitFont(0,0,60,L"黑体");
+	header2.SetRowUnitFont(0,2,20,L"楷体");
+	header2.SetRowUnitFont(1,0,100,L"楷体");
+	header2.SetRowUnitFont(1,2,100,L"楷体");
+
+	//header2.NeedOuterLine(false);
+
 	CMultiTablesUnit multiTableUnit;
 	multiTableUnit.InsertTables(t1);
 	multiTableUnit.InsertTables(t2);
@@ -590,30 +644,37 @@ void CPrintDlg::OnOK()
 	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
 	multiTableUnit.SetTableIntervalInLineOfText(2);
 	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
-	multiTableUnit.SetHeader(header, 3);
+	multiTableUnit.SetHeader(&header2);
 
 	
 	//////////// test 5 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.InsertTask(&unitTable1);
-	job.InsertTask(&unitTable2);
-	job.InsertTask(&unitBitmapTable);
-	job.InsertTask(&userDefinedUnit);
+//	job.InsertTask(&unitTable2);
+//	job.InsertTask(&unitBitmapTable);
+//	job.InsertTask(&userDefinedUnit);
 	job.InsertTask(&mergeUnit);
 	job.InsertTask(&multiTableUnit);
 
-	
 	job.PrintFollowingPrintDialog();
 }
 
 
 void CPrintDlg::OnBnClickedButton1()
 {
+	// get data
+	int rowNum = 100;
+
+	int columnNum = 5;
+
+	ASSERT(rowNum != 0 && columnNum != 0);
+
+
 	// prepare the column
 	vector<COLUMNDEFINITIONS> vecColumnDef;
 	// define my four columns...
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < columnNum; i++)
 	{
 		COLUMNDEFINITIONS cd;
 		TCHAR buf[200];
@@ -625,109 +686,107 @@ void CPrintDlg::OnBnClickedButton1()
 		vecColumnDef.push_back(cd);
 	}
 
-	// test
+	// prepare the data
+	wstring **strArr = NULL;
+	strArr = new wstring* [rowNum];
+	for (int i = 0; i < rowNum; i++)
+	{
+		strArr[i] = new wstring [columnNum];
+	}
+
+	for (int i = 0; i < rowNum; i++)
+	{
+		for (int j = 0; j < columnNum; j++)
+		{
+			srand((unsigned)time(0));
+			int randomPart1 = rand() % 10000;
+			int randomPart2 = rand() % 1000;
+
+			TCHAR c = 0;
+			if (rand() % 2)
+			{
+				c = TEXT('+');
+			}
+			else
+			{
+				c = TEXT('-');
+			}
+			std::wstringstream ss;
+			ss << c << randomPart1 << TEXT(".") << randomPart2 << TEXT('\0');
+			strArr[i][j] = ss.str(); 
+
+			wstring temp = strArr[i][j];
+		}
+	}
+
+	vector<vector<LPCTSTR> > vecParts;
+
+	for (int i = 0; i < rowNum ; i++)
+	{
+		vector<LPCTSTR> vecTemp;
+
+		for (int j = 0; j < columnNum ; j++)
+		{
+			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i][j].c_str()));
+		}
+
+		vecParts.push_back(vecTemp);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////
 	GPrintJob job;
 
-		//////////// test 4 : print multi-tables in one printing unit ////////////////////////////
-	// table 1
-	CPrintUnitMergableTable t1;
-	double fPrt2 = (double)((double)1 / (double)vecColumnDef.size());
-	for (int i = 0; i < vecColumnDef.size(); i++)
-	{
-		vecColumnDef[i].fPct = fPrt2;
-	}
+	CDataTableUnit unitTable1;
+	unitTable1.DefineColumns(vecColumnDef);
+	unitTable1.SetPrintData(&vecParts);
 
-	t1.DefineColumns(vecColumnDef);
-	int rowNum2 = 10;
-	t1.SetRowNum(rowNum2);
-	for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
+	// currently it only support for DT_LEFT, DT_CENTER or DT_RIGHT
+	unitTable1.SetRowFormat(DT_RIGHT);
+
+	// you do  not need to set the row height. However, if you have set, 
+	// the pre-calculation process will be much faster than it does not.
+	unitTable1.SetAllRowsHeightInTextLine(1);
+
+	// create a font that is 90“宋体”for heading
+	unitTable1.SetHeaderFont(90, L"宋体");
+	unitTable1.SetFooterFont(70, L"黑体");
+	unitTable1.SetBodyPrinterFont(90, L"楷体");
+
+	// draw header
+	CHeaderFooterTable header(&job);
+	header.SetRowColumnNum(3, 5);
+
+	for (int i = 0; i < 3; i++)
 	{
-		t1.SetRowHeight(i, 3);
+		header.MergeRows(i,0,i,1);
+		header.MergeRows(i,2,i,4);
+
+		header.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+		header.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 	}
-	t1.MergeCell(1,0,2,2);
-	t1.SetCellText(1,0, L"桂林");
-	t1.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
-	t1.SetAllRowsFont(100, L"宋体");
-	t1.SetRowFont(3, 100, L"黑体");
-	t1.SetHeadingFont(100, L"楷体");
-	t1.SetCellFont(1, 0, 100, L"黑体");
-	t1.SetTitle(L"桂林山水甲天下");
-	t1.SetTitlePen(100, L"宋体");
-	t1.NeedDrawTableOuterline(true);
+	header.SetRowUnitText(0,0,L"abc第一行:");
+	header.SetRowUnitText(0,2,L"Hello world 你好世界！123 :");
+	header.SetRowUnitText(1,0,L"No 2 :");
+	header.SetRowUnitText(1,2,L"123 :");
+	header.SetRowUnitText(2,0,L"No 3 :");
+	header.SetRowUnitText(2,2,L"Hello world 123 :");
+
+	header.NeedOuterLine(false);
+//	unitTable1.SetHeader(&header);
+
+	// draw footer
+	// please ensure you have assign for "3" HEADERDEFINITIONS
 	
-	//// table 2
-	//CPrintUnitMergableTable t2;
-	//double fPrt3 = (double)((double)1 / (double)vecColumnDef.size());
-	//for (int i = 0; i < vecColumnDef.size(); i++)
-	//{
-	//	vecColumnDef[i].fPct = fPrt3;
-	//}
 
-	//t2.DefineColumns(vecColumnDef);
-	//rowNum2 = 20;
-	//t2.SetRowNum(rowNum2);
-	//for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
-	//{
-	//	t2.SetRowHeight(i, 3);
-	//}
-	//t2.SetTitle(L"广西壮族自治区");
-	//for (int i = 0; i < rowNum2 + 1; i++)
-	//{
-	//	for (int j = 0; j < vecColumnDef.size(); j++)
-	//	{
-	//		wstring str = L"广西-";
-	//		WCHAR t[256];
-	//		wsprintf(t, L"%d-", i);
-	//		str.append(t);
-	//		wsprintf(t, L"%d", j);
-	//		str.append(t);
-	//		t2.SetCellText(i,j, str.c_str());
-	//	}
-	//}
-	//
-	//// table 3
-	//CPrintUnitMergableTable t3;
-	//t3.SetTitle(L"广东");
-	//double fPrt4 = (double)((double)1 / (double)vecColumnDef.size());
-	//for (int i = 0; i < vecColumnDef.size(); i++)
-	//{
-	//	vecColumnDef[i].fPct = fPrt4;
-	//}
+	unitTable1.SetSeparateLineInterval(10);
+	unitTable1.SetSeparateLineWidth(3);
 
-	//t3.DefineColumns(vecColumnDef);
-	//rowNum2 = 20;
-	//t3.SetRowNum(rowNum2);
-	//for (int i = 0; i < rowNum2 + 1/*1 is column*/; i++)
-	//{
-	//	t3.SetRowHeight(i, 3);
-	//}
-	//for (int i = 0; i < rowNum2 + 1; i++)
-	//{
-	//	for (int j = 0; j < vecColumnDef.size(); j++)
-	//	{
-	//		wstring str = L"世界-";
-	//		WCHAR t[256];
-	//		wsprintf(t, L"%d-", i);
-	//		str.append(t);
-	//		wsprintf(t, L"%d", j);
-	//		str.append(t);
-	//		t3.SetCellText(i,j, str.c_str());
-	//	}
-	//}
-
-	CMultiTablesUnit multiTableUnit;
-	multiTableUnit.InsertTables(t1);
-	//multiTableUnit.InsertTables(t2);
-	//multiTableUnit.InsertTables(t3);
-	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
-	multiTableUnit.SetTableIntervalInLineOfText(2);
-	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
-
-	job.InsertTask(&multiTableUnit);
+	unitTable1.SetTitle(L"数据1");
+	unitTable1.SetEnglishVersion(true);
+	unitTable1.NeedPrintTitleExcpetFirstPage(true);
 
 
-	CPrintUnitFromDC userDefinedUnit;
-	job.InsertTask(&userDefinedUnit);
+	job.InsertTask(&unitTable1);
 
 	job.PrintFollowingPrintDialog();
 }
