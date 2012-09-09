@@ -10,11 +10,15 @@
 
 #include "MemDCForPrint.h"
 
+#include "PrintUnitMergableTable.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+#include "HeaderFooterTable.h"
 
 using namespace Printing;
 Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
@@ -51,6 +55,9 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 	m_headingHeightInTextLine = 1;
 
 	m_bEnglish = false;
+
+	m_header = NULL;
+	m_footer = NULL;
 }
 
 
@@ -151,7 +158,29 @@ void Printing::GPrintUnit::CreateUserDefinedFont( CFont& fontDes, srtFont *fontS
 	fontDes.CreatePointFont(fontSource->nPointSize, fontSource->name.c_str(), &JDC);
 }
 
-#define SETMETRICELEMENT(destination, source) if ( (destination) == -1) { (destination) = (source); }
+inline void SETMETRICELEMENT(int& destination, int source, int textLineHeight)
+{
+	// if destination is positive, it has been set
+	if ( destination >= 0 ) 
+	{ 
+		return;
+	}
+
+	// if destination is PRINTUNITMETRICS.INVALID_VALUE_FOR_METRICS, use the source
+	if (destination == Printing::PRINTUNITMETRICS::INVALID_VALUE_FOR_METRICS)
+	{
+		destination = source;
+		return;
+	}
+
+	// if destination is negative, use the height of the text line
+	if (destination < 0)
+	{
+		destination = -destination * textLineHeight;
+		return;
+	}
+	
+}
 
 void Printing::GPrintUnit::InitPrintMetrics()
 {
@@ -161,43 +190,43 @@ void Printing::GPrintUnit::InitPrintMetrics()
 		GSELECT_OBJECT(&JDC, &m_fontHeader);
 		JDC.GetTextMetrics(&tm);
 
-		SETMETRICELEMENT(m_pum.pumHeaderHeight, tm.tmHeight * 2)
-		SETMETRICELEMENT(m_pum.pumHeaderLineHeight, tm.tmHeight / 10)
+		SETMETRICELEMENT(m_pum.pumHeaderHeight, tm.tmHeight * 2, tm.tmHeight);
+		SETMETRICELEMENT(m_pum.pumHeaderLineHeight, tm.tmHeight / 10, tm.tmHeight);
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &m_fontFooter);
 		JDC.GetTextMetrics(&tm);
 
-		SETMETRICELEMENT(m_pum.pumFooterHeight, tm.tmHeight * 2)
-		SETMETRICELEMENT(m_pum.pumFooterLineHeight, tm.tmHeight / 10)
+		SETMETRICELEMENT(m_pum.pumFooterHeight, tm.tmHeight * 2, tm.tmHeight);
+		SETMETRICELEMENT(m_pum.pumFooterLineHeight, tm.tmHeight / 10, tm.tmHeight);
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &(m_fontPairBody.fontPrinter));
 		JDC.GetTextMetrics(&tm);
 
-		SETMETRICELEMENT(m_pum.pumLineOfText, tm.tmHeight)
+		SETMETRICELEMENT(m_pum.pumLineOfText, tm.tmHeight, tm.tmHeight);
 	}
 
 	{
 		GSELECT_OBJECT(&JDC, &(m_fontHeading));
 		JDC.GetTextMetrics(&tm);
 		
-		SETMETRICELEMENT(m_pum.pumHeadingHeight, tm.tmHeight)
+		SETMETRICELEMENT(m_pum.pumHeadingHeight, tm.tmHeight, tm.tmHeight);
 	}
 
 	// left and right margin
 	// both the margin is 1/20 of the page
 	{
-		SETMETRICELEMENT(m_pum.pumLeftMarginWidth, (JRECTDEV.right - JRECTDEV.left)/50)
-		SETMETRICELEMENT(m_pum.pumRightMarginWidth, m_pum.pumLeftMarginWidth)
+		SETMETRICELEMENT(m_pum.pumLeftMarginWidth, (JRECTDEV.right - JRECTDEV.left)/50, tm.tmHeight);
+		SETMETRICELEMENT(m_pum.pumRightMarginWidth, m_pum.pumLeftMarginWidth, tm.tmHeight);
 	}
 
 	// top/header and bottom/footer margin
 	{
-		SETMETRICELEMENT(m_pum.pumHeaderMargin, (JRECTDEV.bottom - JRECTDEV.top)/50)
-		SETMETRICELEMENT(m_pum.pumFooterMargin, m_pum.pumHeaderMargin)
+		SETMETRICELEMENT(m_pum.pumHeaderMargin, (JRECTDEV.bottom - JRECTDEV.top)/50, tm.tmHeight);
+		SETMETRICELEMENT(m_pum.pumFooterMargin, m_pum.pumHeaderMargin, tm.tmHeight);
 	}
 
 	RealizeMetrics();
@@ -290,9 +319,9 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 	bool bNewPage = StartPage();
 
 	CRect rect(
-		JRECT.left - 5, 
+		JINFO.m_rectDraw.left, 
 		JCUR.y + m_titleMarginInTextLineHeight * m_pum.pumLineOfText / 2, 
-		JRECT.right + 5, 
+		JINFO.m_rectDraw.right,
 		JRECT.bottom);
 
 	CMemDCUsedForPrinter * pDc = new CMemDCUsedForPrinter(&JDC, rect);
@@ -325,6 +354,7 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 				EndRow(FALSE);
 			}
 
+			// in another page
 			if (SR_NEEDADVANCEDPAGE != StartRow())
 			{
 				// in the same page
@@ -389,9 +419,9 @@ int Printing::GPrintUnit::DrawTableContents( vector<vector<LPCTSTR> >& contents,
 						offset = m_titleMarginInTextLineHeight * m_pum.pumLineOfText / 2;
 					}
 					CRect rect(
-						JRECT.left - 5, 
+						JINFO.m_rectDraw.left, 
 						JCUR.y + offset, 
-						JRECT.right + 5, 
+						JINFO.m_rectDraw.right, 
 						JRECT.bottom);
 					pDc = new CMemDCUsedForPrinter(&JDC, rect);
 					m_pJob->m_pDC = pDc;
@@ -911,21 +941,12 @@ void Printing::GPrintUnit::RealizeMetrics()
 
 void Printing::GPrintUnit::PrintHeader()
 {
-	GSELECT_OBJECT(&JDC, &m_fontHeader);
-
-	wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
-
-	CString strHeader;
-	for (int i = 0; i < MAX_HEADER_COUNT; i++)
+	if (m_header == NULL)
 	{
-		GetContentOnType(m_header[i].type, m_header[i].content.c_str(), strHeader);
-		strHeader += step[i];
+		return;
 	}
-	strHeader.Delete(strHeader.GetLength(), 1);
 
-	strHeader += HFC_NEWLINE;
-
-	PrintHeaderText(strHeader);
+	PrintHeaderText();
 
 	// draw the separate line
 	if (m_bNeedHeaderSeparateLine)
@@ -936,25 +957,25 @@ void Printing::GPrintUnit::PrintHeader()
 
 void Printing::GPrintUnit::PrintFooter()
 {
-	GSELECT_OBJECT(&JDC, &m_fontFooter);
+	//GSELECT_OBJECT(&JDC, &m_fontFooter);
 
-	wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
+	//wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
 
-	CString strFooter;
-	// draw the separate line
-	if (m_bNeedFooterSeperateLine)
-	{
-		DrawSeparetLine(FALSE);
-	}
+	//CString strFooter;
+	//// draw the separate line
+	//if (m_bNeedFooterSeperateLine)
+	//{
+	//	DrawSeparetLine(FALSE);
+	//}
 
-	//strFooter += HFC_NEWLINE;
-	for (int i = 0; i < MAX_FOOTER_COUNT; i++)
-	{
-		GetContentOnType(m_footer[i].type, m_footer[i].content.c_str(), strFooter);
-		strFooter += step[i];
-	}
+	////strFooter += HFC_NEWLINE;
+	//for (int i = 0; i < MAX_FOOTER_COUNT; i++)
+	//{
+	//	GetContentOnType(m_footer[i].type, m_footer[i].content.c_str(), strFooter);
+	//	strFooter += step[i];
+	//}
 
-	PrintFooterText(strFooter);
+	//PrintFooterText(strFooter);
 }
 
 
@@ -979,21 +1000,44 @@ void Printing::GPrintUnit::PrintFooterText(LPCTSTR lpszText)
 
 
 
-void Printing::GPrintUnit::PrintHeaderText(LPCTSTR lpszText)
+void Printing::GPrintUnit::PrintHeaderText()
 {
-	PRINTTEXTLINE ptl;
-	GMakeStructFillZero(ptl);
-
-	ptl.lpszText = lpszText;
-	ptl.tmHeight = m_pum.pumHeaderHeight;
-
-	ptl.rectText.left = JRECT.left;
-	ptl.rectText.right = JRECT.right;
-	ptl.rectText.top = m_pum.pumHeaderMargin;
-	ptl.rectText.bottom = m_pum.pumHeaderMargin + ptl.tmHeight;
-
+	// design the layout
+	CRect rect;
+	rect.left = JRECT.left;
+	rect.right = JRECT.right;
+	rect.top = m_pum.pumHeaderMargin;
+	rect.bottom = m_pum.pumHeaderMargin + m_pum.pumHeaderHeight;
+	
 	g_StartEndRow = FALSE;
-	PrintTextLine(&ptl);
+
+	// assure all the rows can be drawn in the header area
+	// get the height of the text line
+	int textLineHeight = 0;
+	{
+		TEXTMETRIC tm;
+		GSELECT_OBJECT(&JDC, &m_fontHeader);
+		JDC.GetTextMetrics(&tm);
+
+		textLineHeight = tm.tmHeight;
+	}
+
+	// associate the font
+	int nPointSize;
+	LPCTSTR name;
+	if (m_pUserFontHeader)
+	{
+		nPointSize = m_pUserFontHeader->nPointSize;
+		name = m_pUserFontHeader->name.c_str();
+	}
+	else
+	{
+		// use the default value in CreatePrintFonts()
+		nPointSize = 110;
+		name = _T("Garamond");
+	}
+
+	m_header->Paint( &JINFO, nPointSize, name, &m_fontHeader, &JDC, 1, rect, NULL);
 }
 
 int Printing::GPrintUnit::PrintTextLine(
@@ -1275,51 +1319,6 @@ void Printing::GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
 	date = szBuf;	
 }
 
-void Printing::GPrintUnit::GetContentOnType( int type, CString context, CString& str )
-{
-	switch (type)
-	{
-	case TYPE_EMPTY:
-		{	
-		}
-		break;
-	case TYPE_PAGE: // print current page, using "content" as prefix.
-		{
-			CString strPage;
-			strPage.Format(TEXT("%d"), JINFO.m_nCurPage);
-			str = str + context + strPage;
-		}
-		break;
-	case TYPE_DATE: // the current date, using "content" as prefix.
-		{
-			CString date, time;
-			GetCurrentTimeAndDate(date, time);
-			str = str + context + date;
-		}
-		break;
-	case TYPE_TIME: // the current time, using "content" as prefix.
-		{
-			CString date, time;
-			GetCurrentTimeAndDate(date, time);
-			str = str +context + time;
-		}
-		break;
-	case TYPE_DATETIME: // the current date and time, using "content" as prefix.
-		{
-			CString date, time;
-			GetCurrentTimeAndDate(date, time);
-			str = str + context + date + TEXT(" ") + time;
-		}
-		break;
-	case TYPE_DATA:  // user-defined data, it will use "content"
-		{
-			str = str + context;
-		}
-		break;
-	}	
-}
-
-
 UINT Printing::GPrintUnit::SetSeparateLineInterval( UINT interval )
 {
 	UINT old = m_separateLineInterval;
@@ -1565,6 +1564,13 @@ void Printing::GPrintUnit::SetHeaderFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
+void Printing::GPrintUnit::SetHeaderFont(srtFont* headerFont)
+{
+	DELETE_IF_NOT_NULL(m_pUserFontHeader);
+	m_pUserFontHeader = headerFont;
+	SetNeedPreprocessSign(true);	
+}
+
 void Printing::GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 {
 	DELETE_IF_NOT_NULL(m_pUserFontFooter);
@@ -1574,11 +1580,23 @@ void Printing::GPrintUnit::SetFooterFont( int nPointSize, LPCTSTR lpszFaceName )
 	SetNeedPreprocessSign(true);
 }
 
+void Printing::GPrintUnit::SetFooterFont(srtFont* footerFont)
+{
+	DELETE_IF_NOT_NULL(m_pUserFontFooter);
+	m_pUserFontFooter = footerFont;
+	SetNeedPreprocessSign(true);	
+}
+
 void Printing::GPrintUnit::SetMetrics( PRINTUNITMETRICS pum )
 {
 	m_pum = pum;
 
 	SetNeedPreprocessSign(true);
+}
+
+PRINTUNITMETRICS Printing::GPrintUnit::GetMetrics()
+{
+	return m_pum;
 }
 
 bool Printing::GPrintUnit::NeedHeaderLine( bool bNeedHeaderLine /*= true*/ )
@@ -1597,26 +1615,25 @@ bool Printing::GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
 	return bOld;
 }
 
-void Printing::GPrintUnit::SetHeader( HEADERDEFINITIONS *header, int size )
+void Printing::GPrintUnit::SetHeader( CHeaderFooterTable *header )
 {
-	int minSize = MAX_HEADER_COUNT >= size? size : MAX_HEADER_COUNT;
-	for (int i = 0; i < minSize; i++)
+	if (header == NULL)
 	{
-		m_header[i].type = header[i].type;
-		m_header[i].content = header[i].content;
+		return;
 	}
+
+	m_header = header;
+	
+	PRINTUNITMETRICS pm = this->GetMetrics();
+	pm.pumHeaderHeight = -(m_header->GetRowNum());
+	this->SetMetrics(pm);
 
 	SetNeedPreprocessSign(true);
 }
 
-void Printing::GPrintUnit::SetFooter( FOOTERDEFINITIONS *footer, int size )
+void Printing::GPrintUnit::SetFooter( CHeaderFooterTable *footer )
 {
-	int minSize = MAX_FOOTER_COUNT >= size? size : MAX_FOOTER_COUNT;
-	for (int i = 0; i < minSize; i++)
-	{
-		m_footer[i].type = footer[i].type;
-		m_footer[i].content = footer[i].content;
-	}
+	m_footer = footer;
 
 	SetNeedPreprocessSign(true);
 }

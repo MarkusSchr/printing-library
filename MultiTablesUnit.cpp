@@ -184,12 +184,19 @@ void Printing::CMultiTablesUnit::InitPrintMetrics()
 	// for the unit itself
 	CPrintUnitStandardTable<CONST WCHAR>::InitPrintMetrics();
 
+	// in case the metrics and JRECT to be changes, parent's JRECT should be different from children
+	PRINTUNITMETRICS pmTemp = this->GetMetrics();
+	CRect oldRect = JRECT;
+
 	// for each table
 	for (int i = 0; i < m_vecTables.size(); i++)
 	{
 		m_vecTables[i]->m_pJob = this->m_pJob;
 		m_vecTables[i]->InitPrintMetrics();
 	}
+
+	SetMetrics(pmTemp);
+	JRECT = oldRect;
 }
 
 void Printing::CMultiTablesUnit::DeleteDefaultFonts()

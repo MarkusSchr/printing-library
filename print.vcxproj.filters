@@ -2,24 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{53e66597-eead-4ecc-9ecb-fcb973e01460}</UniqueIdentifier>
+      <UniqueIdentifier>{c7ab8d83-8f90-47a1-a2bb-368f48b8234e}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Source Files\HSE">
-      <UniqueIdentifier>{1a7dd13b-afad-4636-a93f-d0d6a318d756}</UniqueIdentifier>
+      <UniqueIdentifier>{614d8d89-fe21-41e7-b78e-b1faf71a8328}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\GridCtrl">
-      <UniqueIdentifier>{fa856bf3-6813-4766-84dd-b7c07be0924b}</UniqueIdentifier>
+      <UniqueIdentifier>{b8d98162-e774-46d8-ba3e-9b7b1a09edaa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{b144b124-a83c-4818-9539-545937fe3711}</UniqueIdentifier>
+      <UniqueIdentifier>{68ad9ac9-90ef-4fc1-ad22-48adf82b3ff1}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="Header Files\GridCtrl">
-      <UniqueIdentifier>{46bea576-6ee5-443b-99bb-3e89e61ea997}</UniqueIdentifier>
+      <UniqueIdentifier>{611711ea-2e84-47ed-a4c2-7a5d268c5d33}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{a7d5ae35-17d3-4049-be5f-eea4be89ac8b}</UniqueIdentifier>
+      <UniqueIdentifier>{b608d58b-c2b4-46fa-a749-9b119cc74681}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
   </ItemGroup>
@@ -109,6 +109,9 @@
     <ClInclude Include="IPrintable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MemDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="MergableTableUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -157,7 +160,7 @@
     <ClInclude Include="GridCtrl\TitleTip.h">
       <Filter>Header Files\GridCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="MemDCForPrint.h">
+    <ClInclude Include="HeaderFooterTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

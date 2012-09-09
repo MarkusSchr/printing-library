@@ -118,6 +118,7 @@ namespace Printing
 		GPrintJob();
 
 		// call to print this job..returns one of the "PRINTJOB_..." codes
+		// the call-back function is the last chance to do unit revising before printing
 		int PrintFollowingPrintDialog(PRINTING_UNITS_SET_FUN fun = NULL, void* param = NULL);
 		// will initialize a structure with pointers to all device names
 		// these structure values are temporary, and must be stored as 

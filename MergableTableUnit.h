@@ -4,6 +4,7 @@
 
 namespace Printing
 {
+	// row is row, cell in line 1 is index 0, while the first row is cell in line 2
 	class CMergableTableUnit : public CPrintUnitMergableTable
 	{
 	public:
