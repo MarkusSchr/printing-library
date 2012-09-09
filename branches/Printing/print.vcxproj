@@ -181,6 +181,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HeaderFooterTable.h" />
     <ClInclude Include="HSECPrintPageConfig.h" />
     <ClInclude Include="HSEPrinter.h" />
     <ClInclude Include="BitmapTableUnit.h" />
@@ -188,7 +189,7 @@
     <ClInclude Include="Gfx_printjob.h" />
     <ClInclude Include="Gfx_printunit.h" />
     <ClInclude Include="IPrintable.h" />
-    <ClInclude Include="MemDCForPrint.h" />
+    <ClInclude Include="MemDC.h" />
     <ClInclude Include="MergableTableUnit.h" />
     <ClInclude Include="MultiTablesUnit.h" />
     <ClInclude Include="print.h" />

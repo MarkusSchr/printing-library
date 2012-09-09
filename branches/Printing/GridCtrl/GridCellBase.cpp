@@ -147,6 +147,10 @@ BOOL Printing::CPntGridCellBase::Draw(CDC* pDC, int nRow, int nCol, CRect rect, 
         TextBkClr = GetBackClr();
     }
 
+	CFont *pFont = GetFontObject();
+	if (pFont)
+		pDC->SelectObject(pFont);
+
     // Draw cell background and highlighting (if necessary)
     // LUC
 	//if ( IsFocused() || IsDropHighlighted() )
@@ -757,7 +761,8 @@ BOOL Printing::CPntGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/,
 
     // Draw without clipping so as not to lose text when printed for real
 	// DT_NOCLIP removed 01.01.01. Slower, but who cares - we are printing!
-    DrawText(pDC->m_hDC, GetText(), -1, rect,
+    LPCTSTR text = GetText();
+	DrawText(pDC->m_hDC, GetText(), -1, rect,
         GetFormat() | /*DT_NOCLIP | */ DT_NOPREFIX);
 
     pDC->RestoreDC(nSavedDC);

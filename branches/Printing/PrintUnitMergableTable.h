@@ -27,15 +27,16 @@ namespace Printing
 
 		// not including column row
 		void SetRowNum(int nRowNum);
+		int GetRowNum() {return m_nRows; }
 
 		// set the column and the row height, they are in multiply of line-of-text
-		void SetColumnRowHeight(int heightInLineOfText);
+		void SetHeadingHeight(int heightInLineOfText);
 		// row == 0, means changing column height
-		void SetRowHeight(int nRow, int heightInLineOfText);
+		void SetCellHeight(int nRow, int heightInLineOfText);
 
 		// format related methods
-		BOOL SetColFormat( UINT nFormat );
-		virtual BOOL SetRowFormat(UINT nFormat);
+		BOOL SetHeadingFormat( UINT nFormat );
+		virtual BOOL SetAllRowFormat(UINT nFormat);
 		BOOL SetCellFormat(int row, int column, UINT nFormat);
 
 		// margin between header/footer and context
@@ -53,8 +54,11 @@ namespace Printing
 		// if nRowIndex is 0, indicate setting heading font
 		void SetAllRowsFont( int nPointSize, LPCTSTR lpszFaceName );
 		void SetRowFont(int nRowIndex, int nPointSize, LPCTSTR lpszFaceName);
-		void SetColFont(int nColIndex, int nPointSize, LPCTSTR lpszFaceName);
 		void SetCellFont(int nRowIndex, int nColIndex, int nPointSize, LPCTSTR lpszFaceName);
+		void SetHeadingFont( int nPointSize, LPCTSTR lpszFaceName );
+
+		// need to draw column?
+		void SetNeedDrawHeadings(bool bNeedDrawColumn){ m_bNeedToShowHeading = bNeedDrawColumn; }
 
 	public:
 		void SetPrintFont(CFont* font);
@@ -128,16 +132,19 @@ namespace Printing
 		bool m_bHasChangedRowOrColumns;
 
 		// store the special user-defined row height, including the column's row
-		map<int, int> m_rowHeight;
+		map<int, int> m_cellHeight;
 
 		// the top and bottom margin between headings and grid ctrl
 		int m_topMarginInLineOfText, m_bottomMarginInLineOfText;
 
 		// row, column and special cell's format
-		UINT m_rowFormat, m_colFormat;
+		UINT m_rowFormat, m_headingFormat;
 		map<tagCell, UINT, ltCell> m_cellFormat;
 
 		// switch to draw outer line
 		bool m_bDrawOuterLine;
+
+		// swith to show whether we need to show columns
+		bool m_bNeedToShowHeading;
 	};
 }

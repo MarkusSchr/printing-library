@@ -202,8 +202,8 @@ namespace Printing
 	// struct that indicates how the printing is ended
 	struct PntPrintEndResult
 	{
-		bool bEndOfPage; // print this page end for reach the bottom of the page
-		bool bEndOfTable;// print this page end for reach the last row of the table
+		bool bEndOfPage; // the printing process ends for reaching the bottom of the page
+		bool bEndOfTable;// the printing process ends for reaching the last row of the table
 		int pixelOfBottom; // the pixel of the bottom at the end of this round's printing 
 
 		PntPrintEndResult()
@@ -526,7 +526,7 @@ namespace Printing
 		int    GetItemImage(int nRow, int nCol) const;
 		BOOL   SetItemState(int nRow, int nCol, UINT state);
 		UINT   GetItemState(int nRow, int nCol) const;
-		BOOL   SetItemFormat(int nRow, int nCol, UINT nFormat);
+		BOOL   SetCellFormat(int nRow, int nCol, UINT nFormat);
 		UINT   GetItemFormat(int nRow, int nCol) const;
 		BOOL   SetItemBkColour(int nRow, int nCol, COLORREF cr = CLR_DEFAULT);
 		COLORREF GetItemBkColour(int nRow, int nCol) const;
@@ -873,6 +873,10 @@ namespace Printing
 		// lines.  Left, right, and gap are in characters (avg width is used).
 		int         m_nHeaderHeight, m_nFooterHeight, m_nLeftMargin,
 			m_nRightMargin, m_nTopMargin, m_nBottomMargin, m_nGap;
+
+		bool m_bNeedDrawHeading;
+	public:
+		void SetNeedDrawHeading(bool bNeedDraw) {m_bNeedDrawHeading = bNeedDraw; }
 
 	protected:
 		void SelectAllCells();
