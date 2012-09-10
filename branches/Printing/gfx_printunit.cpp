@@ -56,8 +56,7 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	m_bEnglish = false;
 
-	m_header = NULL;
-	m_footer = NULL;
+	m_header = m_footer = NULL;
 }
 
 
@@ -69,6 +68,9 @@ Printing::GPrintUnit::~GPrintUnit()
 	DELETE_IF_NOT_NULL(m_pUserFontFooter);
 	DELETE_IF_NOT_NULL(m_pUserFontPrinter);
 	DELETE_IF_NOT_NULL(m_pUserFontScreen);
+
+	DELETE_IF_NOT_NULL(m_header);
+	DELETE_IF_NOT_NULL(m_footer);
 }
 
 
@@ -127,7 +129,7 @@ void Printing::GPrintUnit::CreatePrintFonts()
 	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
 	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
 	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
-	m_fontFooter.CreatePointFont(90, _T("Garamond"), &JDC);//I18nOK
+	m_fontFooter.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK
 
 
 	if (m_pUserFontHeader)
@@ -941,10 +943,7 @@ void Printing::GPrintUnit::RealizeMetrics()
 
 void Printing::GPrintUnit::PrintHeader()
 {
-	if (m_header == NULL)
-	{
-		return;
-	}
+	if (m_header == NULL) {return ;}
 
 	PrintHeaderText();
 
@@ -957,45 +956,58 @@ void Printing::GPrintUnit::PrintHeader()
 
 void Printing::GPrintUnit::PrintFooter()
 {
-	//GSELECT_OBJECT(&JDC, &m_fontFooter);
+	if (m_footer == NULL) {return ;}
 
-	//wchar_t step[MAX_HEADER_COUNT] = {HFC_CENTER, HFC_RIGHTJUSTIFY, _T('')};
+	// draw the separate line
+	if (m_bNeedFooterSeperateLine)
+	{
+		DrawSeparetLine(FALSE);
+	}
 
-	//CString strFooter;
-	//// draw the separate line
-	//if (m_bNeedFooterSeperateLine)
-	//{
-	//	DrawSeparetLine(FALSE);
-	//}
-
-	////strFooter += HFC_NEWLINE;
-	//for (int i = 0; i < MAX_FOOTER_COUNT; i++)
-	//{
-	//	GetContentOnType(m_footer[i].type, m_footer[i].content.c_str(), strFooter);
-	//	strFooter += step[i];
-	//}
-
-	//PrintFooterText(strFooter);
+	PrintFooterText();
 }
 
 
 static BOOL g_StartEndRow = TRUE;
 
-void Printing::GPrintUnit::PrintFooterText(LPCTSTR lpszText)
+void Printing::GPrintUnit::PrintFooterText()
 {
-	PRINTTEXTLINE ptl;
-	GMakeStructFillZero(ptl);
-
-	ptl.lpszText = lpszText;
-	ptl.tmHeight = m_pum.pumFooterHeight;
-
-	ptl.rectText.left = JRECT.left;
-	ptl.rectText.right = JRECT.right;
-	ptl.rectText.top = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight;
-	ptl.rectText.bottom = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin;
+	// design the layout
+	CRect rect;
+	rect.left = JRECT.left;
+	rect.right = JRECT.right;
+	rect.top = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight;
+	rect.bottom = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin;
 
 	g_StartEndRow = FALSE;
-	PrintTextLine(&ptl);
+
+	// assure all the rows can be drawn in the header area
+	// get the height of the text line
+	int textLineHeight = 0;
+	{
+		TEXTMETRIC tm;
+		GSELECT_OBJECT(&JDC, &m_fontFooter);
+		JDC.GetTextMetrics(&tm);
+
+		textLineHeight = tm.tmHeight;
+	}
+
+	// associate the font
+	int nPointSize;
+	LPCTSTR name;
+	if (m_pUserFontFooter)
+	{
+		nPointSize = m_pUserFontFooter->nPointSize;
+		name = m_pUserFontFooter->name.c_str();
+	}
+	else
+	{
+		// use the default value in CreatePrintFonts()
+		nPointSize = 110;
+		name = _T("Garamond");
+	}
+
+	m_footer->Paint( &JINFO, nPointSize, name, &m_fontFooter, &JDC, 1, rect, NULL);
 }
 
 
@@ -1008,7 +1020,7 @@ void Printing::GPrintUnit::PrintHeaderText()
 	rect.right = JRECT.right;
 	rect.top = m_pum.pumHeaderMargin;
 	rect.bottom = m_pum.pumHeaderMargin + m_pum.pumHeaderHeight;
-	
+
 	g_StartEndRow = FALSE;
 
 	// assure all the rows can be drawn in the header area
@@ -1615,14 +1627,11 @@ bool Printing::GPrintUnit::NeedFooterLine( bool bNeedFooterLine /*= true*/ )
 	return bOld;
 }
 
-void Printing::GPrintUnit::SetHeader( CHeaderFooterTable *header )
+void Printing::GPrintUnit::SetHeader( CHeaderFooterTable& header )
 {
-	if (header == NULL)
-	{
-		return;
-	}
-
-	m_header = header;
+	DELETE_IF_NOT_NULL(m_header);
+	m_header = new CHeaderFooterTable(header.m_pJob);
+	*m_header = header;
 	
 	PRINTUNITMETRICS pm = this->GetMetrics();
 	pm.pumHeaderHeight = -(m_header->GetRowNum());
@@ -1631,9 +1640,15 @@ void Printing::GPrintUnit::SetHeader( CHeaderFooterTable *header )
 	SetNeedPreprocessSign(true);
 }
 
-void Printing::GPrintUnit::SetFooter( CHeaderFooterTable *footer )
+void Printing::GPrintUnit::SetFooter( CHeaderFooterTable& footer )
 {
-	m_footer = footer;
+	DELETE_IF_NOT_NULL(m_footer);
+	m_footer = new CHeaderFooterTable(footer.m_pJob);
+	*m_footer = footer;
+
+	PRINTUNITMETRICS pm = this->GetMetrics();
+	pm.pumFooterHeight = -(m_footer->GetRowNum());
+	this->SetMetrics(pm);
 
 	SetNeedPreprocessSign(true);
 }
