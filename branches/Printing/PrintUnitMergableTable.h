@@ -60,6 +60,10 @@ namespace Printing
 		// need to draw column?
 		void SetNeedDrawHeadings(bool bNeedDrawColumn){ m_bNeedToShowHeading = bNeedDrawColumn; }
 
+		// set image in the cell
+		void SetImageSize(int height, int width); 
+		void SetCellImage(int row, int column, int nImageID);
+
 	public:
 		void SetPrintFont(CFont* font);
 		int BeginPrinting(CDC* pDc, CPrintInfo* info, CRect rect);
@@ -78,6 +82,7 @@ namespace Printing
 		void SetGridCellContents();
 		void MergeGridCells();
 		void SetOuterLine();
+		void SetImage();
 
 
 	protected:
@@ -146,5 +151,18 @@ namespace Printing
 
 		// swith to show whether we need to show columns
 		bool m_bNeedToShowHeading;
+
+		struct ImageItem
+		{
+			int row;
+			int column;
+			int imageIndex;
+		};
+		vector<ImageItem> m_imageIndexLists;
+
+		// the variable to contain the image list
+		CImageList m_ImageList;
+		int m_imageHeight, m_imageWidth; // the size of the image, which will be used to print the cell, attention that
+										 // the printer will only print out the size we have specified here
 	};
 }

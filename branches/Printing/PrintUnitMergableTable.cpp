@@ -1,7 +1,10 @@
 #include "StdAfx.h"
 #include "PrintUnitMergableTable.h"
+#include <set>
 #include <algorithm>
 #include "MemDCForPrint.h"
+
+using namespace std;
 
 Printing::CPrintUnitMergableTable::CPrintUnitMergableTable( GPrintJob *pJob /*= NULL*/ )
 	:CPrintUnitStandardTable(pJob)
@@ -112,6 +115,7 @@ void Printing::CPrintUnitMergableTable::CompleteAllColHeadingsDefinition()
 		
 		SetOuterLine();
 
+		SetImage();
 	}
 
 	// for this method will be called every time we've prepared the DC, following with the 
@@ -258,7 +262,6 @@ void Printing::CPrintUnitMergableTable::SetRowFont( int nRowIndex, int nPointSiz
 {
 	for (int i = 0; i < m_nColumns; i++)
 	{
-		// TODO: by aicro "+ 1"
 		SetCellFont(nRowIndex + 1, i, nPointSize, lpszFaceName);
 	}
 }
@@ -356,7 +359,7 @@ int Printing::CPrintUnitMergableTable::BeginPrinting( CDC* pDc, CPrintInfo* info
 
 void CPrintUnitMergableTable::Paint( CDC* pDc, int page, CRect rect, PntPrintEndResult *result )
 {
-		m_pGridCtrl->OnPrint(pDc, page, rect, result);
+	m_pGridCtrl->OnPrint(pDc, page, rect, result);
 }
 
 int Printing::CPrintUnitMergableTable::PrintTitleAndMoveCursor( BOOL bNeedPrintContinue )
@@ -370,6 +373,40 @@ void Printing::CPrintUnitMergableTable::SetHeadingFont( int nPointSize, LPCTSTR 
 	{
 		SetCellFont(0, i, nPointSize, lpszFaceName);
 	}
+}
+
+void Printing::CPrintUnitMergableTable::SetCellImage( int row, int column, int nImageID )
+{
+	ImageItem item;
+	item.row = row;
+	item.column = column;
+	item.imageIndex = nImageID;
+	m_imageIndexLists.push_back(item);
+}
+
+void Printing::CPrintUnitMergableTable::SetImage()
+{
+	m_ImageList.Create(m_imageWidth, m_imageHeight, ILC_COLORDDB, 0, 1);
+	for (int i = 0; i < m_imageIndexLists.size(); i++)
+	{
+		CBitmap bm;
+		int j = m_imageIndexLists[i].imageIndex;
+		bm.LoadBitmap(m_imageIndexLists[i].imageIndex);
+		m_ImageList.Add(&bm, RGB(0,0,0));
+	}
+	m_pGridCtrl->SetImageList(&m_ImageList);
+
+	// set image item
+	for (int i = 0; i < m_imageIndexLists.size(); i++)
+	{
+		m_pGridCtrl->SetItemImage(m_imageIndexLists[i].row, m_imageIndexLists[i].column, i);
+	}
+}
+
+void Printing::CPrintUnitMergableTable::SetImageSize( int height, int width )
+{
+	m_imageHeight = height; 
+	m_imageWidth = width;
 }
 
 

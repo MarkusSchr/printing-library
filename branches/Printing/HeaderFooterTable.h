@@ -67,8 +67,19 @@ namespace Printing
 				SetRowUnitFont(temp.row, temp.column, temp.nPoint, temp.fontName.c_str());
 			}
 
+			// set cell image
+			m_cellImage.clear();
+			m_cellImage.resize(0);
+			for (int i = 0; i < other.m_cellImage.size(); i++)
+			{
+				CellImage temp(other.m_cellImage[i]);
+				SetRowUnitImage(temp.row, temp.column, temp.imageID);
+			}
+
 			// set draw line or not
 			NeedOuterLine(other.m_bNeedOuterLine);
+
+			SetImageSize(other.m_imageHeight, other.m_imageWidth);
 
 			return *this;
 		}
@@ -161,6 +172,28 @@ namespace Printing
 			m_pTable->NeedDrawTableOuterline(bNeed);
 		}
 
+		void SetRowUnitImage(int row, int column, int nImageID)
+		{
+			ASSERT(m_columnNum != 0 && m_rowNum != 0);
+			ASSERT(m_imageHeight != 0 && m_imageWidth != 0);
+
+			CellImage cellImage;
+			cellImage.row = row;
+			cellImage.column = column;
+			cellImage.imageID = nImageID;
+			m_cellImage.push_back(cellImage);
+
+			m_pTable->SetCellImage(row + 1, column, nImageID);
+		}
+
+		void SetImageSize(int height, int width)
+		{
+			m_imageHeight = height;
+			m_imageWidth = width;
+
+			m_pTable->SetImageSize(height, width);
+		}
+
 	private:
 		friend class GPrintUnit;
 
@@ -246,6 +279,16 @@ namespace Printing
 		};
 		vector<CellFont> m_cellFont;
 
+		struct CellImage
+		{
+			int row;
+			int column;
+			int imageID;
+		};
+		vector<CellImage> m_cellImage;
+
 		GPrintJob * m_pJob;
+
+		int m_imageHeight, m_imageWidth;
 	};
 }
