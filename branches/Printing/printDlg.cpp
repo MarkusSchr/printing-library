@@ -345,6 +345,8 @@ void CPrintDlg::OnOK()
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
+	LPCTSTR picturePath = L"d:\\1.jpg";
+	
 	GPrintJob job;
 	
 	CHeaderFooterTable header(&job);
@@ -385,16 +387,19 @@ void CPrintDlg::OnOK()
 		footer.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 		footer.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 	}
-	footer.SetRowUnitText(0,0,L"a:");
+	footer.MergeRows(0,0,1,1);
+	
 	footer.SetRowUnitText(0,1,L"H 你好世界！123 :");
 	footer.SetRowUnitText(0,2,L"dizheng");
-	footer.SetRowUnitText(1,0,L"N2 :");
-	footer.SetRowUnitText(1,1,L"1asdfdasf");
+	
+
 	footer.SetRowUnitText(1,2,L"121211asdfdasf");
 	footer.SetRowUnitText(2,0,L"No 3 123:");
 	footer.SetRowUnitText(2,1,L"No 3 :");
 	footer.SetRowUnitText(2,2,L"Hello world 123 :");
-
+	
+	footer.SetImageSize(32, 32);
+	footer.SetRowUnitImage(0,0,IDB_BITMAP1);
 	footer.NeedOuterLine(false);
 	
 
@@ -457,7 +462,7 @@ void CPrintDlg::OnOK()
 	// set data
 	CBitmap bmp;
 	CSize mSize;
-	LoadPictureFile(L"d:\\1.jpg", &bmp, mSize);
+	LoadPictureFile(picturePath, &bmp, mSize);
 
 	//
 	vector<vector<CBitmap* > > vecBmp;
@@ -527,7 +532,7 @@ void CPrintDlg::OnOK()
 	mergeUnit.SetAllRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
 	mergeUnit.SetAllRowsFont(40, L"宋体");
 	mergeUnit.SetRowFont(0, 10, L"黑体");
-	mergeUnit.SetRowFont(2, 20, L"黑体");
+	mergeUnit.SetRowFont(2, 90, L"黑体");
 	mergeUnit.SetHeadingFont(90, L"楷体");
 	mergeUnit.SetCellFont(1, 0, 10, L"黑体");
 	mergeUnit.NeedDrawTableOuterline(true);
@@ -669,11 +674,11 @@ void CPrintDlg::OnOK()
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.InsertTask(&unitTable1);
-	job.InsertTask(&unitTable2);
-	job.InsertTask(&unitBitmapTable);
-	job.InsertTask(&userDefinedUnit);
-	job.InsertTask(&mergeUnit);
-	job.InsertTask(&multiTableUnit);
+//	job.InsertTask(&unitTable2);
+//	job.InsertTask(&unitBitmapTable);
+//	job.InsertTask(&userDefinedUnit);
+//	job.InsertTask(&mergeUnit);
+//	job.InsertTask(&multiTableUnit);
 
 	job.PrintFollowingPrintDialog();
 }

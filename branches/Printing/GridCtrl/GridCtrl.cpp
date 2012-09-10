@@ -7244,16 +7244,16 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 				if (pCell 
 					&& minRow >= beginPrintRow && minRow < m_nCurrPrintRow)
 				{
-					if (minCol == 0)
-					{
-						rcMergeRect.left++;
-					}
-					if (minRow == beginPrintRow)
-					{
-						rcMergeRect.top++;
-					}
-					rcMergeRect.right--;
-					rcMergeRect.bottom--;
+					//if (minCol == 0)
+					//{
+					//	rcMergeRect.left++;
+					//}
+					//if (minRow == beginPrintRow)
+					//{
+					//	rcMergeRect.top++;
+					//}
+					//rcMergeRect.right--;
+					//rcMergeRect.bottom--;
 					if (pCell)
 					{
 						pCell->Draw(pDC, minRow, minCol, rcMergeRect, TRUE);
