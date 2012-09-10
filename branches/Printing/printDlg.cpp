@@ -358,23 +358,46 @@ void CPrintDlg::OnOK()
 		header.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 		header.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 	}
-	header.SetRowUnitText(0,0,L"abc第一行:");
-	header.SetRowUnitText(0,2,L"Hello world 你好世界！123 :");
-	header.SetRowUnitText(1,0,L"No 2 :");
-	header.SetRowUnitText(1,2,L"123 :");
-	header.SetRowUnitText(2,0,L"No 3 :");
+	header.SetRowUnitText(0,0,L"a:");
+	header.SetRowUnitText(0,1,L"H 你好世界！123 :");
+	header.SetRowUnitText(0,2,L"dizheng");
+	header.SetRowUnitText(1,0,L"N2 :");
+	header.SetRowUnitText(1,1,L"1asdfdasf");
+	header.SetRowUnitText(1,2,L"121211asdfdasf");
+	header.SetRowUnitText(2,0,L"No 3 123:");
+	header.SetRowUnitText(2,1,L"No 3 :");
 	header.SetRowUnitText(2,2,L"Hello world 123 :");
+	header.SetRowUnitText(2,3,L"Hello world 123 :");
+	header.SetRowUnitText(2,4,L"Hello world 123 :");
 
-	header.SetRowUnitFont(0,0,60,L"黑体");
+	header.SetRowUnitFont(0,0,20,L"黑体");
 	header.SetRowUnitFont(0,2,20,L"楷体");
-	header.SetRowUnitFont(1,0,100,L"楷体");
-	header.SetRowUnitFont(1,2,100,L"楷体");
-
-	//header.NeedOuterLine(false);
+	header.SetRowUnitFont(1,0,20,L"楷体");
+	header.SetRowUnitFont(1,2,20,L"楷体");
+	header.NeedOuterLine(false);
 
 	// TODO : To add footer
 	CHeaderFooterTable footer(&job);
+	footer.SetRowColumnNum(3, 3);
+
+	for (int i = 0; i < 3; i++)
+	{
+		footer.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+		footer.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+	}
+	footer.SetRowUnitText(0,0,L"a:");
+	footer.SetRowUnitText(0,1,L"H 你好世界！123 :");
+	footer.SetRowUnitText(0,2,L"dizheng");
+	footer.SetRowUnitText(1,0,L"N2 :");
+	footer.SetRowUnitText(1,1,L"1asdfdasf");
+	footer.SetRowUnitText(1,2,L"121211asdfdasf");
+	footer.SetRowUnitText(2,0,L"No 3 123:");
+	footer.SetRowUnitText(2,1,L"No 3 :");
+	footer.SetRowUnitText(2,2,L"Hello world 123 :");
+
+	footer.NeedOuterLine(false);
 	
+
 	CDataTableUnit unitTable1;
 	unitTable1.DefineColumns(vecColumnDef);
 	unitTable1.SetPrintData(&vecParts);
@@ -388,14 +411,13 @@ void CPrintDlg::OnOK()
 
 	// create a font that is 90“宋体”for heading
 	unitTable1.SetHeaderFont(100, L"宋体");
-	unitTable1.SetFooterFont(70, L"黑体");
+	unitTable1.SetFooterFont(100, L"黑体");
 	unitTable1.SetBodyPrinterFont(90, L"楷体");
 
 	// draw header
-	unitTable1.SetHeader(&header);
-
+	unitTable1.SetHeader(header);
 	// draw footer
-	//unitTable1.SetFooter(&footer);
+	unitTable1.SetFooter(footer);
 
 	unitTable1.SetSeparateLineInterval(10);
 	unitTable1.SetSeparateLineWidth(3);
@@ -409,7 +431,7 @@ void CPrintDlg::OnOK()
 	unitTable2.SetTitle(L"数据2");
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
-	//unitTable2.SetHeader(footer, 3);
+	unitTable2.SetHeader(header);
 	unitTable2.SetAllRowsHeightInTextLine(1);
 	
 
@@ -428,16 +450,14 @@ void CPrintDlg::OnOK()
 	// add the margin around the title
 	unitBitmapTable.SetTitleMargin(2);
 	unitBitmapTable.SetTitlePen(140, L"楷体");
+	unitBitmapTable.SetHeader(header);
+	unitBitmapTable.SetFooter(footer);
 	unitBitmapTable.NeedPrintTitleExcpetFirstPage(true);
-
-	// ability inherited from the base class
-	//unitBitmapTable.SetHeader(&header);
-	//unitBitmapTable.SetFooter(footer, 3);
 
 	// set data
 	CBitmap bmp;
 	CSize mSize;
-	LoadPictureFile(L"C:\\Users\\aico\\Desktop\\1.jpg", &bmp, mSize);
+	LoadPictureFile(L"d:\\1.jpg", &bmp, mSize);
 
 	//
 	vector<vector<CBitmap* > > vecBmp;
@@ -463,9 +483,6 @@ void CPrintDlg::OnOK()
 
 	//////////// test 3 : self-define page ////////////////////////////
 	CPrintUnitFromDC userDefinedUnit;
-//	userDefinedUnit.SetFooter(footer, 3);
-//	userDefinedUnit.SetHeader(&header);
-	
 
 	//////////// test 5 : informal table ////////////////////////////
 	
@@ -500,8 +517,8 @@ void CPrintDlg::OnOK()
 	mergeUnit.SetCellText(6,8, L"abcde!!!");
 	mergeUnit.SetCellText(rowNum - 1, 3, L"asdffdsa");
 	mergeUnit.SetCellText(24, 3, L"画皮2");
-//	mergeUnit.SetHeader(&header);
-//	mergeUnit.SetFooter(footer, 3);
+	mergeUnit.SetHeader(header);
+	mergeUnit.SetFooter(footer);
 	// set the margin between header and main context by 4 * heightOfLineText
 	mergeUnit.SetTopMarginInLineOfText(2);
 	
@@ -512,7 +529,7 @@ void CPrintDlg::OnOK()
 	mergeUnit.SetRowFont(0, 10, L"黑体");
 	mergeUnit.SetRowFont(2, 20, L"黑体");
 	mergeUnit.SetHeadingFont(90, L"楷体");
-//	mergeUnit.SetCellFont(1, 0, 10, L"黑体");
+	mergeUnit.SetCellFont(1, 0, 10, L"黑体");
 	mergeUnit.NeedDrawTableOuterline(true);
 
 	// set title
@@ -644,16 +661,17 @@ void CPrintDlg::OnOK()
 	multiTableUnit.SetIntervalBetweenFirstTableInLineOfText(1);
 	multiTableUnit.SetTableIntervalInLineOfText(2);
 	multiTableUnit.NeedPrintTitleExcpetFirstPage(true);
-	multiTableUnit.SetHeader(&header2);
+	multiTableUnit.SetHeader(header);
+	multiTableUnit.SetFooter(footer);
 
 	
 	//////////// test 5 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.InsertTask(&unitTable1);
-//	job.InsertTask(&unitTable2);
-//	job.InsertTask(&unitBitmapTable);
-//	job.InsertTask(&userDefinedUnit);
+	job.InsertTask(&unitTable2);
+	job.InsertTask(&unitBitmapTable);
+	job.InsertTask(&userDefinedUnit);
 	job.InsertTask(&mergeUnit);
 	job.InsertTask(&multiTableUnit);
 

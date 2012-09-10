@@ -9,14 +9,68 @@ namespace Printing
 	public:
 		CHeaderFooterTable(GPrintJob *job)
 		{
+			m_pJob = job;
 			m_pTable = new CPrintUnitMergableTable(job);
 			m_pTable->SetNeedDrawHeadings(false);
 			m_columnNum = 0;
+			m_rowNum = 0;
 		}
 
 		~CHeaderFooterTable()
 		{
 			DELETE_IF_NOT_NULL(m_pTable)
+		}
+
+		CHeaderFooterTable& operator=(CHeaderFooterTable &other)
+		{
+			if (&other == this)
+			{
+				return *this;
+			}
+
+			// set row column
+			SetRowColumnNum(other.m_rowNum, other.m_columnNum);
+			
+			// set cell merging
+			m_vecMergedCells.clear();
+			m_vecMergedCells.resize(0);
+			for (int i = 0; i < other.m_vecMergedCells.size(); i++)
+			{
+				MergedCell temp(other.m_vecMergedCells[i]);
+				MergeRows(temp.minRow, temp.minColumn, temp.maxRow, temp.maxColumn);
+			}
+
+			// set cell text
+			m_cellTexts.clear();
+			m_cellTexts.resize(0);
+			for (int i = 0; i < other.m_cellTexts.size(); i++)
+			{
+				CellText temp(other.m_cellTexts[i]);
+				SetRowUnitText(temp.row, temp.column, temp.text.c_str());
+			}
+
+			// set cell format
+			m_cellFormat.clear();
+			m_cellFormat.resize(0);
+			for (int i = 0; i < other.m_cellFormat.size(); i++)
+			{
+				CellFormat temp(other.m_cellFormat[i]);
+				SetRowUnitFormat(temp.row, temp.column, temp.format);
+			}
+
+			// set cell font
+			m_cellFont.clear();
+			m_cellFont.resize(0);
+			for (int i = 0; i < other.m_cellFont.size(); i++)
+			{
+				CellFont temp(other.m_cellFont[i]);
+				SetRowUnitFont(temp.row, temp.column, temp.nPoint, temp.fontName.c_str());
+			}
+
+			// set draw line or not
+			NeedOuterLine(other.m_bNeedOuterLine);
+
+			return *this;
 		}
 
 		void SetRowColumnNum(int rowNum, int columnNum)
@@ -35,7 +89,7 @@ namespace Printing
 			{
 				COLUMNDEFINITIONS cd;
 				cd.strName = L"never used";
-				cd.fPct = 0.2;
+				cd.fPct = (double)((double)1 / (double)columnNum);
 				m_vecColumns.push_back(cd);
 			}
 			m_pTable->DefineColumns(m_vecColumns);
@@ -44,6 +98,13 @@ namespace Printing
 		void MergeRows(int minRow, int minColumn, int maxRow, int maxColumn)
 		{
 			ASSERT(m_columnNum != 0 && m_rowNum != 0);
+
+			MergedCell mergedCell;
+			mergedCell.minRow = minRow;
+			mergedCell.minColumn = minColumn;
+			mergedCell.maxRow = maxRow;
+			mergedCell.maxColumn = maxColumn;
+			m_vecMergedCells.push_back(mergedCell);
 
 			// the GridCtrl regards the first row of the table as the heading
 			// so the first row of this table is the second row of GridCtrl
@@ -54,6 +115,12 @@ namespace Printing
 		{
 			ASSERT(m_columnNum != 0 && m_rowNum != 0);
 
+			CellText celltext;
+			celltext.row = row;
+			celltext.column = column;
+			celltext.text = text;
+			m_cellTexts.push_back(celltext);
+
 			// deal with the columns specially
 			// the cell no. 1 is row no.0
 			m_pTable->SetCellText(row + 1, column, text);
@@ -63,6 +130,12 @@ namespace Printing
 		{
 			ASSERT(m_columnNum != 0 && m_rowNum != 0);
 
+			CellFormat cellformat;
+			cellformat.row = row;
+			cellformat.column = column;
+			cellformat.format = format;
+			m_cellFormat.push_back(cellformat);
+
 			// deal with the columns specially
 			// the cell no. 1 is row no.0
 			m_pTable->SetCellFormat(row + 1, column, format);
@@ -71,11 +144,20 @@ namespace Printing
 		void SetRowUnitFont(int row, int column, int nPoint, LPCTSTR fontName)
 		{
 			ASSERT(m_columnNum != 0 && m_rowNum != 0);
+
+			CellFont cellfont;
+			cellfont.row = row;
+			cellfont.column = column;
+			cellfont.nPoint = nPoint;
+			cellfont.fontName = fontName;
+			m_cellFont.push_back(cellfont);
+
 			m_pTable->SetCellFont(row + 1, column, nPoint, fontName);
 		}
 
 		void NeedOuterLine(bool bNeed)
 		{
+			m_bNeedOuterLine = bNeed;
 			m_pTable->NeedDrawTableOuterline(bNeed);
 		}
 
@@ -127,5 +209,43 @@ namespace Printing
 
 		int m_columnNum;
 		int m_rowNum;
+
+		bool m_bNeedOuterLine;
+		
+		struct MergedCell
+		{
+			int minRow;
+			int minColumn;
+			int maxRow;
+			int maxColumn;
+		};
+		vector<MergedCell> m_vecMergedCells;
+
+		struct CellText
+		{
+			int row;
+			int column;
+			wstring text;
+		};
+		vector<CellText> m_cellTexts;
+
+		struct CellFormat
+		{
+			int row;
+			int column;
+			int format;
+		};
+		vector<CellFormat> m_cellFormat;
+
+		struct CellFont
+		{
+			int row;
+			int column;
+			int nPoint;
+			wstring fontName; 
+		};
+		vector<CellFont> m_cellFont;
+
+		GPrintJob * m_pJob;
 	};
 }

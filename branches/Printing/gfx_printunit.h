@@ -375,8 +375,8 @@ namespace Printing
 		// header and footer related methods
 		// the sequence in the array is important, which means the "left", "center" and "right" in sequence
 		// if not necessary, just leave the corresponding item with "type = EMPTY;"
-		void SetHeader(CHeaderFooterTable *header);
-		void SetFooter(CHeaderFooterTable *footer);
+		void SetHeader(CHeaderFooterTable& header);
+		void SetFooter(CHeaderFooterTable& footer);
 		// return the old value
 		bool NeedHeaderLine(bool bNeedHeaderLine = true);
 		bool NeedFooterLine(bool bNeedFooterLine = true);
@@ -486,7 +486,7 @@ namespace Printing
 
 		void SetActiveHeading(int nHeading);
 
-		void PrintFooterText(LPCTSTR lpszText);
+		void PrintFooterText();
 		void PrintHeaderText();
 		// return the height of the text
 		int PrintTextLine(LPCTSTR lpszText, UINT nFormat=0, int tmHeight=0, bool bDrawOuterline = false);
