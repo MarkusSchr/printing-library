@@ -430,6 +430,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HeaderFooterTable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IPrintable.h"
 				>
 			</File>
@@ -510,6 +514,10 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
+			<File
+				RelativePath=".\res\bitmap1.bmp"
+				>
+			</File>
 			<File
 				RelativePath="res\print.ico"
 				>
