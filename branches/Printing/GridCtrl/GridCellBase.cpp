@@ -686,9 +686,23 @@ BOOL Printing::CPntGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/,
         crFG = RGB(0, 0, 0);
     }
 
+	COLORREF TextBkClr;
+	if (GetBackClr() == CLR_DEFAULT)
+	{
+		TextBkClr = ((CPntGridDefaultCell*) GetDefaultCell())->GetBackClr();
+	}
+	else
+	{
+		TextBkClr = GetBackClr();
+	}
+	rect.top++;rect.right++; rect.bottom++;    // FillRect doesn't draw RHS or bottom
+	CBrush brush(TextBkClr);
+	pDC->FillRect(rect, &brush);
+	rect.top--;rect.right--; rect.bottom--;
+
     pDC->SetTextColor(crFG);
 
-    CFont *pFont = GetFontObject();
+    CFont *pFont = GetFontObject(pDC);
     if (pFont)
         pDC->SelectObject(pFont);
 
@@ -763,7 +777,7 @@ BOOL Printing::CPntGridCellBase::PrintCell(CDC* pDC, int /*nRow*/, int /*nCol*/,
 	// DT_NOCLIP removed 01.01.01. Slower, but who cares - we are printing!
     LPCTSTR text = GetText();
 	DrawText(pDC->m_hDC, GetText(), -1, rect,
-        GetFormat() | /*DT_NOCLIP | */ DT_NOPREFIX);
+        GetFormat() | /*DT_NOCLIP | */DT_NOPREFIX);
 
     pDC->RestoreDC(nSavedDC);
 

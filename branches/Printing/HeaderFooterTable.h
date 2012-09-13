@@ -93,6 +93,7 @@ namespace Printing
 			// set row
 			m_rowNum = rowNum;
 			m_pTable->SetRowNum(m_rowNum); // the first row is the one showing the heading
+			SetAllRowsFont(DEFAULT_FONT_HEIGHT, DEFAULT_FONT_NAME);
 
 			// set column
 			m_columnNum = columnNum;

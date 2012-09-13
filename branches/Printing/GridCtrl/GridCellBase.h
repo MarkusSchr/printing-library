@@ -109,7 +109,7 @@ namespace Printing
 		virtual COLORREF   GetTextClr()    const                = 0 ;
 		virtual COLORREF   GetBackClr()    const                = 0 ;
 		virtual LOGFONT  * GetFont()       const                = 0 ;
-		virtual CFont    * GetFontObject() const                = 0 ;
+		virtual CFont * GetFontObject(CDC* pDC = NULL) const = 0 ;
 		virtual CPntGridCtrl* GetGrid()       const                = 0 ;
 		virtual CWnd     * GetEditWnd()    const                = 0 ;
 		virtual UINT       GetMargin()     const                = 0 ;

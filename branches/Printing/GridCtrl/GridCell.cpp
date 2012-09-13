@@ -31,6 +31,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "..\\Definitions.h"
 #include "GridCell.h"
 #include "InPlaceEdit.h"
 #include "GridCtrl.h"
@@ -115,7 +116,7 @@ LOGFONT* Printing::CPntGridCell::GetFont() const
     return m_plfFont; 
 }
 
-CFont* Printing::CPntGridCell::GetFontObject() const
+CFont* Printing::CPntGridCell::GetFontObject( CDC* pDC /*= NULL*/ ) const
 {
     // If the default font is specified, use the default cell implementation
     if (m_plfFont == NULL)
@@ -130,7 +131,7 @@ CFont* Printing::CPntGridCell::GetFontObject() const
     {
         static CFont Font;
         Font.DeleteObject();
-        Font.CreateFontIndirect(m_plfFont);
+		Font.CreatePointFont(m_plfFont->lfHeight, m_plfFont->lfFaceName, pDC);
         return &Font;
     }
 }
@@ -205,8 +206,10 @@ void Printing::CPntGridCell::OnEndEdit()
 /////////////////////////////////////////////////////////////////////////////
 // CGridDefaultCell
 
-Printing::CPntGridDefaultCell::CPntGridDefaultCell() 
+Printing::CPntGridDefaultCell::CPntGridDefaultCell(CDC* pDC) 
 {
+	m_pDC = pDC;
+
 #ifdef _WIN32_WCE
     m_nFormat = DT_LEFT|DT_VCENTER|DT_SINGLELINE|DT_NOPREFIX;
 #else
@@ -217,16 +220,16 @@ Printing::CPntGridDefaultCell::CPntGridDefaultCell()
     m_Size    = CSize(30,10);
     m_dwStyle = 0;
 
-#ifdef _WIN32_WCE
-    LOGFONT lf;
-    GetObject(GetStockObject(SYSTEM_FONT), sizeof(LOGFONT), &lf);
-    SetFont(&lf);
-#else // not CE
-    NONCLIENTMETRICS ncm;
-    ncm.cbSize = sizeof(NONCLIENTMETRICS);
-    VERIFY(SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0));
-    SetFont(&(ncm.lfMessageFont));
-#endif
+	LOGFONT logFont;
+	memset(&logFont, 0, sizeof(LOGFONT));
+
+	LPCTSTR lpszFaceName = DEFAULT_FONT_NAME;
+	logFont.lfCharSet = DEFAULT_CHARSET;
+	logFont.lfHeight = DEFAULT_FONT_HEIGHT;
+	lstrcpyn(logFont.lfFaceName, lpszFaceName, sizeof(logFont.lfFaceName)/sizeof(logFont.lfFaceName[0]) );
+	logFont.lfWeight = FW_BOLD;
+	
+    SetFont(&logFont);
 }
 
 Printing::CPntGridDefaultCell::~CPntGridDefaultCell()
@@ -234,19 +237,14 @@ Printing::CPntGridDefaultCell::~CPntGridDefaultCell()
     m_Font.DeleteObject(); 
 }
 
-void Printing::CPntGridDefaultCell::SetFont(const LOGFONT* plf)
+void Printing::CPntGridDefaultCell::SetFont( const LOGFONT* plf )
 {
     ASSERT(plf);
 
     if (!plf) return;
 
-    m_Font.DeleteObject();
-    m_Font.CreateFontIndirect(plf);
-
-    Printing::CPntGridCell::SetFont(plf);
-
     // Get the font size and hence the default cell size
-    CDC* pDC = CDC::FromHandle(::GetDC(NULL));
+    CDC* pDC = m_pDC;
     if (pDC)
     {
         CFont* pOldFont = pDC->SelectObject(&m_Font);
@@ -256,13 +254,18 @@ void Printing::CPntGridDefaultCell::SetFont(const LOGFONT* plf)
         m_Size.cy = (m_Size.cy * 3) / 2;
 
         pDC->SelectObject(pOldFont);
-        ReleaseDC(NULL, pDC->GetSafeHdc());
     }
     else
     {
         SetMargin(3);
         m_Size = CSize(40,16);
     }
+
+	m_Font.DeleteObject();
+	m_Font.CreatePointFont(plf->lfHeight, plf->lfFaceName, pDC);
+
+	Printing::CPntGridCell::SetFont(plf);
+
 }
 
 LOGFONT* Printing::CPntGridDefaultCell::GetFont() const
