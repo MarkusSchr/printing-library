@@ -222,7 +222,7 @@ namespace Printing
 
 		// Construction
 	public:
-		CPntGridCtrl(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0);
+		CPntGridCtrl(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0, CDC * pDC = NULL);
 
 		BOOL Create(const RECT& rect, CWnd* parent, UINT nID,
 			DWORD dwStyle = WS_CHILD | WS_BORDER | WS_TABSTOP | WS_VISIBLE);
@@ -386,10 +386,10 @@ namespace Printing
 
 		// ***************************************************************************** //
 		// These have been deprecated. Use GetDefaultCell and then set the colors
-		void     SetTextColor(COLORREF clr)      { m_cellDefault.SetTextClr(clr);        }
-		COLORREF GetTextColor()                  { return m_cellDefault.GetTextClr();    }
-		void     SetTextBkColor(COLORREF clr)    { m_cellDefault.SetBackClr(clr);        }
-		COLORREF GetTextBkColor()                { return m_cellDefault.GetBackClr();    }
+		void     SetTextColor(COLORREF clr)      { m_pCellDefault->SetTextClr(clr);        }
+		COLORREF GetTextColor()                  { return m_pCellDefault->GetTextClr();    }
+		void     SetTextBkColor(COLORREF clr)    { m_pCellDefault->SetBackClr(clr);        }
+		COLORREF GetTextBkColor()                { return m_pCellDefault->GetBackClr();    }
 		void     SetFixedTextColor(COLORREF clr) { m_cellFixedRowDef.SetTextClr(clr); 
 		m_cellFixedColDef.SetTextClr(clr); 
 		m_cellFixedRowColDef.SetTextClr(clr); }
@@ -403,19 +403,19 @@ namespace Printing
 		void     SetBkColor(COLORREF clr)        { SetGridBkColor(clr);                  }
 		COLORREF GetBkColor()                    { return GetGridBkColor();              }
 
-		void     SetDefCellMargin( int nMargin)  { m_cellDefault.SetMargin(nMargin); 
+		void     SetDefCellMargin( int nMargin)  { m_pCellDefault->SetMargin(nMargin); 
 		m_cellFixedRowDef.SetMargin(nMargin); 
 		m_cellFixedColDef.SetMargin(nMargin); 
 		m_cellFixedRowColDef.SetMargin(nMargin); }
-		int      GetDefCellMargin() const        { return m_cellDefault.GetMargin();     }
+		int      GetDefCellMargin() const        { return m_pCellDefault->GetMargin();     }
 
-		int      GetDefCellHeight() const        { return m_cellDefault.GetHeight();     }
-		void     SetDefCellHeight(int nHeight)   { m_cellDefault.SetHeight(nHeight); 
+		int      GetDefCellHeight() const        { return m_pCellDefault->GetHeight();     }
+		void     SetDefCellHeight(int nHeight)   { m_pCellDefault->SetHeight(nHeight); 
 		m_cellFixedRowDef.SetHeight(nHeight); 
 		m_cellFixedColDef.SetHeight(nHeight); 
 		m_cellFixedRowColDef.SetHeight(nHeight); }
-		int      GetDefCellWidth() const         { return m_cellDefault.GetWidth();     }
-		void     SetDefCellWidth(int nWidth)     { m_cellDefault.SetWidth(nWidth); 
+		int      GetDefCellWidth() const         { return m_pCellDefault->GetWidth();     }
+		void     SetDefCellWidth(int nWidth)     { m_pCellDefault->SetWidth(nWidth); 
 		m_cellFixedRowDef.SetWidth(nWidth); 
 		m_cellFixedColDef.SetWidth(nWidth); 
 		m_cellFixedRowColDef.SetWidth(nWidth); }
@@ -649,9 +649,6 @@ namespace Printing
 #if !defined(_WIN32_WCE_NO_PRINTING) && !defined(GRIDCONTROL_NO_PRINTING)
 	public:
 		// EFW - New printing support functions
-		void EnableWysiwygPrinting(BOOL bEnable = TRUE) { m_bWysiwygPrinting = bEnable;     }
-		BOOL GetWysiwygPrinting()                       { return m_bWysiwygPrinting;        }
-
 		void SetShadedPrintOut(BOOL bEnable = TRUE)     {   m_bShadedPrintOut = bEnable;    }
 		BOOL GetShadedPrintOut(void)                    {   return m_bShadedPrintOut;       }
 
@@ -817,7 +814,7 @@ namespace Printing
 
 		// Fonts and images
 		CRuntimeClass*   m_pRtcDefault; // determines kind of Grid Cell created by default
-		CPntGridDefaultCell m_cellDefault;  // "default" cell. Contains default colours, font etc.
+		CPntGridDefaultCell *m_pCellDefault;  // "default" cell. Contains default colours, font etc.
 		CPntGridDefaultCell m_cellFixedColDef, m_cellFixedRowDef, m_cellFixedRowColDef;
 		CFont*       m_pPrinterFont;  // for the printer
 		CImageList* m_pImageList;
@@ -875,6 +872,7 @@ namespace Printing
 			m_nRightMargin, m_nTopMargin, m_nBottomMargin, m_nGap;
 
 		bool m_bNeedDrawHeading;
+		CDC * m_pDC;
 	public:
 		void SetNeedDrawHeading(bool bNeedDraw) {m_bNeedDrawHeading = bNeedDraw; }
 
@@ -977,7 +975,7 @@ namespace Printing
 		if (bFixedRow && bFixedCol) return (CPntGridCellBase*) &m_cellFixedRowColDef;
 		if (bFixedRow)              return (CPntGridCellBase*) &m_cellFixedRowDef;
 		if (bFixedCol)              return (CPntGridCellBase*) &m_cellFixedColDef;
-		return (CPntGridCellBase*) &m_cellDefault;
+		return (CPntGridCellBase*) m_pCellDefault;
 	}
 
 	inline CPntGridCellBase* CPntGridCtrl::GetCell(int nRow, int nCol) const

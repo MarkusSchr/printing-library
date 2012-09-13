@@ -345,7 +345,7 @@ void CPrintDlg::OnOK()
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
-	LPCTSTR picturePath = L"d:\\1.jpg";
+	LPCTSTR picturePath = L"C:\\Users\\aico\\Desktop\\1.jpg";
 	
 	GPrintJob job;
 	
@@ -372,11 +372,11 @@ void CPrintDlg::OnOK()
 	header.SetRowUnitText(2,3,L"Hello world 123 :");
 	header.SetRowUnitText(2,4,L"Hello world 123 :");
 
-	header.SetRowUnitFont(0,0,20,L"黑体");
-	header.SetRowUnitFont(0,2,20,L"楷体");
-	header.SetRowUnitFont(1,0,20,L"楷体");
-	header.SetRowUnitFont(1,2,20,L"楷体");
-	header.NeedOuterLine(false);
+	header.SetRowUnitFont(0,0,40,L"黑体");
+	header.SetRowUnitFont(0,2,80,L"楷体");
+	header.SetRowUnitFont(1,0,120,L"楷体");
+	header.SetRowUnitFont(1,2,120,L"楷体");
+	//	header.NeedOuterLine(false);
 
 	// TODO : To add footer
 	CHeaderFooterTable footer(&job);
@@ -414,10 +414,11 @@ void CPrintDlg::OnOK()
 	// the pre-calculation process will be much faster than it does not.
 	unitTable1.SetAllRowsHeightInTextLine(1);
 
-	// create a font that is 90“宋体”for heading
-	unitTable1.SetHeaderFont(100, L"宋体");
+	// create a font that is 120“宋体”for heading
+//	unitTable1.SetHeaderFont(120, L"宋体");
+	unitTable1.SetFooterFont(70, L"黑体");
 	unitTable1.SetFooterFont(100, L"黑体");
-	unitTable1.SetBodyPrinterFont(90, L"楷体");
+	unitTable1.SetBodyPrinterFont(120, L"楷体");
 
 	// draw header
 	unitTable1.SetHeader(header);
@@ -510,7 +511,7 @@ void CPrintDlg::OnOK()
 	mergeUnit.MergeCell(7,3,7,4);
 
 	// merge the heading
-	for (int i = 0; i < 1; i++)
+	for (int i = 1; i < 1; i++)
 	{
 		mergeUnit.MergeCell(i, 0, i, 1);
 		mergeUnit.MergeCell(i, 2, i, columnNum - 1);
@@ -530,11 +531,11 @@ void CPrintDlg::OnOK()
 	// to set the row format as "DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE"
 	// which is also the default value, just to show we can do it.
 	mergeUnit.SetAllRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
-	mergeUnit.SetAllRowsFont(40, L"宋体");
-	mergeUnit.SetRowFont(0, 10, L"黑体");
+	mergeUnit.SetAllRowsFont(100, L"宋体");
+	mergeUnit.SetRowFont(0, 120, L"楷体");
 	mergeUnit.SetRowFont(2, 90, L"黑体");
-	mergeUnit.SetHeadingFont(90, L"楷体");
-	mergeUnit.SetCellFont(1, 0, 10, L"黑体");
+	mergeUnit.SetHeadingFont(120, L"楷体");
+	mergeUnit.SetCellFont(1, 0, 60, L"黑体");
 	mergeUnit.NeedDrawTableOuterline(true);
 
 	// set title
@@ -560,11 +561,19 @@ void CPrintDlg::OnOK()
 	}
 	t1.MergeCell(1,0,2,2);
 	t1.SetCellText(1,0, L"桂林");
+	t1.SetCellText(1,1, L"桂林2");
+	t1.SetCellText(1,3, L"桂林3");
+	t1.SetCellText(2,0, L"桂林4");
+	t1.SetCellText(2,1, L"桂林4");
+	t1.SetCellText(2,2, L"桂林4");
+	t1.SetCellText(4,2, L"恐龙");
+	t1.SetCellText(6,2, L"爱立信");
+	t1.SetCellText(9,2, L"微软，文思，输入法");
 	t1.SetRowFormat(DT_CENTER | DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE);
-	t1.SetAllRowsFont(30, L"宋体");
-	t1.SetRowFont(3, 30, L"黑体");
-	t1.SetHeadingFont(30, L"楷体");
-	t1.SetCellFont(1, 0, 30, L"黑体");
+	t1.SetAllRowsFont(70, L"宋体");
+	t1.SetRowFont(3, 60, L"黑体");
+	t1.SetHeadingFont(100, L"楷体");
+	t1.SetCellFont(1, 0, 90, L"黑体");
 	t1.SetTitle(L"桂林山水甲天下");
 	t1.NeedDrawTableOuterline(true);
 	
@@ -630,35 +639,6 @@ void CPrintDlg::OnOK()
 		}
 	}
 
-
-	// header for multitableunit
-	CHeaderFooterTable header2(&job);
-	header2.SetRowColumnNum(3, 5);
-
-	for (int i = 0; i < 3; i++)
-	{
-		header2.MergeRows(i,0,i,1);
-		header2.MergeRows(i,2,i,4);
-
-		header2.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
-		header2.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
-	}
-	header2.SetRowUnitText(0,0,L"222第一行:");
-	header2.SetRowUnitText(0,2,L"222Hello world 你好世界！123 :");
-	header2.SetRowUnitText(1,0,L"222No 2 :");
-	header2.SetRowUnitText(1,2,L"222123 :");
-	header2.SetRowUnitText(2,0,L"222No 3 :");
-	header2.SetRowUnitText(2,2,L"222Hello world 123 :");
-	/*header2.SetRowUnitText(3,0,L"222No 4 :");
-	header2.SetRowUnitText(4,0,L"222No 5 :");*/
-
-	header2.SetRowUnitFont(0,0,60,L"黑体");
-	header2.SetRowUnitFont(0,2,20,L"楷体");
-	header2.SetRowUnitFont(1,0,100,L"楷体");
-	header2.SetRowUnitFont(1,2,100,L"楷体");
-
-	//header2.NeedOuterLine(false);
-
 	CMultiTablesUnit multiTableUnit;
 	multiTableUnit.InsertTables(t1);
 	multiTableUnit.InsertTables(t2);
@@ -669,16 +649,15 @@ void CPrintDlg::OnOK()
 	multiTableUnit.SetHeader(header);
 	multiTableUnit.SetFooter(footer);
 
-	
 	//////////// test 5 : print ////////////////////////////
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.InsertTask(&unitTable1);
-//	job.InsertTask(&unitTable2);
-//	job.InsertTask(&unitBitmapTable);
-//	job.InsertTask(&userDefinedUnit);
-//	job.InsertTask(&mergeUnit);
-//	job.InsertTask(&multiTableUnit);
+	job.InsertTask(&unitTable2);
+	job.InsertTask(&unitBitmapTable);
+	job.InsertTask(&userDefinedUnit);
+	job.InsertTask(&mergeUnit);
+	job.InsertTask(&multiTableUnit);
 
 	job.PrintFollowingPrintDialog();
 }
@@ -771,9 +750,9 @@ void CPrintDlg::OnBnClickedButton1()
 	unitTable1.SetAllRowsHeightInTextLine(1);
 
 	// create a font that is 90“宋体”for heading
-	unitTable1.SetHeaderFont(90, L"宋体");
+	unitTable1.SetHeaderFont(120, L"宋体");
 	unitTable1.SetFooterFont(70, L"黑体");
-	unitTable1.SetBodyPrinterFont(90, L"楷体");
+	unitTable1.SetBodyPrinterFont(120, L"楷体");
 
 	// draw header
 	CHeaderFooterTable header(&job);

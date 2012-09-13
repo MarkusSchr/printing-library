@@ -76,7 +76,7 @@ namespace Printing
 		virtual COLORREF    GetTextClr() const          { return m_crFgClr; } // TODO: change to use default cell
 		virtual COLORREF    GetBackClr() const          { return m_crBkClr; }
 		virtual LOGFONT*    GetFont() const;
-		virtual CFont*      GetFontObject() const;
+		virtual CFont* GetFontObject(CDC* pDC = NULL) const;
 		virtual UINT        GetMargin() const;
 
 		virtual BOOL        IsEditing() const           { return m_bEditing; }
@@ -114,7 +114,7 @@ namespace Printing
 
 		// Construction/Destruction
 	public:
-		CPntGridDefaultCell();
+		CPntGridDefaultCell(CDC* pDC = NULL);
 		virtual ~CPntGridDefaultCell();
 
 	public:
@@ -130,14 +130,15 @@ namespace Printing
 		virtual void     SetState(DWORD /*nState*/)             { ASSERT(FALSE);         }
 		virtual DWORD    GetState() const                       { return CPntGridCell::GetState()|GVIS_READONLY; }
 		virtual void     SetCoords( int /*row*/, int /*col*/)   { ASSERT(FALSE);         }
-		virtual void     SetFont(const LOGFONT* /*plf*/);
+		virtual void SetFont(const LOGFONT* plf);
 		virtual LOGFONT* GetFont() const;   
-		virtual CFont*   GetFontObject() const;
+		virtual CFont* GetFontObject() const;
 
 	protected:
 		CSize m_Size;       // Default Size
 		CFont m_Font;       // Cached font
 		DWORD m_dwStyle;    // Cell Style - unused
+		CDC* m_pDC;
 	};
 
 	//{{AFX_INSERT_LOCATION}}

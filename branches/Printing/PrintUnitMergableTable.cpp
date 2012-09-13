@@ -52,6 +52,9 @@ void Printing::CPrintUnitMergableTable::SetRowNum(int nRowNum)
 	m_mergeCellPos.clear();
 	m_mergeCellPos.resize(0);
 
+	// side effect
+	SetAllRowsFont(DEFAULT_FONT_HEIGHT, DEFAULT_FONT_NAME);
+
 	m_bHasChangedRowOrColumns = true;
 }
 
@@ -207,7 +210,7 @@ void Printing::CPrintUnitMergableTable::CreateGridCtrl()
 	DELETE_IF_NOT_NULL(m_pGridCtrl);
 
 	// create the grid ctrl
-	m_pGridCtrl = new CPntGridCtrl;
+	m_pGridCtrl = new CPntGridCtrl(0,0,0,0,&JDC);
 
 	m_pGridCtrl->Create(JINFO.m_rectDraw, AfxGetMainWnd(), 100);
 	// fill it up with stuff

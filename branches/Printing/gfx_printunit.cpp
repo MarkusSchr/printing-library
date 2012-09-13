@@ -56,7 +56,8 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	m_bEnglish = false;
 
-	m_header = m_footer = NULL;
+	m_header = NULL;
+	m_footer = NULL;
 }
 
 
@@ -115,21 +116,13 @@ BOOL Printing::GPrintUnit::ContinuePrinting() const
 
 void Printing::GPrintUnit::CreatePrintFonts()
 {
-	LOGFONT logFont;
-	GMakeStructFillZero(logFont);
+	LPCTSTR lpszFaceName = DEFAULT_FONT_NAME;//I18nok
 
-	LPCTSTR lpszFaceName = _T("Arial");//I18nok
-
-	logFont.lfCharSet = DEFAULT_CHARSET;
-	logFont.lfHeight = 90;
-	lstrcpyn(logFont.lfFaceName, lpszFaceName, GGetArrayElementCount(logFont.lfFaceName));
-	logFont.lfWeight = FW_BOLD;
-
-	m_fontHeading.CreatePointFontIndirect(&logFont, &JDC);
-	m_fontPairBody.fontPrinter.CreatePointFont(90, lpszFaceName, &JDC);
-	m_fontPairBody.fontScreen.CreatePointFont(90, lpszFaceName);
-	m_fontHeader.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK	
-	m_fontFooter.CreatePointFont(110, _T("Garamond"), &JDC);//I18nOK
+	m_fontHeading.CreatePointFont(DEFAULT_FONT_HEIGHT, lpszFaceName, &JDC);
+	m_fontPairBody.fontPrinter.CreatePointFont(DEFAULT_FONT_HEIGHT, lpszFaceName, &JDC);
+	//m_fontPairBody.fontScreen.CreatePointFont(DEFAULT_FONT_HEIGHT, lpszFaceName);
+	m_fontHeader.CreatePointFont(DEFAULT_FONT_HEIGHT, lpszFaceName, &JDC);//I18nOK	
+	m_fontFooter.CreatePointFont(DEFAULT_FONT_HEIGHT, lpszFaceName, &JDC);//I18nOK
 
 
 	if (m_pUserFontHeader)
@@ -1003,8 +996,8 @@ void Printing::GPrintUnit::PrintFooterText()
 	else
 	{
 		// use the default value in CreatePrintFonts()
-		nPointSize = 110;
-		name = _T("Garamond");
+		nPointSize = DEFAULT_FONT_HEIGHT;
+		name = DEFAULT_FONT_NAME;
 	}
 
 	m_footer->Paint( &JINFO, nPointSize, name, &m_fontFooter, &JDC, 1, rect, NULL);
@@ -1045,8 +1038,8 @@ void Printing::GPrintUnit::PrintHeaderText()
 	else
 	{
 		// use the default value in CreatePrintFonts()
-		nPointSize = 110;
-		name = _T("Garamond");
+		nPointSize = DEFAULT_FONT_HEIGHT;
+		name = DEFAULT_FONT_NAME;
 	}
 
 	m_header->Paint( &JINFO, nPointSize, name, &m_fontHeader, &JDC, 1, rect, NULL);
