@@ -25,7 +25,7 @@ namespace Printing
 		BOOL MergeCell(int minRow, int minColumn, int maxRow, int maxColumn);
 		BOOL SetCellText(int row, int column, LPCTSTR text);
 
-		// not including column row
+		// not including column row, it has a side effect that it will reset all the row fonts
 		void SetRowNum(int nRowNum);
 		int GetRowNum() {return m_nRows; }
 

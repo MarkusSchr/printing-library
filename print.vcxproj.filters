@@ -51,9 +51,6 @@
     <ClCompile Include="PrintUnitFromDC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PrintUnitMergableTable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,6 +77,9 @@
     </ClCompile>
     <ClCompile Include="GridCtrl\TitleTip.cpp">
       <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintUnitMergableTable.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -127,9 +127,6 @@
     <ClInclude Include="PrintUnitFromDC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PrintUnitMergableTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PrintUnitTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -160,7 +157,13 @@
     <ClInclude Include="GridCtrl\TitleTip.h">
       <Filter>Header Files\GridCtrl</Filter>
     </ClInclude>
+    <ClInclude Include="Definitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="HeaderFooterTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitMergableTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

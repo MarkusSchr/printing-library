@@ -181,6 +181,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Definitions.h" />
     <ClInclude Include="HeaderFooterTable.h" />
     <ClInclude Include="HSECPrintPageConfig.h" />
     <ClInclude Include="HSEPrinter.h" />

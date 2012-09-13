@@ -7,6 +7,8 @@
 
 #include "afxtempl.h"
 
+#include "Definitions.h"
+
 #include <vector>
 using namespace std;
 
@@ -22,6 +24,7 @@ using namespace std;
 #define GGetArrayElementCount(array)  (sizeof(array)/sizeof(array[0]))
 // set a string to NULs
 #define GMakeStringFillZero(str)    ::ZeroMemory((str), sizeof((str)))
+
 
 // returns a percentage 'fPct' of a value 'val'
 template <class _Ty> inline _Ty GPERCENT(_Ty val, double fPct)
