@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{c7ab8d83-8f90-47a1-a2bb-368f48b8234e}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Source Files\HSE">
+      <UniqueIdentifier>{614d8d89-fe21-41e7-b78e-b1faf71a8328}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GridCtrl">
+      <UniqueIdentifier>{b8d98162-e774-46d8-ba3e-9b7b1a09edaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68ad9ac9-90ef-4fc1-ad22-48adf82b3ff1}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Header Files\GridCtrl">
+      <UniqueIdentifier>{611711ea-2e84-47ed-a4c2-7a5d268c5d33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{b608d58b-c2b4-46fa-a749-9b119cc74681}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BitmapTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DataTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gfx_printjob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gfx_printunit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MergableTableUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiTablesUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="print.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="printDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintUnitFromDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HSECPrintPageConfig.cpp">
+      <Filter>Source Files\HSE</Filter>
+    </ClCompile>
+    <ClCompile Include="HSEPrinter.cpp">
+      <Filter>Source Files\HSE</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCell.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCellBase.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridCtrl.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\GridDropTarget.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\InPlaceEdit.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="GridCtrl\TitleTip.cpp">
+      <Filter>Source Files\GridCtrl</Filter>
+    </ClCompile>
+    <ClCompile Include="PrintUnitMergableTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="print.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HSECPrintPageConfig.h">
+      <Filter>Source Files\HSE</Filter>
+    </ClInclude>
+    <ClInclude Include="HSEPrinter.h">
+      <Filter>Source Files\HSE</Filter>
+    </ClInclude>
+    <ClInclude Include="BitmapTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gfx_printjob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gfx_printunit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IPrintable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MergableTableUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiTablesUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="print.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="printDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitFromDC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\CellRange.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCell.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCellBase.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridCtrl.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\GridDropTarget.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\InPlaceEdit.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="GridCtrl\TitleTip.h">
+      <Filter>Header Files\GridCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="Definitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeaderFooterTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintUnitMergableTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\print.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\print.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>
