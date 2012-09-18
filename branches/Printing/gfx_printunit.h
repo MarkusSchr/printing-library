@@ -384,7 +384,7 @@ namespace Printing
 		bool NeedHeaderLine(bool bNeedHeaderLine = true);
 		bool NeedFooterLine(bool bNeedFooterLine = true);
 		// set the interval between the header and the table
-		UINT  SetSeparateLineInterval(UINT interval);
+		double SetSeparateLineIntervalInTextLineHeight(double interval);
 		UINT  SetSeparateLineWidth(UINT width);	
 		// if bHeader is TRUE, means drawing header's line, or drawing footer's line
 		void DrawSeparetLine(BOOL bHeader);
@@ -405,7 +405,7 @@ namespace Printing
 		void SetUnitName(string name) {m_unitName = name; }
 		string GetUnitName() {return m_unitName; }
 
-		void SetAllRowsHeightInTextLine(int rowHeightInTextLine) {m_restrictedRowHeightInTextLine = rowHeightInTextLine; }
+		void SetAllRowsHeightInTextLineHeight(int rowHeightInTextLine) {m_restrictedRowHeightInTextLine = rowHeightInTextLine; }
 		void SetHeaderHeightInTextLine(int headerHeightInTextLine) {m_headingHeightInTextLine = headerHeightInTextLine; }
 
 		void SetEnglishVersion(bool bEnglish) {m_bEnglish = bEnglish; }
@@ -640,7 +640,7 @@ namespace Printing
 		srtFont* m_pUserFontScreen;
 
 		UINT m_separateLineWidth;
-		UINT m_separateLineInterval;
+		double m_separateLineIntervalInTextLineHeight;
 
 		// this is the index of m_vecColumnPage, to indicate which Columns page we are
 		int m_currentWorkingColums;

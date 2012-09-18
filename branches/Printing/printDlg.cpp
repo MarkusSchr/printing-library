@@ -16,6 +16,7 @@
 #include "HeaderFooterTable.h"
 ////////////////////////////////////
 #include "PrintUnitFromDC.h"
+#include "UserDefinedPaintingUnit.h"
 ////////////////////////////////////
 
 #include "MemDC.h"
@@ -360,7 +361,7 @@ void CPrintDlg::OnOK()
 		header.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 		header.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 	}
-	header.SetRowUnitText(0,0,L"a:");
+	header.SetRowUnitText(0,0,L"456654");
 	header.SetRowUnitText(0,1,L"H 你好世界！123 :");
 	header.SetRowUnitText(0,2,L"dizheng");
 	header.SetRowUnitText(1,0,L"N2 :");
@@ -372,7 +373,7 @@ void CPrintDlg::OnOK()
 	header.SetRowUnitText(2,3,L"Hello world 123 :");
 	header.SetRowUnitText(2,4,L"Hello world 123 :");
 
-	header.SetRowUnitFont(0,0,40,L"黑体");
+	header.SetRowUnitFont(0,0,120,L"楷体");
 	header.SetRowUnitFont(0,2,80,L"楷体");
 	header.SetRowUnitFont(1,0,120,L"楷体");
 	header.SetRowUnitFont(1,2,120,L"楷体");
@@ -412,7 +413,7 @@ void CPrintDlg::OnOK()
 
 	// you do  not need to set the row height. However, if you have set, 
 	// the pre-calculation process will be much faster than it does not.
-	unitTable1.SetAllRowsHeightInTextLine(1);
+	unitTable1.SetAllRowsHeightInTextLineHeight(1);
 
 	// create a font that is 120“宋体”for heading
 //	unitTable1.SetHeaderFont(120, L"宋体");
@@ -425,7 +426,7 @@ void CPrintDlg::OnOK()
 	// draw footer
 	unitTable1.SetFooter(footer);
 
-	unitTable1.SetSeparateLineInterval(10);
+	unitTable1.SetSeparateLineIntervalInTextLineHeight(0.5);
 	unitTable1.SetSeparateLineWidth(3);
 
 	unitTable1.SetTitle(L"数据1");
@@ -438,7 +439,7 @@ void CPrintDlg::OnOK()
 	unitTable2.DefineColumns(vecColumnDef);
 	unitTable2.SetPrintData(&vecParts);
 	unitTable2.SetHeader(header);
-	unitTable2.SetAllRowsHeightInTextLine(1);
+	unitTable2.SetAllRowsHeightInTextLineHeight(1);
 	
 
 	COLUMNDEFINITIONS cd;
@@ -653,11 +654,11 @@ void CPrintDlg::OnOK()
 	// actual printing
 	// it will use result of the printer dialog's DC
 	job.InsertTask(&unitTable1);
-	job.InsertTask(&unitTable2);
-	job.InsertTask(&unitBitmapTable);
-	job.InsertTask(&userDefinedUnit);
-	job.InsertTask(&mergeUnit);
-	job.InsertTask(&multiTableUnit);
+	//job.InsertTask(&unitTable2);
+	//job.InsertTask(&unitBitmapTable);
+	//job.InsertTask(&userDefinedUnit);
+	//job.InsertTask(&mergeUnit);
+	//job.InsertTask(&multiTableUnit);
 
 	job.PrintFollowingPrintDialog();
 }
@@ -665,99 +666,11 @@ void CPrintDlg::OnOK()
 
 void CPrintDlg::OnBnClickedButton1()
 {
-	// get data
-	int rowNum = 100;
+	Printing::GPrintJob job;
+	CUserPaintingExampleUnit unitTable1;
 
-	int columnNum = 5;
-
-	ASSERT(rowNum != 0 && columnNum != 0);
-
-
-	// prepare the column
-	vector<COLUMNDEFINITIONS> vecColumnDef;
-	// define my four columns...
-	for (int i = 0; i < columnNum; i++)
-	{
-		COLUMNDEFINITIONS cd;
-		TCHAR buf[200];
-		_itow_s(i, buf, 10);
-		wstring str = buf;
-		str.append(TEXT("个列"));
-		cd.strName = str.c_str();
-
-		vecColumnDef.push_back(cd);
-	}
-
-	// prepare the data
-	wstring **strArr = NULL;
-	strArr = new wstring* [rowNum];
-	for (int i = 0; i < rowNum; i++)
-	{
-		strArr[i] = new wstring [columnNum];
-	}
-
-	for (int i = 0; i < rowNum; i++)
-	{
-		for (int j = 0; j < columnNum; j++)
-		{
-			srand((unsigned)time(0));
-			int randomPart1 = rand() % 10000;
-			int randomPart2 = rand() % 1000;
-
-			TCHAR c = 0;
-			if (rand() % 2)
-			{
-				c = TEXT('+');
-			}
-			else
-			{
-				c = TEXT('-');
-			}
-			std::wstringstream ss;
-			ss << c << randomPart1 << TEXT(".") << randomPart2 << TEXT('\0');
-			strArr[i][j] = ss.str(); 
-
-			wstring temp = strArr[i][j];
-		}
-	}
-
-	vector<vector<LPCTSTR> > vecParts;
-
-	for (int i = 0; i < rowNum ; i++)
-	{
-		vector<LPCTSTR> vecTemp;
-
-		for (int j = 0; j < columnNum ; j++)
-		{
-			vecTemp.push_back(const_cast<LPCTSTR>(strArr[i][j].c_str()));
-		}
-
-		vecParts.push_back(vecTemp);
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////
-	GPrintJob job;
-
-	CDataTableUnit unitTable1;
-	unitTable1.DefineColumns(vecColumnDef);
-	unitTable1.SetPrintData(&vecParts);
-
-	// currently it only support for DT_LEFT, DT_CENTER or DT_RIGHT
-	unitTable1.SetRowFormat(DT_RIGHT);
-
-	// you do  not need to set the row height. However, if you have set, 
-	// the pre-calculation process will be much faster than it does not.
-	unitTable1.SetAllRowsHeightInTextLine(1);
-
-	// create a font that is 90“宋体”for heading
-	unitTable1.SetHeaderFont(120, L"宋体");
-	unitTable1.SetFooterFont(70, L"黑体");
-	unitTable1.SetBodyPrinterFont(120, L"楷体");
-
-	// draw header
 	CHeaderFooterTable header(&job);
 	header.SetRowColumnNum(3, 5);
-
 	for (int i = 0; i < 3; i++)
 	{
 		header.MergeRows(i,0,i,1);
@@ -766,27 +679,46 @@ void CPrintDlg::OnBnClickedButton1()
 		header.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 		header.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
 	}
-	header.SetRowUnitText(0,0,L"abc第一行:");
-	header.SetRowUnitText(0,2,L"Hello world 你好世界！123 :");
-	header.SetRowUnitText(1,0,L"No 2 :");
-	header.SetRowUnitText(1,2,L"123 :");
-	header.SetRowUnitText(2,0,L"No 3 :");
+	header.SetRowUnitText(0,0,L"a:");
+	header.SetRowUnitText(0,1,L"H 你好世界！123 :");
+	header.SetRowUnitText(0,2,L"dizheng");
+	header.SetRowUnitText(1,0,L"N2 :");
+	header.SetRowUnitText(1,1,L"1asdfdasf");
+	header.SetRowUnitText(1,2,L"121211asdfdasf");
+	header.SetRowUnitText(2,0,L"No 3 123:");
+	header.SetRowUnitText(2,1,L"No 3 :");
 	header.SetRowUnitText(2,2,L"Hello world 123 :");
+	header.SetRowUnitText(2,3,L"Hello world 123 :");
+	header.SetRowUnitText(2,4,L"Hello world 123 :");
 
+	header.SetRowUnitFont(0,0,40,L"黑体");
+	header.SetRowUnitFont(0,2,80,L"楷体");
+	header.SetRowUnitFont(1,0,120,L"楷体");
+	header.SetRowUnitFont(1,2,120,L"楷体");
 	header.NeedOuterLine(false);
-//	unitTable1.SetHeader(&header);
+	unitTable1.SetHeader(header);
 
-	// draw footer
-	// please ensure you have assign for "3" HEADERDEFINITIONS
-	
+	CHeaderFooterTable footer(&job);
+	footer.SetRowColumnNum(3, 3);
+	for (int i = 0; i < 3; i++)
+	{
+		footer.SetRowUnitFormat(i, 0, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+		footer.SetRowUnitFormat(i, 2, DT_LEFT | DT_SINGLELINE | DT_VCENTER );
+	}
+	footer.MergeRows(0,0,1,1);
 
-	unitTable1.SetSeparateLineInterval(10);
-	unitTable1.SetSeparateLineWidth(3);
+	footer.SetRowUnitText(0,1,L"H 你好世界！123 :");
+	footer.SetRowUnitText(0,2,L"dizheng");
 
-	unitTable1.SetTitle(L"数据1");
-	unitTable1.SetEnglishVersion(true);
-	unitTable1.NeedPrintTitleExcpetFirstPage(true);
 
+	footer.SetRowUnitText(1,2,L"121211asdfdasf");
+	footer.SetRowUnitText(2,0,L"No 3 123:");
+	footer.SetRowUnitText(2,1,L"No 3 :");
+	footer.SetRowUnitText(2,2,L"Hello world 123 :");
+
+	footer.SetImageSize(32, 32);
+	footer.NeedOuterLine(false);
+	unitTable1.SetFooter(footer);
 
 	job.InsertTask(&unitTable1);
 

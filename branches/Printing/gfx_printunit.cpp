@@ -58,6 +58,9 @@ Printing::GPrintUnit::GPrintUnit(GPrintJob *pJob)
 
 	m_header = NULL;
 	m_footer = NULL;
+
+	m_separateLineIntervalInTextLineHeight = 0.5;
+	m_separateLineWidth = 2;
 }
 
 
@@ -925,8 +928,8 @@ void Printing::GPrintUnit::RealizeMetrics()
 {
 	JRECT = JINFO.m_rectDraw;
 
-	JRECT.top += (m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + 2 * m_pum.pumHeaderLineHeight);
-	JRECT.bottom -= (m_pum.pumFooterMargin + m_pum.pumFooterHeight + 2 * m_pum.pumFooterLineHeight);
+	JRECT.top += (m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + 2 * m_separateLineIntervalInTextLineHeight * m_pum.pumLineOfText);
+	JRECT.bottom -= (m_pum.pumFooterMargin + m_pum.pumFooterHeight + 2 * m_separateLineIntervalInTextLineHeight * m_pum.pumLineOfText);
 	JRECT.left += m_pum.pumLeftMarginWidth;
 	JRECT.right -= m_pum.pumRightMarginWidth;
 
@@ -1324,10 +1327,10 @@ void Printing::GPrintUnit::GetCurrentTimeAndDate( CString& date, CString& time )
 	date = szBuf;	
 }
 
-UINT Printing::GPrintUnit::SetSeparateLineInterval( UINT interval )
+double Printing::GPrintUnit::SetSeparateLineIntervalInTextLineHeight( double interval )
 {
-	UINT old = m_separateLineInterval;
-	m_separateLineInterval = interval;
+	double old = m_separateLineIntervalInTextLineHeight;
+	m_separateLineIntervalInTextLineHeight = interval;
 	return old;
 }
 
@@ -1346,15 +1349,7 @@ UINT Printing::GPrintUnit::SetSeparateLineWidth( UINT width )
 
 void Printing::GPrintUnit::DrawSeparetLine( BOOL bHeader )
 {
-	// adjust the separeteline interval in case the user has entered an invalid value
-	if (bHeader == TRUE && (int)m_separateLineInterval >= m_pum.pumHeaderLineHeight)
-	{
-		m_separateLineInterval = m_pum.pumHeaderLineHeight;
-	}
-	else if(bHeader == FALSE && (int)m_separateLineInterval >= m_pum.pumFooterLineHeight)
-	{
-		m_separateLineInterval = m_pum.pumFooterLineHeight;
-	}
+	int intervalHeight = m_separateLineIntervalInTextLineHeight * m_pum.pumLineOfText;
 
 	CPen pen;
 	pen.CreatePen(PS_SOLID, m_separateLineWidth, RGB(0,0,0));
@@ -1363,11 +1358,11 @@ void Printing::GPrintUnit::DrawSeparetLine( BOOL bHeader )
 	int linePosY;
 	if (bHeader == TRUE)
 	{
-		linePosY = JINFO.m_rectDraw.top + m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + m_separateLineInterval;
+		linePosY = JINFO.m_rectDraw.top + m_pum.pumHeaderMargin + m_pum.pumHeaderHeight + intervalHeight;
 	}
 	else
 	{
-		linePosY = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight - m_separateLineInterval;
+		linePosY = JINFO.m_rectDraw.bottom - m_pum.pumFooterMargin - m_pum.pumFooterHeight - intervalHeight;
 	}
 
 	int beginX = JCUR.x;
