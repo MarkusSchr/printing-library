@@ -7093,26 +7093,18 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 				int Overlap = (col == 0)? 0:1;
 				pDC->MoveTo(rect.left-Overlap, rect.bottom);
 				pDC->LineTo(rect.right, rect.bottom);
-				if (printedRow == printedRow) {
-					// if it is the first row, we need draw the top line
-					// otherwise, the top line is the same as the bottom line of the 
-					// above cell
-					pDC->MoveTo(rect.left-Overlap, rect.top);
-					pDC->LineTo(rect.right, rect.top);
-				}
+
+				pDC->MoveTo(rect.left-Overlap, rect.top);
+				pDC->LineTo(rect.right, rect.top);
 			}
 			if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_VERT)
 			{
 				int Overlap = (bFirstPrintedRow)? 0:1;
 				pDC->MoveTo(rect.right, rect.top-Overlap);
 				pDC->LineTo(rect.right, rect.bottom);
-				if (col == 0) {
-					// if it is the first column, we need draw the left line
-					// otherwise, the left line is the same as the right line of the 
-					// left cell
-					pDC->MoveTo(rect.left, rect.top-Overlap);
-					pDC->LineTo(rect.left, rect.bottom);
-				}
+
+				pDC->MoveTo(rect.left, rect.top-Overlap);
+				pDC->LineTo(rect.left, rect.bottom);
 			}
 		}
 		m_nCurrPrintRow++;
@@ -7205,14 +7197,9 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 						int Overlap = (minCol == 0)? 0:1;
 						pDC->MoveTo(rcMergeRect.left - Overlap, rcMergeRect.bottom);
 						pDC->LineTo(rcMergeRect.right, rcMergeRect.bottom);
-						if (minRow == beginPrintRow) 
-						{
-							// if it is the first row, we need draw the top line
-							// otherwise, the top line is the same as the bottom line of the 
-							// above cell
-							pDC->MoveTo(rcMergeRect.left - Overlap, rcMergeRect.top);
-							pDC->LineTo(rcMergeRect.right, rcMergeRect.top);
-						}
+
+						pDC->MoveTo(rcMergeRect.left - Overlap, rcMergeRect.top);
+						pDC->LineTo(rcMergeRect.right, rcMergeRect.top);
 					}
 					if (m_nGridLines == GVL_BOTH || m_nGridLines == GVL_VERT)
 					{
@@ -7224,14 +7211,9 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 						}
 						pDC->MoveTo(rcMergeRect.right, rcMergeRect.top - Overlap);
 						pDC->LineTo(rcMergeRect.right, rcMergeRect.bottom);
-						if (minCol == 0) 
-						{
-							// if it is the first column, we need draw the left line
-							// otherwise, the left line is the same as the right line of the 
-							// left cell
-							pDC->MoveTo(rcMergeRect.left, rcMergeRect.top - Overlap);
-							pDC->LineTo(rcMergeRect.left, rcMergeRect.bottom);
-						}
+
+						pDC->MoveTo(rcMergeRect.left, rcMergeRect.top - Overlap);
+						pDC->LineTo(rcMergeRect.left, rcMergeRect.bottom);
 					}
 				}
 			}

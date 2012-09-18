@@ -67,9 +67,6 @@ namespace Printing
 		m_bNeedHeaderSeparateLine = true;
 		m_bNeedFooterSeperateLine = true;
 
-		m_separateLineWidth = 2;
-		m_separateLineInterval = 15;
-
 		m_pData = NULL;
 		m_nRowFormat = DT_CENTER;
 

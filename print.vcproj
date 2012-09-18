@@ -477,6 +477,10 @@
 				RelativePath="StdAfx.h"
 				>
 			</File>
+			<File
+				RelativePath=".\UserDefinedPaintingUnit.h"
+				>
+			</File>
 			<Filter
 				Name="GridCtrl"
 				>
