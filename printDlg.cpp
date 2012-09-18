@@ -345,7 +345,7 @@ void CPrintDlg::OnOK()
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
-	LPCTSTR picturePath = L"C:\\Users\\aico\\Desktop\\1.jpg";
+	LPCTSTR picturePath = L"D:\\我的文档\\桌面\\Aicro's work\\1.jpg";
 	
 	GPrintJob job;
 	
@@ -587,7 +587,7 @@ void CPrintDlg::OnOK()
 	}
 
 	t2.DefineColumns(vecColumnDef);
-	rowNum = 20;
+	rowNum = 5;
 	t2.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{
@@ -619,7 +619,7 @@ void CPrintDlg::OnOK()
 	}
 
 	t3.DefineColumns(vecColumnDef);
-	rowNum = 20;
+	rowNum = 10;
 	t3.SetRowNum(rowNum);
 	for (int i = 0; i < rowNum + 1/*1 is column*/; i++)
 	{

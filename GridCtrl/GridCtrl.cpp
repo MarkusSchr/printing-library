@@ -7132,7 +7132,7 @@ void Printing::CPntGridCtrl::OnPrint( CDC *pDC, int currentPageNum, CRect client
 	// record the pixel of the bottom
 	if (printedEndReslt)
 	{
-		printedEndReslt->pixelOfBottom = rect.bottom + clientRect.top;
+		printedEndReslt->pixelOfBottom = rect.bottom /*+ clientRect.top*/;
 	}
 
 	// draw the merged cell

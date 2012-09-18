@@ -1491,12 +1491,19 @@ void Printing::GPrintUnit::DrawOuterLine()
 			lpDefFirst->nWidth, 
 			m_sizeCurrentRow.cy);
 
-		// TODO: change the pen
-		CBrush brEdge; 
-		brEdge.CreateSolidBrush(RGB(0,0,0));
+		CPen pen(PS_SOLID, 0, RGB(0,0,0));
+		CPen *pOldPen = (CPen*) JDC.SelectObject(&pen);
 
-		GSELECT_OBJECT(&JDC, &brEdge);
-		JDC.DrawEdge(&rect, EDGE_BUMP, BF_ADJUST | BF_BOTTOMLEFT | BF_TOPRIGHT);
+		JDC.MoveTo(rect.left, rect.top);
+		JDC.LineTo(rect.right, rect.top);
+		JDC.MoveTo(rect.left, rect.top);
+		JDC.LineTo(rect.left, rect.bottom);
+		JDC.MoveTo(rect.left, rect.bottom);
+		JDC.LineTo(rect.right, rect.bottom);
+		JDC.MoveTo(rect.right, rect.bottom);
+		JDC.LineTo(rect.right, rect.top);
+
+		JDC.SelectObject(pOldPen);
 	}
 }
 
